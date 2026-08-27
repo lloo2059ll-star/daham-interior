@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>DAHAM — 업무일지</title>
+<script src="auth.js"></script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E65100">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -408,10 +409,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <script>
 var LOG_KEY   = 'daham_worklog_v1';
 var SCHED_KEY = 'daham_schedule_v1';
-var SUPA_URL  = 'https://famqvwnsustbxuizohni.supabase.co';
-var SUPA_KEY  = 'sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
-var _authToken = (window.DAHAM_AUTH && DAHAM_AUTH.getAccessToken) ? DAHAM_AUTH.getAccessToken() : '';
-var _HDRS = {'apikey':SUPA_KEY,'Authorization':'Bearer '+(_authToken||SUPA_KEY),'Content-Type':'application/json'};
+var _AUTH_CONFIG = DAHAM_AUTH.getSupabaseConfig();
+var SUPA_URL  = _AUTH_CONFIG.url;
+var SUPA_KEY  = _AUTH_CONFIG.key;
+var _authToken = DAHAM_AUTH.getAccessToken();
+var _HDRS = {'apikey':SUPA_KEY,'Authorization':'Bearer '+_authToken,'Content-Type':'application/json'};
 var _saveTimer = null;
 var MONTH_KO  = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 var DOW_KO    = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];

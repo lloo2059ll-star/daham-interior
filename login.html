@@ -27,7 +27,8 @@ body{min-height:100vh;overflow-x:hidden}
 .brand-top{position:absolute;top:40px;left:0;right:0;text-align:center;font-size:13px;font-weight:700;letter-spacing:.33em;color:#0b2348;white-space:nowrap}
 .login-center{width:min(470px,calc(100% - 72px));margin:auto;padding:108px 0 138px}
 .welcome{font-size:18px;color:#98a4ba;margin:0 0 6px;text-align:center;font-weight:400}
-h1{font-size:48px;line-height:1.05;letter-spacing:-.04em;margin:0 0 50px;text-align:center;color:#001d45;font-weight:800}
+h1{font-size:48px;line-height:1.05;letter-spacing:-.04em;margin:0 0 28px;text-align:center;color:#001d45;font-weight:800}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:#f1f4f8;border-radius:9px;padding:4px;margin-bottom:26px}.tab{height:42px;border:0;border-radius:7px;background:transparent;color:#7d899e;font-weight:700;cursor:pointer}.tab.active{background:#fff;color:#071f45;box-shadow:0 2px 8px #001c4312}.auth-form[hidden]{display:none}.signup-note{font-size:12px;line-height:1.55;color:#7d899e;margin:-8px 0 18px}.msg.ok{color:#147a4b;background:#effaf4;border-radius:8px;padding:10px}.btn:disabled{opacity:.6;cursor:wait}
 .field{margin-bottom:25px}
 .field label{display:block;font-size:14px;font-weight:700;color:#142c50;margin:0 0 10px 2px}
 .input-wrap{height:60px;border:1px solid #c8cfdd;border-radius:7px;display:flex;align-items:center;background:#fff;transition:.18s ease}
@@ -70,7 +71,8 @@ h1{font-size:48px;line-height:1.05;letter-spacing:-.04em;margin:0 0 50px;text-al
     <div class="login-center">
       <p class="welcome">Welcome Back</p>
       <h1>로그인</h1>
-      <form id="form" novalidate>
+      <div class="tabs" role="tablist" aria-label="계정 메뉴"><button class="tab active" id="loginTab" type="button">로그인</button><button class="tab" id="signupTab" type="button">직원 회원가입</button></div>
+      <form id="loginForm" class="auth-form" novalidate>
         <div class="field">
           <label for="username">아이디</label>
           <div class="input-wrap">
@@ -91,6 +93,15 @@ h1{font-size:48px;line-height:1.05;letter-spacing:-.04em;margin:0 0 50px;text-al
         <button class="btn" type="submit">로그인</button>
         <div class="msg" id="msg"></div>
       </form>
+      <form id="signupForm" class="auth-form" novalidate hidden>
+        <p class="signup-note">가입 후 대표 또는 관리자의 승인이 완료되어야 내부 페이지에 로그인할 수 있습니다.</p>
+        <div class="field"><label for="signupName">이름</label><div class="input-wrap"><input id="signupName" autocomplete="name" placeholder="이름을 입력하세요" required></div></div>
+        <div class="field"><label for="signupEmail">이메일</label><div class="input-wrap"><input id="signupEmail" type="email" autocomplete="email" placeholder="name@example.com" required></div></div>
+        <div class="field"><label for="signupPassword">비밀번호</label><div class="input-wrap"><input id="signupPassword" type="password" autocomplete="new-password" placeholder="8자 이상" required></div></div>
+        <div class="field"><label for="signupPasswordConfirm">비밀번호 확인</label><div class="input-wrap"><input id="signupPasswordConfirm" type="password" autocomplete="new-password" placeholder="비밀번호를 다시 입력하세요" required></div></div>
+        <button class="btn" id="signupSubmit" type="submit">가입 신청</button>
+        <div class="msg" id="signupMsg" aria-live="polite"></div>
+      </form>
       <div class="help">
         <svg class="help-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 13v-2a8 8 0 0 1 16 0v2"></path><path d="M4 13h2.5v5H5a1 1 0 0 1-1-1v-4Zm16 0h-2.5v5H19a1 1 0 0 0 1-1v-4Z"></path><path d="M17.5 18c-.8 2-2.6 3-5.5 3"></path></svg>
         <span>계정 문의는 관리자에게 연락하세요</span>
@@ -101,14 +112,25 @@ h1{font-size:48px;line-height:1.05;letter-spacing:-.04em;margin:0 0 50px;text-al
 </div>
 <script src="auth.js"></script>
 <script>
-const form=document.getElementById('form');
+const form=document.getElementById('loginForm');
 const username=document.getElementById('username');
 const password=document.getElementById('password');
 const msg=document.getElementById('msg');
 const togglePassword=document.getElementById('togglePassword');
 
-// 기존 계정 생성/로그인 구조는 그대로 유지합니다.
-(async()=>{if(!await DAHAM_AUTH.hasAccount()) location.replace('signup.html');})();
+const loginTab=document.getElementById('loginTab');
+const signupTab=document.getElementById('signupTab');
+const signupForm=document.getElementById('signupForm');
+function selectTab(name){
+  const signup=name==='signup';
+  form.hidden=signup; signupForm.hidden=!signup;
+  loginTab.classList.toggle('active',!signup); signupTab.classList.toggle('active',signup);
+  document.querySelector('h1').textContent=signup?'직원 회원가입':'로그인';
+  if(signup) location.hash='signup'; else history.replaceState(null,'',location.pathname);
+}
+loginTab.onclick=()=>selectTab('login');
+signupTab.onclick=()=>selectTab('signup');
+if(location.hash==='#signup') selectTab('signup');
 
 togglePassword.addEventListener('click',()=>{
   const show=password.type==='password';
@@ -125,6 +147,22 @@ form.addEventListener('submit',async(e)=>{
   }catch(err){
     msg.textContent=err && err.message ? err.message : '로그인에 실패했습니다.';
   }
+});
+signupForm.addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  const signupMsg=document.getElementById('signupMsg');
+  const signupSubmit=document.getElementById('signupSubmit');
+  const passwordValue=document.getElementById('signupPassword').value;
+  signupMsg.className='msg'; signupMsg.textContent='';
+  if(passwordValue!==document.getElementById('signupPasswordConfirm').value){signupMsg.textContent='비밀번호가 서로 다릅니다.';return}
+  signupSubmit.disabled=true;
+  try{
+    const result=await DAHAM_AUTH.createAccount({name:document.getElementById('signupName').value,email:document.getElementById('signupEmail').value,password:passwordValue});
+    signupMsg.className='msg ok';
+    signupMsg.textContent=result.message||'가입이 완료되었습니다. 관리자 승인 대기 중입니다.';
+    signupForm.reset();
+  }catch(err){signupMsg.textContent=err?.message||'가입 신청에 실패했습니다.'}
+  finally{signupSubmit.disabled=false}
 });
 </script>
 </body>

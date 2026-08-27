@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>다함인테리어 — 공사일정표</title>
+<script src="auth.js"></script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E65100">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -458,8 +459,9 @@ function getHoliday(ds){
 
 /* ════ CONSTANTS ════ */
 var DB_KEY    = 'daham_schedule_v1';
-var SUPA_URL  = 'https://famqvwnsustbxuizohni.supabase.co';
-var SUPA_KEY  = 'sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
+var _AUTH_CONFIG = DAHAM_AUTH.getSupabaseConfig();
+var SUPA_URL  = _AUTH_CONFIG.url;
+var SUPA_KEY  = _AUTH_CONFIG.key;
 var SHARE_URL = 'https://ozgiihtixsjwoxbtotfi.supabase.co';
 var SHARE_KEY = 'sb_publishable_aHoQvdLGjD6J36LXb90HhA_d-DyvbAm';
 var _sb = null;
@@ -630,8 +632,8 @@ function fmtDate(s){
 
 /* ════ STORAGE ════ */
 /* ════ CLOUD SYNC (fetch 기반 — Supabase SDK 제거) ════ */
-var _authToken = (window.DAHAM_AUTH && DAHAM_AUTH.getAccessToken) ? DAHAM_AUTH.getAccessToken() : '';
-var _HDRS = {'apikey':SUPA_KEY,'Authorization':'Bearer '+(_authToken||SUPA_KEY),'Content-Type':'application/json'};
+var _authToken = DAHAM_AUTH.getAccessToken();
+var _HDRS = {'apikey':SUPA_KEY,'Authorization':'Bearer '+_authToken,'Content-Type':'application/json'};
 function initCloud(){ /* SDK 불필요 */ }
 function setSyncDot(state){
   var el=document.getElementById('sync-dot');

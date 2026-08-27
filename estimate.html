@@ -12,6 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="auth.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1541,8 +1542,9 @@ function deletePhotoBlob(id) {
     _pDB.transaction('images', 'readwrite').objectStore('images').delete(id);
   });
 }
-var SUPA_URL = 'https://famqvwnsustbxuizohni.supabase.co';
-var SUPA_KEY = 'sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
+var _AUTH_CONFIG = DAHAM_AUTH.getSupabaseConfig();
+var SUPA_URL = _AUTH_CONFIG.url;
+var SUPA_KEY = _AUTH_CONFIG.key;
 var _sb = null;
 var allProjects = [];
 var currentProjId = null;
