@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DAHAM — 발주 관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-dk:#BF360C;--orange-lt:#FFF3EE;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;--line:#e0e0e0;--line-lt:#f5f5f5;
+  --bg:#f2f2f2;--white:#fff;
+  --s-pending:#EF6C00;--s-pending-lt:#FFF3E0;
+  --s-ordered:#1565C0;--s-ordered-lt:#E3F2FD;
+  --s-delivered:#2E7D32;--s-delivered-lt:#E8F5E9;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13px;min-height:100vh}
+
+.toolbar{position:sticky;top:0;z-index:100;height:48px;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:2px solid var(--orange);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.14em;color:var(--orange)}
+.tb-btn{font-family:var(--sans);font-size:11px;font-weight:600;padding:6px 14px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .15s;
+  text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.tb-btn:hover{border-color:var(--ink);color:var(--ink)}
+.tb-btn.primary{border-color:var(--orange);background:var(--orange);color:#fff}
+.tb-btn.primary:hover{background:var(--orange-dk)}
+
+.main{max-width:900px;margin:0 auto;padding:28px 20px 80px}
+
+/* 통계 */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:#fff;border-radius:10px;padding:14px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer;border:2px solid transparent;transition:all .15s}
+.stat.active,.stat:hover{border-color:var(--orange)}
+.stat-n{font-size:26px;font-weight:800;font-family:'Bebas Neue',sans-serif;letter-spacing:.04em;line-height:1}
+.stat-l{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+.stat.all .stat-n{color:var(--ink)}
+.stat.pending .stat-n{color:var(--s-pending)}
+.stat.ordered .stat-n{color:var(--s-ordered)}
+.stat.delivered .stat-n{color:var(--s-delivered)}
+
+/* 검색 */
+.list-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.list-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.search-input{font-family:var(--sans);font-size:12px;border:1.5px solid var(--line);
+  padding:5px 10px;outline:none;width:200px;color:var(--ink);background:#fff}
+.search-input:focus{border-color:var(--orange)}
+
+/* 카드 */
+.order-card{background:#fff;border-radius:10px;padding:18px;margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);border:1.5px solid transparent;transition:border-color .15s}
+.order-card:hover{border-color:rgba(230,81,0,.2)}
+.card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.card-top-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.status-badge{font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:12px}
+.badge-pending{background:var(--s-pending-lt);color:var(--s-pending)}
+.badge-ordered{background:var(--s-ordered-lt);color:var(--s-ordered)}
+.badge-delivered{background:var(--s-delivered-lt);color:var(--s-delivered)}
+.card-proj{font-size:14px;font-weight:800;color:var(--ink)}
+.card-cat{font-size:11px;font-weight:700;color:var(--mid);background:var(--line-lt);padding:2px 8px;border-radius:10px}
+.card-meta{font-size:11px;color:var(--dim);margin-bottom:8px}
+.card-items{font-size:12px;color:var(--mid);line-height:1.9;
+  background:var(--line-lt);padding:10px 12px;border-radius:6px;margin-bottom:10px}
+.card-actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.act-btn{font-family:var(--sans);font-size:10px;font-weight:600;padding:5px 12px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .12s}
+.act-btn:hover{border-color:var(--orange);color:var(--orange)}
+.act-btn.kakao{border-color:#FEE500;background:#FEE500;color:#3A1D1D;font-weight:700}
+.act-btn.kakao:hover{background:#f5db00}
+.act-btn.blue{border-color:var(--s-ordered);color:var(--s-ordered)}
+.act-btn.blue:hover{background:var(--s-ordered);color:#fff}
+.act-btn.green{border-color:var(--s-delivered);color:var(--s-delivered)}
+.act-btn.green:hover{background:var(--s-delivered);color:#fff}
+.empty{text-align:center;padding:48px;color:var(--dim);font-size:12px;line-height:2;
+  background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+
+/* 모달 */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow-y:auto}
+.modal-hd{padding:14px 20px;border-bottom:2px solid var(--orange);
+  display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.modal-title{font-size:15px;font-weight:800}
+.modal-close{font-family:var(--sans);font-size:18px;cursor:pointer;color:var(--dim);
+  background:none;border:none;line-height:1;padding:4px}
+.modal-close:hover{color:var(--ink)}
+.modal-body{padding:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--dim);margin-bottom:5px}
+.field input,.field textarea,.fsel{
+  font-family:var(--sans);font-size:13px;color:var(--ink);width:100%;
+  border:1.5px solid var(--line);padding:7px 10px;outline:none;background:#fff;transition:border-color .15s}
+.field input:focus,.field textarea:focus,.fsel:focus{border-color:var(--orange)}
+.field textarea{resize:vertical;min-height:60px;line-height:1.7}
+.fsel{cursor:pointer}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* 자재 목록 편집 */
+.items-hd{display:grid;grid-template-columns:1fr 80px 60px 28px;gap:6px;
+  font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--dim);padding:0 0 4px}
+.item-row{display:grid;grid-template-columns:1fr 80px 60px 28px;gap:6px;margin-bottom:6px;align-items:center}
+.item-row input{font-family:var(--sans);font-size:12px;border:1.5px solid var(--line);
+  padding:5px 8px;outline:none;width:100%;background:#fff;color:var(--ink)}
+.item-row input:focus{border-color:var(--orange)}
+.item-del{font-family:var(--sans);font-size:13px;cursor:pointer;background:none;border:none;
+  color:var(--dim);width:28px;height:28px;display:flex;align-items:center;justify-content:center}
+.item-del:hover{color:#C62828}
+.add-item-btn{font-family:var(--sans);font-size:11px;font-weight:600;padding:5px 12px;
+  cursor:pointer;border:1.5px dashed var(--line);background:#fff;color:var(--dim);
+  transition:all .12s;width:100%;margin-top:4px}
+.add-item-btn:hover{border-color:var(--orange);color:var(--orange)}
+
+.modal-ft{padding:12px 20px;border-top:1px solid var(--line);
+  display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff}
+.modal-ft button{font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 20px;
+  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .15s}
+.modal-ft button:hover{border-color:var(--ink);color:var(--ink)}
+.modal-ft button.save{border-color:var(--orange);background:var(--orange);color:#fff}
+.modal-ft button.save:hover{background:var(--orange-dk)}
+.modal-ft button.del{border-color:#C62828;color:#C62828}
+.modal-ft button.del:hover{background:#C62828;color:#fff}
+
+/* 카톡 미리보기 모달 */
+.kakao-modal{background:#fff;width:100%;max-width:420px}
+.kakao-preview{background:#B2C7D9;padding:20px;font-size:13px;line-height:1.9;
+  white-space:pre-wrap;font-family:var(--sans);min-height:120px;color:#1a1a1a}
+.kakao-bubble{background:#fff;border-radius:0 12px 12px 12px;padding:12px 14px;
+  display:inline-block;max-width:100%;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:8px 20px;font-size:11px;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+</head>
+<body>
+
+<div class="toolbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="index.html" class="tb-btn">← 홈</a>
+    <span class="brand">DAHAM</span>
+  </div>
+  <button class="tb-btn primary" onclick="openModal()">+ 새 발주</button>
+</div>
+
+<div class="main">
+  <div class="stats">
+    <div class="stat all active" onclick="setFilter('all')" id="stat-all">
+      <div class="stat-n" id="cnt-all">0</div><div class="stat-l">전체</div>
+    </div>
+    <div class="stat pending" onclick="setFilter('pending')" id="stat-pending">
+      <div class="stat-n" id="cnt-pending">0</div><div class="stat-l">미발주</div>
+    </div>
+    <div class="stat ordered" onclick="setFilter('ordered')" id="stat-ordered">
+      <div class="stat-n" id="cnt-ordered">0</div><div class="stat-l">발주완료</div>
+    </div>
+    <div class="stat delivered" onclick="setFilter('delivered')" id="stat-delivered">
+      <div class="stat-n" id="cnt-delivered">0</div><div class="stat-l">납품완료</div>
+    </div>
+  </div>
+
+  <div class="list-hd">
+    <div class="list-title">발주 목록</div>
+    <input class="search-input" id="search" type="text" placeholder="현장명 또는 자재 검색" oninput="renderList()">
+  </div>
+  <div id="order-list"></div>
+</div>
+
+<!-- 발주 편집 모달 -->
+<div class="modal-bg" id="modal-bg" style="display:none" onclick="onBgClick(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">새 발주</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field">
+          <label>현장</label>
+          <select class="fsel" id="m-proj" onchange="onProjChange()"></select>
+        </div>
+        <div class="field">
+          <label>공종</label>
+          <select class="fsel" id="m-cat" onchange="onCatChange()"></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>거래처</label>
+          <select class="fsel" id="m-supplier"></select>
+        </div>
+        <div class="field">
+          <label>납품 예정일</label>
+          <input type="date" id="m-delivery">
+        </div>
+      </div>
+
+      <!-- 자재 목록 -->
+      <div class="field">
+        <label>자재 목록</label>
+        <div class="items-hd"><div>자재명</div><div>수량</div><div>단위</div><div></div></div>
+        <div id="item-rows"></div>
+        <button class="add-item-btn" onclick="addItemRow()">+ 자재 추가</button>
+      </div>
+
+      <div class="field">
+        <label>메모</label>
+        <textarea id="m-memo" placeholder="색상, 규격, 배송 주의사항 등"></textarea>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="del" id="btn-del" style="display:none" onclick="deleteRecord()">삭제</button>
+      <button onclick="closeModal()">취소</button>
+      <button class="save" onclick="saveRecord()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 카톡 메시지 모달 -->
+<div class="modal-bg" id="kakao-bg" style="display:none" onclick="if(event.target===this)closeKakao()">
+  <div class="modal kakao-modal">
+    <div class="modal-hd">
+      <div class="modal-title">📋 카톡 메시지</div>
+      <button class="modal-close" onclick="closeKakao()">✕</button>
+    </div>
+    <div style="padding:16px 20px">
+      <div class="kakao-preview"><div class="kakao-bubble"><pre id="kakao-text" style="font-family:var(--sans);font-size:13px;line-height:1.9;white-space:pre-wrap"></pre></div></div>
+      <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="tb-btn" onclick="closeKakao()">닫기</button>
+        <button class="tb-btn primary" onclick="copyKakao()">📋 복사</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var ORDER_KEY   = 'daham_order_v1';
+var SCHED_KEY   = 'daham_schedule_v1';
+var EST_KEY     = 'daham_detail_v2';
+var CONTACT_KEY = 'daham_contacts_v1';
+
+var CATS = ['철거','전기','창호','설비','목공','필름','타일','도장','도배','바닥재','주방/가구','중문','청소','기타'];
+
+var CAT_TO_SEC = {
+  '철거':['철거'],'전기':['전기/조명'],'창호':['샷시'],
+  '설비':['설비'],'목공':['목작업','문/문틀','인테리어철물'],
+  '필름':['필름'],'타일':['거실욕실','안방욕실','타일류'],
+  '도장':['탄성코트'],'도배':['도배'],'바닥재':['바닥'],
+  '주방/가구':['싱크대','가구'],'중문':['중문'],
+  '청소':['기타 및 요청사항'],'기타':[]
+};
+
+var records      = [];
+var schedProjs   = [];
+var estProjs     = [];
+var contacts     = [];
+var currentFilter= 'all';
+var editingId    = null;
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function pad(n){ return n<10?'0'+n:String(n); }
+function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function fmtDate(ds){
+  if(!ds) return '';
+  var p=ds.split('-');
+  return p[0]+'년 '+parseInt(p[1])+'월 '+parseInt(p[2])+'일';
+}
+
+function load(){
+  try{ records  =JSON.parse(localStorage.getItem(ORDER_KEY)||'[]');   }catch(e){ records=[]; }
+  try{ schedProjs=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]');  }catch(e){ schedProjs=[]; }
+  try{ estProjs  =JSON.parse(localStorage.getItem(EST_KEY)||'[]');    }catch(e){ estProjs=[]; }
+  try{ contacts  =JSON.parse(localStorage.getItem(CONTACT_KEY)||'[]');}catch(e){ contacts=[]; }
+}
+function save(){ localStorage.setItem(ORDER_KEY,JSON.stringify(records)); }
+
+/* ── 자재 자동 불러오기 ── */
+function getMaterialsForCat(projId, cat){
+  var secs = CAT_TO_SEC[cat]||[];
+  if(!secs.length||!projId) return [];
+  var sp = schedProjs.find(function(p){ return p.id===projId; });
+  if(!sp||!sp.estimateId) return [];
+  var ep = estProjs.find(function(p){ return p.id===sp.estimateId; });
+  if(!ep||!ep.selectedMaterials) return [];
+  var seen={}, items=[];
+  ep.selectedMaterials.forEach(function(m){
+    if(secs.indexOf(m.sec)<0) return;
+    var k=m.sub+'|'+(m.det||'');
+    if(seen[k]) return;
+    seen[k]=1;
+    var name=m.sub+(m.det?' '+m.det:'');
+    var qty=m.qty||'';
+    var unit=/^\d/.test(String(m.unit||''))?'':m.unit;
+    items.push({name:name, qty:String(qty), unit:unit});
+  });
+  return items;
+}
+
+/* ── 필터·렌더링 ── */
+function setFilter(f){
+  currentFilter=f;
+  ['all','pending','ordered','delivered'].forEach(function(k){
+    document.getElementById('stat-'+k).classList.toggle('active',k===f);
+  });
+  renderList();
+}
+
+function updateStats(){
+  var cnt={all:records.length,pending:0,ordered:0,delivered:0};
+  records.forEach(function(r){ if(cnt[r.status]!==undefined) cnt[r.status]++; });
+  document.getElementById('cnt-all').textContent      =cnt.all;
+  document.getElementById('cnt-pending').textContent  =cnt.pending;
+  document.getElementById('cnt-ordered').textContent  =cnt.ordered;
+  document.getElementById('cnt-delivered').textContent=cnt.delivered;
+}
+
+function statusLabel(s){
+  if(s==='pending')   return '<span class="status-badge badge-pending">미발주</span>';
+  if(s==='ordered')   return '<span class="status-badge badge-ordered">발주완료</span>';
+  if(s==='delivered') return '<span class="status-badge badge-delivered">납품완료</span>';
+  return '';
+}
+
+function renderList(){
+  var q=(document.getElementById('search').value||'').trim().toLowerCase();
+  var list=records.filter(function(r){
+    if(currentFilter!=='all'&&r.status!==currentFilter) return false;
+    if(q){
+      var haystack=(r.projName||'')+(r.cat||'')+(r.items||[]).map(function(i){return i.name;}).join('');
+      if(haystack.toLowerCase().indexOf(q)<0) return false;
+    }
+    return true;
+  });
+  var order={pending:0,ordered:1,delivered:2};
+  list.sort(function(a,b){
+    var os=order[a.status]-order[b.status];
+    if(os!==0) return os;
+    return (b.createdAt||'')>(a.createdAt||'')?1:-1;
+  });
+  updateStats();
+
+  var el=document.getElementById('order-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty">'+(q||currentFilter!=='all'?'조건에 맞는 발주가 없습니다.':'발주 내역이 없습니다.<br>상단 "+ 새 발주" 버튼으로 등록하세요.')+'</div>';
+    return;
+  }
+
+  el.innerHTML=list.map(function(r){
+    var itemsHtml=(r.items||[]).map(function(i){
+      return '· '+i.name+(i.qty?' &nbsp;<strong>'+esc(i.qty)+(i.unit?esc(i.unit):'')+'</strong>':'');
+    }).join('<br>');
+    var metaParts=[];
+    if(r.supplierName) metaParts.push('거래처: <strong>'+esc(r.supplierName)+'</strong>'+(r.supplierTel?' ('+esc(r.supplierTel)+')':''));
+    if(r.deliveryDate) metaParts.push('납품 예정: <strong>'+esc(fmtDate(r.deliveryDate))+'</strong>');
+
+    var actions='<button class="act-btn kakao" onclick="showKakao(\''+r.id+'\')">📋 카톡 복사</button>';
+    if(r.status==='pending')
+      actions+='<button class="act-btn blue" onclick="quickStatus(\''+r.id+'\',\'ordered\')">발주완료</button>';
+    if(r.status==='ordered'||r.status==='pending')
+      actions+='<button class="act-btn green" onclick="quickStatus(\''+r.id+'\',\'delivered\')">납품완료</button>';
+    if(r.status==='delivered')
+      actions+='<button class="act-btn" onclick="quickStatus(\''+r.id+'\',\'pending\')">재발주</button>';
+    actions+='<button class="act-btn" onclick="openModal(\''+r.id+'\')">수정</button>';
+
+    return '<div class="order-card">'
+      +'<div class="card-top">'
+        +'<div class="card-top-left">'+statusLabel(r.status)
+          +'<span class="card-proj">'+esc(r.projName||'현장명 미입력')+'</span>'
+          +'<span class="card-cat">'+esc(r.cat||'')+'</span>'
+        +'</div>'
+      +'</div>'
+      +(metaParts.length?'<div class="card-meta">'+metaParts.join(' &nbsp;·&nbsp; ')+'</div>':'')
+      +(itemsHtml?'<div class="card-items">'+itemsHtml+'</div>':'')
+      +(r.memo?'<div style="font-size:11px;color:var(--dim);margin-bottom:10px">'+esc(r.memo)+'</div>':'')
+      +'<div class="card-actions">'+actions+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function quickStatus(id,status){
+  var r=records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  r.status=status;
+  save(); renderList();
+  var msg={pending:'재발주 처리했습니다',ordered:'✓ 발주완료',delivered:'✓ 납품완료'};
+  showToast(msg[status]||'저장했습니다');
+}
+
+/* ── 모달 ── */
+function fillProjSel(){
+  var sel=document.getElementById('m-proj');
+  sel.innerHTML='<option value="">-- 현장 선택 --</option>';
+  schedProjs.forEach(function(p){
+    var name=(p.info&&(p.info.name||p.info.addr))||'현장명 미입력';
+    sel.innerHTML+='<option value="'+p.id+'">'+esc(name)+'</option>';
+  });
+}
+function fillCatSel(selected){
+  var sel=document.getElementById('m-cat');
+  sel.innerHTML=CATS.map(function(c){
+    return '<option value="'+c+'"'+(c===selected?' selected':'')+'>'+c+'</option>';
+  }).join('');
+}
+function fillSupplierSel(cat, selectedId){
+  var sel=document.getElementById('m-supplier');
+  var list=contacts.filter(function(c){ return !cat||c.cat===cat||c.cat==='기타'; });
+  sel.innerHTML='<option value="">-- 거래처 선택 (선택사항) --</option>';
+  contacts.forEach(function(c){
+    sel.innerHTML+='<option value="'+c.id+'"'+(c.id===selectedId?' selected':'')+'>'
+      +esc(c.cat+' | '+c.name+(c.tel?' | '+c.tel:''))+'</option>';
+  });
+}
+
+function onProjChange(){
+  var cat=document.getElementById('m-cat').value;
+  loadItemsFromEstimate(document.getElementById('m-proj').value, cat);
+}
+function onCatChange(){
+  var cat=document.getElementById('m-cat').value;
+  fillSupplierSel(cat,'');
+  loadItemsFromEstimate(document.getElementById('m-proj').value, cat);
+}
+function loadItemsFromEstimate(projId, cat){
+  var items=getMaterialsForCat(projId, cat);
+  if(items.length) renderItemRows(items);
+}
+
+function renderItemRows(items){
+  var el=document.getElementById('item-rows');
+  el.innerHTML='';
+  items.forEach(function(item){ addItemRow(item); });
+}
+function addItemRow(item){
+  item=item||{name:'',qty:'',unit:''};
+  var el=document.getElementById('item-rows');
+  var row=document.createElement('div');
+  row.className='item-row';
+  row.innerHTML='<input type="text" placeholder="자재명" value="'+esc(item.name||'')+'">'
+    +'<input type="text" placeholder="수량" value="'+esc(item.qty||'')+'">'
+    +'<input type="text" placeholder="단위" value="'+esc(item.unit||'')+'">'
+    +'<button class="item-del" onclick="this.parentElement.remove()" title="삭제">✕</button>';
+  el.appendChild(row);
+}
+function getItemRows(){
+  var rows=document.querySelectorAll('#item-rows .item-row');
+  var items=[];
+  rows.forEach(function(row){
+    var inputs=row.querySelectorAll('input');
+    var name=inputs[0].value.trim();
+    if(!name) return;
+    items.push({name:name,qty:inputs[1].value.trim(),unit:inputs[2].value.trim()});
+  });
+  return items;
+}
+
+function openModal(id){
+  editingId=id||null;
+  var r=id?records.find(function(x){ return x.id===id; }):null;
+  document.getElementById('modal-title').textContent=r?'발주 수정':'새 발주';
+  document.getElementById('btn-del').style.display=r?'inline-flex':'none';
+  fillProjSel();
+  fillCatSel(r?r.cat:CATS[0]);
+  fillSupplierSel(r?r.cat:'', r?r.supplierId:'');
+  document.getElementById('m-proj').value    =r?(r.projId||''):'';
+  document.getElementById('m-delivery').value=r?(r.deliveryDate||''):'';
+  document.getElementById('m-memo').value    =r?(r.memo||''):'';
+  if(r&&r.items&&r.items.length){ renderItemRows(r.items); }
+  else { document.getElementById('item-rows').innerHTML=''; addItemRow(); }
+  document.getElementById('modal-bg').style.display='flex';
+}
+function closeModal(){ document.getElementById('modal-bg').style.display='none'; editingId=null; }
+function onBgClick(e){ if(e.target===document.getElementById('modal-bg')) closeModal(); }
+
+function saveRecord(){
+  var projId  =document.getElementById('m-proj').value;
+  var cat     =document.getElementById('m-cat').value;
+  var supId   =document.getElementById('m-supplier').value;
+  var delivery=document.getElementById('m-delivery').value;
+  var memo    =document.getElementById('m-memo').value.trim();
+  var items   =getItemRows();
+
+  var sp=schedProjs.find(function(p){ return p.id===projId; });
+  var projName=sp?(sp.info&&(sp.info.name||sp.info.addr)||'현장명 미입력'):'현장명 미입력';
+  var sup=contacts.find(function(c){ return c.id===supId; });
+  var supplierName=sup?(sup.name||''):'';
+  var supplierTel =sup?(sup.tel||''):'';
+
+  if(!items.length){ showToast('자재를 한 개 이상 입력해주세요'); return; }
+
+  if(editingId){
+    var r=records.find(function(x){ return x.id===editingId; });
+    if(r){ r.projId=projId;r.projName=projName;r.cat=cat;r.supplierId=supId;
+           r.supplierName=supplierName;r.supplierTel=supplierTel;
+           r.deliveryDate=delivery;r.memo=memo;r.items=items; }
+  } else {
+    records.push({id:uid(),projId:projId,projName:projName,cat:cat,
+      supplierId:supId,supplierName:supplierName,supplierTel:supplierTel,
+      deliveryDate:delivery,memo:memo,items:items,
+      status:'pending',createdAt:new Date().toISOString()});
+  }
+  save(); closeModal(); renderList(); showToast('✓ 저장했습니다');
+}
+
+function deleteRecord(){
+  if(!editingId) return;
+  dahamConfirm('이 발주 내역을 삭제할까요?', function() {
+    records=records.filter(function(x){ return x.id!==editingId; });
+    save(); closeModal(); renderList(); showToast('삭제했습니다');
+  });
+}
+
+/* ── 카톡 메시지 ── */
+function showKakao(id){
+  var r=records.find(function(x){ return x.id===id; });
+  if(!r) return;
+  var lines=[];
+  lines.push('안녕하세요 '+(r.supplierName?r.supplierName+'님 ':'')+':)');
+  lines.push((r.projName||'현장')+' 현장 발주 드립니다.');
+  lines.push('');
+  lines.push('['+r.cat+']');
+  (r.items||[]).forEach(function(i){
+    var line='- '+i.name;
+    if(i.qty) line+=' : '+i.qty+(i.unit?i.unit:'');
+    lines.push(line);
+  });
+  if(r.deliveryDate){
+    lines.push('');
+    lines.push('납품 예정일: '+fmtDate(r.deliveryDate));
+  }
+  if(r.memo){
+    lines.push('');
+    lines.push(r.memo);
+  }
+  lines.push('');
+  lines.push('감사합니다.');
+  lines.push('다함인테리어 최일성');
+  document.getElementById('kakao-text').textContent=lines.join('\n');
+  document.getElementById('kakao-bg').style.display='flex';
+}
+function closeKakao(){ document.getElementById('kakao-bg').style.display='none'; }
+function copyKakao(){
+  var text=document.getElementById('kakao-text').textContent;
+  if(navigator.clipboard){ navigator.clipboard.writeText(text).then(function(){ showToast('✓ 복사했습니다 — 카톡에 붙여넣기 하세요'); closeKakao(); }); }
+  else {
+    var ta=document.createElement('textarea');
+    ta.value=text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('✓ 복사했습니다'); closeKakao();
+  }
+}
+
+function showToast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },2500); }
+
+load();
+renderList();
+</script>
+<script src="auth.js"></script>
+
+<script>
+(function(){
+  const KEY='daham_workflow_v1';
+  const now=()=>new Date().toISOString();
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{"projects":{}}')}catch(e){return {projects:{}}}};
+  const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
+  const pid=()=>localStorage.getItem('daham_current_project')||new URLSearchParams(location.search).get('project')||'default';
+  window.DAHAM_WORKFLOW={
+    getProject(){const d=load(), id=pid(); return (d.projects[id] ||= {id,updatedAt:now(),estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]})},
+    update(mut){const d=load(),id=pid(); const p=(d.projects[id] ||= {id,estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]}); mut(p); p.updatedAt=now(); save(d); return p},
+    syncEstimate(items){return this.update(p=>{p.estimateItems=items||[]})},
+    syncSchedule(items){return this.update(p=>{p.scheduleItems=items||[]})},
+    syncOrders(items){return this.update(p=>{p.orderItems=items||[]})},
+    key:KEY
+  };
+})();
+</script>
+
+</body>
+</html>

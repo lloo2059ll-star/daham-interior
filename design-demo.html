@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>견적서 디자인 데모</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Inter+Tight:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--orange:#E85D1F;--orange-lt:#FFF5EE;--ink:#1a1a1a;--mid:#666;--dim:#aaa;--line:#e8e8e8;--bg:#f0f0f0;--white:#fff;--labor:#E85D1F;--material:#1565C0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);padding:28px 24px}
+
+/* ── 상단 컨트롤 ── */
+.top-bar{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.brand{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--orange);letter-spacing:.1em;margin-right:8px}
+.toggle-btn{font-size:11px;font-weight:600;padding:6px 18px;border:1.5px solid var(--line);background:var(--white);cursor:pointer;font-family:inherit;color:var(--mid);transition:all .15s;letter-spacing:.08em}
+.toggle-btn.on{border-color:var(--orange);background:var(--orange);color:#fff}
+.note{font-size:11px;color:var(--dim);margin-left:4px}
+
+/* ── 뷰 공통 ── */
+.view{display:none}
+.view.active{display:block}
+.sections{display:flex;flex-direction:column;gap:10px}
+
+/* ════════════════════════════════
+   현재 디자인
+════════════════════════════════ */
+.sec-old{background:var(--white);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.sec-hd-old{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none}
+.sec-hd-old:hover{background:#fafafa}
+.sn-old{font-size:17px;font-weight:700;color:var(--orange);font-family:'Inter Tight',sans-serif;min-width:28px}
+.snm-old{font-size:13px;font-weight:700}
+.scat-old{font-size:10px;color:var(--dim);margin-left:2px}
+.sstats-old{margin-left:auto;display:flex;gap:14px}
+.ss-old{text-align:right}
+.ssl-old{font-size:9px;color:var(--dim);letter-spacing:.08em}
+.ssv-old{font-size:11.5px;font-weight:600;font-family:'Inter Tight',sans-serif;color:var(--dim)}
+
+/* sub-group header */
+.subhd-old{background:#f5f5f5;padding:7px 16px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;user-select:none}
+.subhd-old:hover{background:#ebebeb}
+.sub-cnt-old{font-size:9px;color:var(--dim);background:var(--line);padding:1px 6px;border-radius:8px}
+/* chips */
+.chips-old{padding:8px 16px 10px 32px;background:#faf9ff;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px}
+.chip-old{font-size:11px;font-weight:600;padding:5px 12px;border:1.5px solid var(--line);cursor:pointer;background:var(--white);color:var(--mid);transition:all .15s}
+.chip-old:hover{border-color:var(--orange);color:var(--orange)}
+.chip-old.sel{background:var(--orange);color:#fff;border-color:#c94e18}
+/* item rows (old) */
+.irow-old{display:none;align-items:center;padding:7px 16px 7px 32px;border-bottom:1px solid #f5f5f5;font-size:11px}
+.irow-old.vis{display:flex}
+.iname-old{flex:1;color:var(--mid);font-size:10.5px}
+.idet-old{width:180px;font-size:10.5px;color:var(--ink)}
+.iunit-old{width:32px;text-align:center;color:var(--dim);font-size:10px}
+.iqty-old{width:64px;text-align:right}
+.iqty-old input{width:100%;border:none;border-bottom:1px dashed #ccc;text-align:right;font-size:11px;font-family:'Inter Tight',sans-serif;background:transparent;outline:none;padding:1px 0}
+.icalc-old{width:80px;text-align:right;font-family:'Inter Tight',sans-serif;font-size:11px;color:var(--dim)}
+/* direct row old */
+.drow-old{display:flex;align-items:center;padding:7px 16px;border-bottom:1px solid #f5f5f5;font-size:11px}
+.drow-old:last-child{border-bottom:none}
+
+/* ════════════════════════════════
+   개선 디자인
+════════════════════════════════ */
+.sec-new{background:var(--white);box-shadow:0 1px 6px rgba(0,0,0,.08);overflow:hidden}
+.sec-hd-new{display:flex;align-items:center;gap:10px;padding:12px 18px;cursor:pointer;user-select:none;border-bottom:2px solid transparent;transition:border-color .2s}
+.sec-hd-new:hover{background:#fafafa}
+.sec-hd-new.has-input{border-bottom-color:var(--orange)}
+.sn-new{font-size:17px;font-weight:700;color:var(--orange);font-family:'Inter Tight',sans-serif;min-width:28px}
+.snm-new{font-size:13px;font-weight:700}
+.scat-new{font-size:10px;color:var(--dim);margin-left:2px}
+.sstats-new{margin-left:auto;display:flex;gap:16px;transition:opacity .25s}
+.sstats-new.hidden{opacity:0;pointer-events:none}
+.ss-new{text-align:right}
+.ssl-new{font-size:9px;color:var(--dim);letter-spacing:.08em}
+.ssv-new{font-size:12px;font-weight:700;font-family:'Inter Tight',sans-serif}
+.ssv-new.l{color:var(--labor)}
+.ssv-new.m{color:var(--material)}
+.ssv-new.t{color:var(--ink)}
+
+/* sub-group header new */
+.subhd-new{padding:8px 18px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;background:#fafafa;border-bottom:1px solid var(--line);user-select:none;transition:background .15s}
+.subhd-new:hover{background:#f0f0f0}
+.subhd-new.has-sel{background:var(--orange-lt);color:var(--orange)}
+.sub-cnt-new{font-size:9px;color:var(--dim);background:var(--line);padding:1px 6px;border-radius:8px}
+.subhd-new.has-sel .sub-cnt-new{background:rgba(232,93,31,.15);color:var(--orange)}
+/* chips new */
+.chips-new{padding:8px 18px 10px 34px;background:#fff;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:6px}
+.chip-new{font-size:11px;font-weight:600;padding:5px 12px;border:1.5px solid var(--line);cursor:pointer;background:var(--white);color:var(--mid);transition:all .15s;border-radius:2px}
+.chip-new:hover{border-color:var(--orange);color:var(--orange)}
+.chip-new.sel{background:var(--orange);color:#fff;border-color:#c94e18}
+/* item rows new (chip-based) */
+.irow-new{display:none;padding:8px 18px 8px 34px;border-bottom:1px solid #f5f5f5;transition:background .15s}
+.irow-new.vis{display:flex;align-items:center}
+.irow-new.vis.has-val{background:#FFFBF8}
+.idet-new{flex:1;font-size:11px;color:var(--ink);font-weight:500}
+.iunit-new{width:28px;text-align:center;color:var(--dim);font-size:10px}
+.iqty-new{width:60px}
+.iqty-new input{width:100%;border:none;border-bottom:1.5px solid var(--line);text-align:right;font-size:12px;font-family:'Inter Tight',sans-serif;font-weight:600;background:transparent;outline:none;padding:2px 0;transition:border-color .15s}
+.iqty-new input:focus,.iqty-new input.hv{border-bottom-color:var(--orange)}
+.isep{width:1px;height:14px;background:var(--line);margin:0 12px;flex-shrink:0}
+.icalcs-new{display:flex;gap:14px;opacity:0;transition:opacity .2s}
+.irow-new.vis.has-val .icalcs-new{opacity:1}
+.icalc-new{text-align:right}
+.icl-new{font-size:8.5px;color:var(--dim);letter-spacing:.06em}
+.icv-new{font-size:11px;font-weight:700;font-family:'Inter Tight',sans-serif}
+.icv-new.l{color:var(--labor)}
+.icv-new.m{color:var(--material)}
+.icv-new.t{color:var(--ink);font-size:12px}
+
+/* direct rows new */
+.drow-new{display:flex;align-items:center;padding:9px 18px;border-bottom:1px solid #f5f5f5;transition:all .15s;opacity:.42}
+.drow-new:last-child{border-bottom:none}
+.drow-new:hover{opacity:1;background:#fafafa}
+.drow-new.has-val{opacity:1;background:#FFFBF8}
+.drname-new{flex:1;font-size:11.5px;font-weight:500}
+.drunit-new{width:28px;text-align:center;color:var(--dim);font-size:10px;margin-right:4px}
+.drqty-new{width:60px}
+.drqty-new input{width:100%;border:none;border-bottom:1.5px solid var(--line);text-align:right;font-size:12px;font-family:'Inter Tight',sans-serif;font-weight:600;background:transparent;outline:none;padding:2px 0;transition:border-color .15s}
+.drqty-new input:focus,.drqty-new input.hv{border-bottom-color:var(--orange);color:var(--orange)}
+.drsep{width:1px;height:14px;background:var(--line);margin:0 12px;flex-shrink:0}
+.drcalcs{display:flex;gap:14px;opacity:0;transition:opacity .2s}
+.drow-new.has-val .drcalcs{opacity:1}
+.drcalc{text-align:right}
+.drcl{font-size:8.5px;color:var(--dim);letter-spacing:.06em}
+.drcv{font-size:11px;font-weight:700;font-family:'Inter Tight',sans-serif}
+.drcv.l{color:var(--labor)}
+.drcv.m{color:var(--material)}
+.drcv.t{color:var(--ink);font-size:12px}
+
+/* section footer new */
+.sec-foot-new{display:flex;align-items:center;padding:10px 18px;background:#fafafa;border-top:1.5px solid var(--line);transition:opacity .25s}
+.sec-foot-new.hidden{opacity:0}
+.sftl-new{font-size:9.5px;font-weight:700;letter-spacing:.15em;color:var(--dim)}
+.sfvals-new{margin-left:auto;display:flex;gap:20px}
+.sfv-new{text-align:right}
+.sfvl-new{font-size:8.5px;color:var(--dim)}
+.sfvv-new{font-size:13px;font-weight:700;font-family:'Inter Tight',sans-serif}
+.sfvv-new.l{color:var(--labor)}
+.sfvv-new.m{color:var(--material)}
+.sfvv-new.t{color:var(--ink)}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+<script src="auth.js"></script></head>
+<body>
+
+<div class="top-bar">
+  <span class="brand">DAHAM · INTERIOR</span>
+  <button class="toggle-btn" id="btn-old" onclick="show('old')">현재</button>
+  <button class="toggle-btn on" id="btn-new" onclick="show('new')">개선안</button>
+  <span class="note">← 수량 직접 입력해보세요</span>
+</div>
+
+<!-- ════ 현재 디자인 ════ -->
+<div class="view active" id="view-old">
+<div class="sections">
+
+  <!-- 도배 (chip 방식) -->
+  <div class="sec-old">
+    <div class="sec-hd-old">
+      <span class="sn-old">01</span><span class="snm-old">도배</span><span class="scat-old">마감공사</span>
+      <div class="sstats-old">
+        <div class="ss-old"><div class="ssl-old">인건비</div><div class="ssv-old" id="o1l">—</div></div>
+        <div class="ss-old"><div class="ssl-old">자재비</div><div class="ssv-old" id="o1m">—</div></div>
+        <div class="ss-old"><div class="ssl-old">소계</div><div class="ssv-old" id="o1t">—</div></div>
+      </div>
+    </div>
+    <div class="subhd-old">▶ 베스띠<span class="sub-cnt-old">3</span></div>
+    <div class="chips-old">
+      <span class="chip-old" onclick="oldChip(this,'oi0',1)">24평~29평</span>
+      <span class="chip-old" onclick="oldChip(this,'oi1',1)">30평~39평</span>
+      <span class="chip-old" onclick="oldChip(this,'oi2',1)">40평~49평</span>
+    </div>
+    <div class="irow-old" id="oi0"><div class="iname-old">베스띠</div><div class="idet-old">24평~29평</div><div class="iunit-old">식</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(0,this,270000*7,33766*15,'o1')"></div><div class="icalc-old" id="olt0">—</div><div class="icalc-old" id="omt0">—</div><div class="icalc-old" id="ott0">—</div></div>
+    <div class="irow-old" id="oi1"><div class="iname-old">베스띠</div><div class="idet-old">30평~39평</div><div class="iunit-old">식</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(1,this,270000*7,33766*18,'o1')"></div><div class="icalc-old" id="olt1">—</div><div class="icalc-old" id="omt1">—</div><div class="icalc-old" id="ott1">—</div></div>
+    <div class="irow-old" id="oi2"><div class="iname-old">베스띠</div><div class="idet-old">40평~49평</div><div class="iunit-old">식</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(2,this,270000*9,33766*22,'o1')"></div><div class="icalc-old" id="olt2">—</div><div class="icalc-old" id="omt2">—</div><div class="icalc-old" id="ott2">—</div></div>
+  </div>
+
+  <!-- 바닥 (direct 방식) -->
+  <div class="sec-old">
+    <div class="sec-hd-old">
+      <span class="sn-old">02</span><span class="snm-old">바닥</span><span class="scat-old">마감공사</span>
+      <div class="sstats-old">
+        <div class="ss-old"><div class="ssl-old">인건비</div><div class="ssv-old" id="o2l">—</div></div>
+        <div class="ss-old"><div class="ssl-old">자재비</div><div class="ssv-old" id="o2m">—</div></div>
+        <div class="ss-old"><div class="ssl-old">소계</div><div class="ssv-old" id="o2t">—</div></div>
+      </div>
+    </div>
+    <div class="drow-old"><div style="flex:1;font-size:11px">장판 LG2.2T(지아자연애)</div><div class="iunit-old">평</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldDCalc(0,this,28500,25000,'o2')"></div><div class="icalc-old" id="odl0">—</div><div class="icalc-old" id="odm0">—</div><div class="icalc-old" id="odt0">—</div></div>
+    <div class="drow-old"><div style="flex:1;font-size:11px">장판 LG3.2T(지아사랑애)</div><div class="iunit-old">평</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldDCalc(1,this,42000,35400,'o2')"></div><div class="icalc-old" id="odl1">—</div><div class="icalc-old" id="odm1">—</div><div class="icalc-old" id="odt1">—</div></div>
+    <div class="drow-old"><div style="flex:1;font-size:11px">강마루 구정(94-800 7.5T)</div><div class="iunit-old">평</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldDCalc(2,this,19000,98000,'o2')"></div><div class="icalc-old" id="odl2">—</div><div class="icalc-old" id="odm2">—</div><div class="icalc-old" id="odt2">—</div></div>
+    <div class="drow-old"><div style="flex:1;font-size:11px">강마루 구정마블러스(597-597 8.7T)</div><div class="iunit-old">평</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldDCalc(3,this,25000,115000,'o2')"></div><div class="icalc-old" id="odl3">—</div><div class="icalc-old" id="odm3">—</div><div class="icalc-old" id="odt3">—</div></div>
+    <div class="drow-old"><div style="flex:1;font-size:11px">바닥샌딩(기본)</div><div class="iunit-old">평</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldDCalc(4,this,12000,0,'o2')"></div><div class="icalc-old" id="odl4">—</div><div class="icalc-old" id="odm4">—</div><div class="icalc-old" id="odt4">—</div></div>
+  </div>
+
+  <!-- 전기/조명 -->
+  <div class="sec-old">
+    <div class="sec-hd-old">
+      <span class="sn-old">03</span><span class="snm-old">전기/조명</span><span class="scat-old">설비공사</span>
+      <div class="sstats-old">
+        <div class="ss-old"><div class="ssl-old">인건비</div><div class="ssv-old" id="o3l">—</div></div>
+        <div class="ss-old"><div class="ssl-old">자재비</div><div class="ssv-old" id="o3m">—</div></div>
+        <div class="ss-old"><div class="ssl-old">소계</div><div class="ssv-old" id="o3t">—</div></div>
+      </div>
+    </div>
+    <div class="subhd-old">▶ 거실등<span class="sub-cnt-old">3</span></div>
+    <div class="chips-old">
+      <span class="chip-old" onclick="oldChip(this,'oe0',3)">파인3등</span>
+      <span class="chip-old" onclick="oldChip(this,'oe1',3)">엣지3등</span>
+      <span class="chip-old" onclick="oldChip(this,'oe2',3)">삼성베젤3등</span>
+    </div>
+    <div class="irow-old" id="oe0"><div class="iname-old">거실등</div><div class="idet-old">파인3등(380*710)</div><div class="iunit-old">개</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(10,this,12000,130000,'o3')"></div><div class="icalc-old" id="olt10">—</div><div class="icalc-old" id="omt10">—</div><div class="icalc-old" id="ott10">—</div></div>
+    <div class="irow-old" id="oe1"><div class="iname-old">거실등</div><div class="idet-old">엣지3등(180*1200)</div><div class="iunit-old">개</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(11,this,12000,130000,'o3')"></div><div class="icalc-old" id="olt11">—</div><div class="icalc-old" id="omt11">—</div><div class="icalc-old" id="ott11">—</div></div>
+    <div class="irow-old" id="oe2"><div class="iname-old">거실등</div><div class="idet-old">삼성베젤3등(310*1210)</div><div class="iunit-old">개</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(12,this,12000,130000,'o3')"></div><div class="icalc-old" id="olt12">—</div><div class="icalc-old" id="omt12">—</div><div class="icalc-old" id="ott12">—</div></div>
+    <div class="subhd-old">▶ 매입등 2인치<span class="sub-cnt-old">3</span></div>
+    <div class="chips-old">
+      <span class="chip-old" onclick="oldChip(this,'oe3',3)">주광색</span>
+      <span class="chip-old" onclick="oldChip(this,'oe4',3)">주백색</span>
+      <span class="chip-old" onclick="oldChip(this,'oe5',3)">전구색</span>
+    </div>
+    <div class="irow-old" id="oe3"><div class="iname-old">매입등 2인치</div><div class="idet-old">주광색</div><div class="iunit-old">개</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(13,this,16000,4500,'o3')"></div><div class="icalc-old" id="olt13">—</div><div class="icalc-old" id="omt13">—</div><div class="icalc-old" id="ott13">—</div></div>
+    <div class="irow-old" id="oe4"><div class="iname-old">매입등 2인치</div><div class="idet-old">주백색</div><div class="iunit-old">개</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(14,this,16000,4500,'o3')"></div><div class="icalc-old" id="olt14">—</div><div class="icalc-old" id="omt14">—</div><div class="icalc-old" id="ott14">—</div></div>
+    <div class="irow-old" id="oe5"><div class="iname-old">매입등 2인치</div><div class="idet-old">전구색</div><div class="iunit-old">개</div><div class="iqty-old"><input type="number" placeholder="0" min="0" oninput="oldICalc(15,this,16000,4500,'o3')"></div><div class="icalc-old" id="olt15">—</div><div class="icalc-old" id="omt15">—</div><div class="icalc-old" id="ott15">—</div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════ 개선 디자인 ════ -->
+<div class="view" id="view-new">
+<div class="sections">
+
+  <!-- 도배 -->
+  <div class="sec-new">
+    <div class="sec-hd-new" id="nhd1">
+      <span class="sn-new">01</span><span class="snm-new">도배</span><span class="scat-new">마감공사</span>
+      <div class="sstats-new hidden" id="ns1">
+        <div class="ss-new"><div class="ssl-new">인건비</div><div class="ssv-new l" id="n1l">—</div></div>
+        <div class="ss-new"><div class="ssl-new">자재비</div><div class="ssv-new m" id="n1m">—</div></div>
+        <div class="ss-new"><div class="ssl-new">소계</div><div class="ssv-new t" id="n1t">—</div></div>
+      </div>
+    </div>
+    <div class="subhd-new" id="nshd1" onclick="newToggleSub('nc1','nshd1')">
+      <span>▶ 베스띠</span><span class="sub-cnt-new">3</span>
+    </div>
+    <div id="nc1" style="display:none">
+      <div class="chips-new">
+        <span class="chip-new" onclick="newChip(this,'ni0')">24평~29평</span>
+        <span class="chip-new" onclick="newChip(this,'ni1')">30평~39평</span>
+        <span class="chip-new" onclick="newChip(this,'ni2')">40평~49평</span>
+      </div>
+      <div class="irow-new" id="ni0">
+        <div class="idet-new">24평~29평</div><div class="iunit-new">식</div>
+        <div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(0,this,1890000,506490,'n1','ni0','nshd1')"></div>
+        <div class="isep"></div>
+        <div class="icalcs-new">
+          <div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt0">—</div></div>
+          <div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt0">—</div></div>
+          <div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt0">—</div></div>
+        </div>
+      </div>
+      <div class="irow-new" id="ni1">
+        <div class="idet-new">30평~39평</div><div class="iunit-new">식</div>
+        <div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(1,this,1890000,607788,'n1','ni1','nshd1')"></div>
+        <div class="isep"></div>
+        <div class="icalcs-new">
+          <div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt1">—</div></div>
+          <div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt1">—</div></div>
+          <div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt1">—</div></div>
+        </div>
+      </div>
+      <div class="irow-new" id="ni2">
+        <div class="idet-new">40평~49평</div><div class="iunit-new">식</div>
+        <div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(2,this,2430000,742852,'n1','ni2','nshd1')"></div>
+        <div class="isep"></div>
+        <div class="icalcs-new">
+          <div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt2">—</div></div>
+          <div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt2">—</div></div>
+          <div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt2">—</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec-foot-new hidden" id="nf1">
+      <span class="sftl-new">SUBTOTAL</span>
+      <div class="sfvals-new">
+        <div class="sfv-new"><div class="sfvl-new">인건비</div><div class="sfvv-new l" id="nf1l">—</div></div>
+        <div class="sfv-new"><div class="sfvl-new">자재비</div><div class="sfvv-new m" id="nf1m">—</div></div>
+        <div class="sfv-new"><div class="sfvl-new">소 계</div><div class="sfvv-new t" id="nf1t">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 바닥 -->
+  <div class="sec-new">
+    <div class="sec-hd-new" id="nhd2">
+      <span class="sn-new">02</span><span class="snm-new">바닥</span><span class="scat-new">마감공사</span>
+      <div class="sstats-new hidden" id="ns2">
+        <div class="ss-new"><div class="ssl-new">인건비</div><div class="ssv-new l" id="n2l">—</div></div>
+        <div class="ss-new"><div class="ssl-new">자재비</div><div class="ssv-new m" id="n2m">—</div></div>
+        <div class="ss-new"><div class="ssl-new">소계</div><div class="ssv-new t" id="n2t">—</div></div>
+      </div>
+    </div>
+    <div class="drow-new" id="nd0"><span class="drname-new">장판 LG2.2T(지아자연애)</span><span class="drunit-new">평</span><div class="drqty-new"><input type="number" placeholder="0" min="0" oninput="newDCalc(0,this,28500,25000,'n2')"></div><div class="drsep"></div><div class="drcalcs"><div class="drcalc"><div class="drcl">인건비</div><div class="drcv l" id="ndl0">—</div></div><div class="drcalc"><div class="drcl">자재비</div><div class="drcv m" id="ndm0">—</div></div><div class="drcalc"><div class="drcl">합계</div><div class="drcv t" id="ndt0">—</div></div></div></div>
+    <div class="drow-new" id="nd1"><span class="drname-new">장판 LG3.2T(지아사랑애)</span><span class="drunit-new">평</span><div class="drqty-new"><input type="number" placeholder="0" min="0" oninput="newDCalc(1,this,42000,35400,'n2')"></div><div class="drsep"></div><div class="drcalcs"><div class="drcalc"><div class="drcl">인건비</div><div class="drcv l" id="ndl1">—</div></div><div class="drcalc"><div class="drcl">자재비</div><div class="drcv m" id="ndm1">—</div></div><div class="drcalc"><div class="drcl">합계</div><div class="drcv t" id="ndt1">—</div></div></div></div>
+    <div class="drow-new" id="nd2"><span class="drname-new">강마루 구정(94-800 7.5T)</span><span class="drunit-new">평</span><div class="drqty-new"><input type="number" placeholder="0" min="0" oninput="newDCalc(2,this,19000,98000,'n2')"></div><div class="drsep"></div><div class="drcalcs"><div class="drcalc"><div class="drcl">인건비</div><div class="drcv l" id="ndl2">—</div></div><div class="drcalc"><div class="drcl">자재비</div><div class="drcv m" id="ndm2">—</div></div><div class="drcalc"><div class="drcl">합계</div><div class="drcv t" id="ndt2">—</div></div></div></div>
+    <div class="drow-new" id="nd3"><span class="drname-new">강마루 구정마블러스(597-597 8.7T)</span><span class="drunit-new">평</span><div class="drqty-new"><input type="number" placeholder="0" min="0" oninput="newDCalc(3,this,25000,115000,'n2')"></div><div class="drsep"></div><div class="drcalcs"><div class="drcalc"><div class="drcl">인건비</div><div class="drcv l" id="ndl3">—</div></div><div class="drcalc"><div class="drcl">자재비</div><div class="drcv m" id="ndm3">—</div></div><div class="drcalc"><div class="drcl">합계</div><div class="drcv t" id="ndt3">—</div></div></div></div>
+    <div class="drow-new" id="nd4"><span class="drname-new">바닥샌딩(기본)</span><span class="drunit-new">평</span><div class="drqty-new"><input type="number" placeholder="0" min="0" oninput="newDCalc(4,this,12000,0,'n2')"></div><div class="drsep"></div><div class="drcalcs"><div class="drcalc"><div class="drcl">인건비</div><div class="drcv l" id="ndl4">—</div></div><div class="drcalc"><div class="drcl">자재비</div><div class="drcv m" id="ndm4">—</div></div><div class="drcalc"><div class="drcl">합계</div><div class="drcv t" id="ndt4">—</div></div></div></div>
+    <div class="sec-foot-new hidden" id="nf2">
+      <span class="sftl-new">SUBTOTAL</span>
+      <div class="sfvals-new">
+        <div class="sfv-new"><div class="sfvl-new">인건비</div><div class="sfvv-new l" id="nf2l">—</div></div>
+        <div class="sfv-new"><div class="sfvl-new">자재비</div><div class="sfvv-new m" id="nf2m">—</div></div>
+        <div class="sfv-new"><div class="sfvl-new">소 계</div><div class="sfvv-new t" id="nf2t">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 전기/조명 -->
+  <div class="sec-new">
+    <div class="sec-hd-new" id="nhd3">
+      <span class="sn-new">03</span><span class="snm-new">전기/조명</span><span class="scat-new">설비공사</span>
+      <div class="sstats-new hidden" id="ns3">
+        <div class="ss-new"><div class="ssl-new">인건비</div><div class="ssv-new l" id="n3l">—</div></div>
+        <div class="ss-new"><div class="ssl-new">자재비</div><div class="ssv-new m" id="n3m">—</div></div>
+        <div class="ss-new"><div class="ssl-new">소계</div><div class="ssv-new t" id="n3t">—</div></div>
+      </div>
+    </div>
+    <div class="subhd-new" id="nshd3a" onclick="newToggleSub('nc3a','nshd3a')">
+      <span>▶ 거실등</span><span class="sub-cnt-new">3</span>
+    </div>
+    <div id="nc3a" style="display:none">
+      <div class="chips-new">
+        <span class="chip-new" onclick="newChip(this,'ne0')">파인3등(380*710)</span>
+        <span class="chip-new" onclick="newChip(this,'ne1')">엣지3등(180*1200)</span>
+        <span class="chip-new" onclick="newChip(this,'ne2')">삼성베젤3등(310*1210)</span>
+      </div>
+      <div class="irow-new" id="ne0"><div class="idet-new">파인3등(380*710)</div><div class="iunit-new">개</div><div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(20,this,12000,130000,'n3','ne0','nshd3a')"></div><div class="isep"></div><div class="icalcs-new"><div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt20">—</div></div><div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt20">—</div></div><div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt20">—</div></div></div></div>
+      <div class="irow-new" id="ne1"><div class="idet-new">엣지3등(180*1200)</div><div class="iunit-new">개</div><div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(21,this,12000,130000,'n3','ne1','nshd3a')"></div><div class="isep"></div><div class="icalcs-new"><div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt21">—</div></div><div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt21">—</div></div><div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt21">—</div></div></div></div>
+      <div class="irow-new" id="ne2"><div class="idet-new">삼성베젤3등(310*1210)</div><div class="iunit-new">개</div><div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(22,this,12000,130000,'n3','ne2','nshd3a')"></div><div class="isep"></div><div class="icalcs-new"><div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt22">—</div></div><div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt22">—</div></div><div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt22">—</div></div></div></div>
+    </div>
+    <div class="subhd-new" id="nshd3b" onclick="newToggleSub('nc3b','nshd3b')">
+      <span>▶ 매입등 2인치</span><span class="sub-cnt-new">3</span>
+    </div>
+    <div id="nc3b" style="display:none">
+      <div class="chips-new">
+        <span class="chip-new" onclick="newChip(this,'ne3')">주광색</span>
+        <span class="chip-new" onclick="newChip(this,'ne4')">주백색</span>
+        <span class="chip-new" onclick="newChip(this,'ne5')">전구색</span>
+      </div>
+      <div class="irow-new" id="ne3"><div class="idet-new">주광색</div><div class="iunit-new">개</div><div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(23,this,16000,4500,'n3','ne3','nshd3b')"></div><div class="isep"></div><div class="icalcs-new"><div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt23">—</div></div><div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt23">—</div></div><div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt23">—</div></div></div></div>
+      <div class="irow-new" id="ne4"><div class="idet-new">주백색</div><div class="iunit-new">개</div><div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(24,this,16000,4500,'n3','ne4','nshd3b')"></div><div class="isep"></div><div class="icalcs-new"><div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt24">—</div></div><div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt24">—</div></div><div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt24">—</div></div></div></div>
+      <div class="irow-new" id="ne5"><div class="idet-new">전구색</div><div class="iunit-new">개</div><div class="iqty-new"><input type="number" placeholder="0" min="0" oninput="newICalc(25,this,16000,4500,'n3','ne5','nshd3b')"></div><div class="isep"></div><div class="icalcs-new"><div class="icalc-new"><div class="icl-new">인건비</div><div class="icv-new l" id="nlt25">—</div></div><div class="icalc-new"><div class="icl-new">자재비</div><div class="icv-new m" id="nmt25">—</div></div><div class="icalc-new"><div class="icl-new">합계</div><div class="icv-new t" id="ntt25">—</div></div></div></div>
+    </div>
+    <div class="sec-foot-new hidden" id="nf3">
+      <span class="sftl-new">SUBTOTAL</span>
+      <div class="sfvals-new">
+        <div class="sfv-new"><div class="sfvl-new">인건비</div><div class="sfvv-new l" id="nf3l">—</div></div>
+        <div class="sfv-new"><div class="sfvl-new">자재비</div><div class="sfvv-new m" id="nf3m">—</div></div>
+        <div class="sfv-new"><div class="sfvl-new">소 계</div><div class="sfvv-new t" id="nf3t">—</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+var c=function(n){return n>0?n.toLocaleString('ko-KR'):'—'};
+var secTotals={o1:{l:0,m:0},o2:{l:0,m:0},o3:{l:0,m:0},n1:{l:0,m:0},n2:{l:0,m:0},n3:{l:0,m:0}};
+var itemTotals={};
+
+function updateSecOld(sec){
+  var t=secTotals[sec];
+  document.getElementById(sec+'l').textContent=c(t.l);
+  document.getElementById(sec+'m').textContent=c(t.m);
+  document.getElementById(sec+'t').textContent=c(t.l+t.m);
+}
+function updateSecNew(sec){
+  var t=secTotals[sec];
+  var s=document.getElementById('n'+sec.slice(1)+'stats')||document.getElementById('ns'+sec.slice(1));
+  var f=document.getElementById('nf'+sec.slice(1));
+  if(t.l+t.m>0){
+    if(s)s.classList.remove('hidden');
+    if(f)f.classList.remove('hidden');
+    document.getElementById(sec+'l').textContent=t.l.toLocaleString();
+    document.getElementById(sec+'m').textContent=t.m.toLocaleString();
+    document.getElementById(sec+'t').textContent=(t.l+t.m).toLocaleString();
+    var fl=document.getElementById('nf'+sec.slice(1)+'l');
+    var fm=document.getElementById('nf'+sec.slice(1)+'m');
+    var ft=document.getElementById('nf'+sec.slice(1)+'t');
+    if(fl)fl.textContent=t.l.toLocaleString();
+    if(fm)fm.textContent=t.m.toLocaleString();
+    if(ft)ft.textContent=(t.l+t.m).toLocaleString();
+    var hd=document.getElementById('nhd'+sec.slice(1));
+    if(hd)hd.classList.add('has-input');
+  } else {
+    if(s)s.classList.add('hidden');
+    if(f)f.classList.add('hidden');
+    var hd=document.getElementById('nhd'+sec.slice(1));
+    if(hd)hd.classList.remove('has-input');
+  }
+}
+
+// OLD helpers
+function oldChip(el,rowId,secN){
+  el.classList.toggle('selected');
+  var row=document.getElementById(rowId);
+  if(row){
+    var on=el.classList.contains('selected');
+    row.classList.toggle('vis',on);
+    if(!on){var inp=row.querySelector('input');if(inp){inp.value='';inp.dispatchEvent(new Event('input'));}}
+  }
+}
+function oldICalc(i,el,lu,mu,sec){
+  var qty=parseFloat(el.value)||0;
+  var lt=qty*lu,mt=qty*mu;
+  document.getElementById('olt'+i).textContent=c(lt);
+  document.getElementById('omt'+i).textContent=c(mt);
+  document.getElementById('ott'+i).textContent=c(lt+mt);
+  itemTotals['old_i'+i]={l:lt,m:mt};
+  recalcSecOld(sec);
+}
+function oldDCalc(i,el,lu,mu,sec){
+  var qty=parseFloat(el.value)||0;
+  var lt=qty*lu,mt=qty*mu;
+  document.getElementById('odl'+i).textContent=c(lt);
+  document.getElementById('odm'+i).textContent=c(mt);
+  document.getElementById('odt'+i).textContent=c(lt+mt);
+  itemTotals['old_d'+i]={l:lt,m:mt};
+  recalcSecOld(sec);
+}
+function recalcSecOld(sec){
+  var tl=0,tm=0;
+  Object.keys(itemTotals).forEach(function(k){if(k.indexOf('old_')===0){tl+=itemTotals[k].l;tm+=itemTotals[k].m;}});
+  if(sec==='o1'){tl=0;tm=0;[0,1,2].forEach(function(i){var v=itemTotals['old_i'+i]||{l:0,m:0};tl+=v.l;tm+=v.m;});}
+  if(sec==='o2'){tl=0;tm=0;[0,1,2,3,4].forEach(function(i){var v=itemTotals['old_d'+i]||{l:0,m:0};tl+=v.l;tm+=v.m;});}
+  if(sec==='o3'){tl=0;tm=0;[10,11,12,13,14,15].forEach(function(i){var v=itemTotals['old_i'+i]||{l:0,m:0};tl+=v.l;tm+=v.m;});}
+  secTotals[sec]={l:tl,m:tm};
+  updateSecOld(sec);
+}
+
+// NEW helpers
+function newToggleSub(contentId,hdId){
+  var c=document.getElementById(contentId);
+  var open=c.style.display!=='none';
+  c.style.display=open?'none':'block';
+  var hd=document.getElementById(hdId);
+  var arrow=hd.querySelector('span');
+  if(arrow)arrow.textContent=(open?'▶ ':'▼ ')+arrow.textContent.replace(/^[▶▼] /,'');
+}
+function newChip(el,rowId){
+  var on=!el.classList.contains('sel');
+  el.classList.toggle('sel',on);
+  var row=document.getElementById(rowId);
+  if(row){
+    row.classList.toggle('vis',on);
+    if(!on){var inp=row.querySelector('input');if(inp){inp.value='';inp.dispatchEvent(new Event('input'));}}
+    else{setTimeout(function(){var inp=row.querySelector('input');if(inp)inp.focus();},50);}
+  }
+}
+function newICalc(i,el,lu,mu,sec,rowId,hdId){
+  var qty=parseFloat(el.value)||0;
+  var lt=qty*lu,mt=qty*mu;
+  document.getElementById('nlt'+i).textContent=c(lt);
+  document.getElementById('nmt'+i).textContent=c(mt);
+  document.getElementById('ntt'+i).textContent=c(lt+mt);
+  var row=document.getElementById(rowId);
+  if(row){row.classList.toggle('has-val',qty>0);var inp=row.querySelector('input');if(inp)inp.classList.toggle('hv',qty>0);}
+  var hd=document.getElementById(hdId);
+  if(hd)hd.classList.toggle('has-sel',qty>0);
+  itemTotals['new_i'+i]={l:lt,m:mt,sec:sec};
+  recalcSecNew(sec);
+}
+function newDCalc(i,el,lu,mu,sec){
+  var qty=parseFloat(el.value)||0;
+  var lt=qty*lu,mt=qty*mu;
+  document.getElementById('ndl'+i).textContent=c(lt);
+  document.getElementById('ndm'+i).textContent=c(mt);
+  document.getElementById('ndt'+i).textContent=c(lt+mt);
+  var row=document.getElementById('nd'+i);
+  if(row){row.classList.toggle('has-val',qty>0);var inp=row.querySelector('input');if(inp)inp.classList.toggle('hv',qty>0);}
+  itemTotals['new_d'+i]={l:lt,m:mt,sec:sec};
+  recalcSecNew(sec);
+}
+function recalcSecNew(sec){
+  var tl=0,tm=0;
+  Object.keys(itemTotals).forEach(function(k){if(itemTotals[k].sec===sec){tl+=itemTotals[k].l;tm+=itemTotals[k].m;}});
+  secTotals[sec]={l:tl,m:tm};
+  updateSecNew(sec);
+}
+
+function show(v){
+  document.getElementById('view-old').classList.toggle('active',v==='old');
+  document.getElementById('view-new').classList.toggle('active',v==='new');
+  document.getElementById('btn-old').classList.toggle('on',v==='old');
+  document.getElementById('btn-new').classList.toggle('on',v==='new');
+}
+</script>
+</body>
+</html>

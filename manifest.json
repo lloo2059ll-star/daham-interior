@@ -1,0 +1,9 @@
+{
+  "name": "DAHAM Interior Management System",
+  "short_name": "DAHAM",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f6f7fb",
+  "theme_color": "#18223b",
+  "lang": "ko-KR"
+}

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAHAM — 견적 요약서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR',sans-serif; background:#f5f5f5; padding:20px; color:#1a1a1a; }
+
+.toolbar {
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; height:44px; margin:-20px -20px 20px;
+  background:#fff; border-bottom:2px solid #E85D1F;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.tb-brand { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:600; color:#E85D1F; letter-spacing:.1em; }
+.tb-btn {
+  font-size:11px; font-weight:500; padding:6px 14px; cursor:pointer;
+  border:1.5px solid #ddd; background:#fff; color:#555; transition:all .15s;
+}
+.tb-btn:hover { border-color:#1a1a1a; color:#1a1a1a; }
+.tb-btn.primary { border-color:#E85D1F; background:#E85D1F; color:#fff; }
+.tb-btn.primary:hover { background:#c94e18; }
+
+.page {
+  width:210mm; min-height:297mm; margin:0 auto;
+  background:#fff; padding:18mm 16mm;
+  box-shadow:0 4px 24px rgba(0,0,0,.08); position:relative;
+}
+.page::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:6px;
+  background:linear-gradient(90deg,#E85D1F 0%,#F49B5C 100%);
+}
+
+.header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:16px; border-bottom:1px solid #e5e5e5; margin-bottom:24px; }
+.brand { font-family:'Cormorant Garamond',serif; font-size:26px; font-weight:600; letter-spacing:.08em; color:#E85D1F; }
+.brand-sub { font-size:10px; letter-spacing:.3em; color:#888; margin-top:2px; font-weight:400; }
+.header-right { text-align:right; font-size:11px; color:#666; line-height:1.6; }
+.doc-no { font-family:'Inter Tight',sans-serif; font-size:12px; color:#1a1a1a; font-weight:600; letter-spacing:.08em; }
+
+.title-block { text-align:center; margin-bottom:28px; }
+.title-en { font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:.4em; color:#E85D1F; margin-bottom:8px; }
+.title-ko { font-family:'Noto Serif KR',serif; font-size:26px; font-weight:500; letter-spacing:.15em; color:#1a1a1a; }
+.title-tagline { font-size:11px; color:#888; margin-top:8px; letter-spacing:.05em; }
+
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; background:#fafafa; border:1px solid #eee; margin-bottom:24px; }
+.info-cell { padding:12px 16px; border-right:1px solid #eee; border-bottom:1px solid #eee; }
+.info-cell:nth-child(2n) { border-right:none; }
+.info-cell:nth-last-child(-n+2) { border-bottom:none; }
+.info-label { font-size:9px; color:#999; letter-spacing:.15em; margin-bottom:4px; font-weight:500; }
+.info-value { font-size:13px; color:#1a1a1a; font-weight:500; }
+
+.section-title { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+.section-num { font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:.2em; color:#E85D1F; font-weight:600; }
+.section-bar { width:3px; height:14px; background:#E85D1F; }
+.section-name { font-size:13px; font-weight:700; letter-spacing:.1em; }
+.section-name-en { margin-left:auto; font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:.2em; color:#aaa; }
+
+.scope { margin-bottom:24px; }
+.cat-row { display:flex; align-items:center; gap:10px; background:#fdf5f1; border-left:4px solid #E85D1F; border-bottom:1px solid #f0ddd4; padding:10px 14px; margin:12px 0 0; }
+.cat-row:first-child { margin-top:0; }
+.cat-num { font-family:'Inter Tight',sans-serif; font-size:11px; font-weight:700; color:#E85D1F; min-width:22px; letter-spacing:.05em; }
+.cat-name { font-size:13px; font-weight:700; color:#1a1a1a; letter-spacing:.1em; }
+.cat-en { font-family:'Cormorant Garamond',serif; font-size:10px; letter-spacing:.3em; color:#ccc; margin-left:8px; }
+.cat-total { margin-left:auto; font-family:'Inter Tight',sans-serif; font-size:13px; font-weight:700; color:#E85D1F; letter-spacing:-.01em; }
+.scope-group { border:1px solid #ebebeb; border-top:none; margin-bottom:0; }
+.scope-row { display:grid; grid-template-columns:40px 1fr auto; align-items:center; padding:9px 14px 9px 24px; border-bottom:1px solid #f5f5f5; font-size:12px; background:#fff; }
+.scope-row:last-child { border-bottom:none; }
+.scope-num { font-family:'Inter Tight',sans-serif; color:#bbb; font-weight:600; font-size:11px; }
+.scope-name { color:#1a1a1a; font-weight:500; letter-spacing:.02em; }
+.scope-name small { color:#aaa; font-size:10px; margin-left:8px; letter-spacing:0; font-weight:400; }
+.scope-amount { font-family:'Inter Tight',sans-serif; font-size:12.5px; font-weight:600; color:#333; letter-spacing:-.01em; }
+
+.total-block {
+  background:#fff; border:2px solid #1a1a1a; padding:18px 20px; margin:8px 0 24px 0;
+  display:grid; grid-template-columns:1fr auto; align-items:center;
+}
+.total-block .breakdown { font-size:10.5px; color:#555; line-height:1.9; letter-spacing:.04em; }
+.total-block .breakdown .label { display:inline-block; width:140px; color:#999; }
+.total-block .breakdown .amount { font-family:'Inter Tight',sans-serif; font-size:12px; color:#1a1a1a; font-weight:500; }
+.total-block .grand { text-align:right; border-left:1px solid #e5e5e5; padding-left:24px; }
+.total-block .grand-label { font-size:9px; letter-spacing:.3em; color:#E85D1F; margin-bottom:4px; }
+.total-block .grand-amount { font-family:'Inter Tight',sans-serif; font-size:30px; font-weight:700; color:#1a1a1a; letter-spacing:-.02em; }
+.total-block .grand-amount .won { font-size:18px; font-weight:500; color:#E85D1F; margin-right:4px; letter-spacing:0; }
+
+.payment { display:grid; grid-template-columns:repeat(4,1fr); gap:0; border:1px solid #eee; margin-bottom:18px; }
+.payment-cell { padding:12px; border-right:1px solid #eee; text-align:center; }
+.payment-cell:last-child { border-right:none; }
+.payment-cell.deposit { border-top:3px solid #E85D1F; }
+.payment-cell.start   { border-top:3px solid #4A7CC9; }
+.payment-cell.interim { border-top:3px solid #888; }
+.payment-cell.balance { border-top:3px solid #1a1a1a; }
+.payment-label { font-family:'Cormorant Garamond',serif; font-size:10px; letter-spacing:.25em; color:#999; margin-bottom:4px; }
+.payment-name  { font-size:11px; color:#666; margin-bottom:6px; }
+.payment-percent { font-family:'Inter Tight',sans-serif; font-size:24px; font-weight:700; color:#1a1a1a; letter-spacing:-.02em; }
+.payment-percent .pct { font-size:14px; color:#888; font-weight:500; margin-left:1px; }
+.payment-amount { font-family:'Inter Tight',sans-serif; font-size:11px; color:#555; margin-top:4px; }
+
+.bottom-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px; }
+.bottom-card { border:1px solid #eee; padding:14px 16px; }
+.bottom-card .label { font-size:10px; letter-spacing:.2em; color:#E85D1F; margin-bottom:6px; font-weight:500; }
+.bottom-card .value { font-size:12.5px; color:#1a1a1a; line-height:1.6; }
+
+.offer { background:linear-gradient(90deg,#FFF5EE 0%,#FFFAF6 100%); border-left:3px solid #E85D1F; padding:12px 16px; margin-bottom:22px; display:flex; align-items:center; gap:12px; }
+.offer-tag { background:#E85D1F; color:#fff; font-size:9px; letter-spacing:.2em; padding:4px 10px; font-weight:600; }
+.offer-text { font-size:12px; color:#1a1a1a; font-weight:500; }
+.offer-text strong { color:#E85D1F; font-weight:700; }
+
+.footer { border-top:1px solid #e5e5e5; padding-top:14px; display:grid; grid-template-columns:1fr auto; align-items:end; gap:16px; }
+.footer-brand { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:600; color:#E85D1F; letter-spacing:.1em; margin-bottom:4px; }
+.footer-info { font-size:10.5px; color:#666; line-height:1.7; }
+.footer-info span { color:#1a1a1a; font-weight:500; }
+.footer-sns { text-align:right; font-size:10.5px; color:#888; line-height:1.7; }
+.footer-sns .ig { color:#E85D1F; font-weight:500; }
+
+.empty-state { text-align:center; padding:60px 20px; color:#888; font-size:14px; line-height:2; }
+
+@media print {
+  @page { size:A4 portrait; margin:0; }
+  body { background:#fff; padding:0; margin:0; }
+  .toolbar { display:none; }
+  .toast { display:none!important; }
+  .page { box-shadow:none; margin:0; width:210mm; }
+  /* 섹션 잘림 방지 */
+  .total-block { break-inside:avoid; page-break-inside:avoid; }
+  .payment { break-inside:avoid; page-break-inside:avoid; }
+  .bottom-grid { break-inside:avoid; page-break-inside:avoid; }
+  .offer { break-inside:avoid; page-break-inside:avoid; }
+  .footer { break-inside:avoid; page-break-inside:avoid; }
+  .cat-row { break-after:avoid; page-break-after:avoid; }
+  .scope-group { break-inside:avoid; page-break-inside:avoid; }
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+<script src="auth.js"></script></head>
+<body>
+
+<div class="toolbar">
+  <div class="tb-brand">DAHAM · INTERIOR</div>
+  <div style="display:flex;gap:6px">
+    <button class="tb-btn" onclick="history.back()">← 견적서</button>
+    <button class="tb-btn primary" onclick="window.print()">인쇄 / PDF</button>
+  </div>
+</div>
+
+<div id="doc-wrap"></div>
+
+<script>
+
+function fmt(n) { return Math.round(n/100)*100; }
+function comma(n) { return fmt(n).toLocaleString('ko-KR'); }
+
+var CATEGORIES = [
+  { label: '기초공사', en: 'BASE WORK', groups: [
+    { label: '철거 및 가설',               secs: ['철거', '샷시'] },
+    { label: '목작업 · 거실 디자인',       secs: ['목작업'] },
+  ]},
+  { label: '설비공사', en: 'SYSTEM WORK', groups: [
+    { label: '전기 · 조명 · 콘센트',       secs: ['전기/조명', '시스템에어컨'] },
+    { label: '설비',                        secs: ['설비'] },
+  ]},
+  { label: '가구공사', en: 'FURNITURE WORK', groups: [
+    { label: '싱크대 · 주방 가구',          secs: ['싱크대'] },
+    { label: '현관 가구 (신발장)',           secs: ['가구'] },
+    { label: '방문 · 문틀 · 인테리어철물',  secs: ['문/문틀', '인테리어철물', '중문'] },
+  ]},
+  { label: '마감공사', en: 'FINISH WORK', groups: [
+    { label: '도배 · 바닥 마감',            secs: ['도배', '바닥'] },
+    { label: '거실욕실',                    secs: ['거실욕실'] },
+    { label: '안방욕실',                    secs: ['안방욕실'] },
+    { label: '타일류 · 필름',              secs: ['타일류', '필름', '탄성코트'] },
+  ]},
+];
+
+function resolveGroup(g, sections, matched) {
+  var total = 0, subNames = [];
+  g.secs.forEach(function(name) {
+    var sec = sections.find(function(s){ return s.name === name; });
+    if (sec) {
+      matched[sec.name] = true;
+      total += sec.total;
+      (sec.items||[]).forEach(function(item) {
+        if (subNames.indexOf(item.sub) < 0) subNames.push(item.sub);
+      });
+    }
+  });
+  return total > 0 ? { label: g.label, total: total, subNames: subNames } : null;
+}
+
+function buildCategories(sections) {
+  var matched = {};
+  var cats = [];
+  CATEGORIES.forEach(function(cat) {
+    var groups = [];
+    cat.groups.forEach(function(g) {
+      var r = resolveGroup(g, sections, matched);
+      if (r) groups.push(r);
+    });
+    if (groups.length) cats.push({ label: cat.label, en: cat.en, groups: groups,
+      total: groups.reduce(function(s,g){ return s+g.total; },0) });
+  });
+  var etc = [];
+  sections.forEach(function(sec) {
+    if (!matched[sec.name] && sec.total > 0) {
+      var subNames = [];
+      (sec.items||[]).forEach(function(item) {
+        if (subNames.indexOf(item.sub) < 0) subNames.push(item.sub);
+      });
+      etc.push({ label: sec.name, total: sec.total, subNames: subNames });
+    }
+  });
+  if (etc.length) cats.push({ label: '기타 · 부대비용', en: 'OTHERS', groups: etc,
+    total: etc.reduce(function(s,g){ return s+g.total; },0) });
+  return cats;
+}
+
+function render(d) {
+  var c = d.client || {};
+  var sections = d.sections || [];
+  var t = d.grandTotal || 0;
+
+  var cats = buildCategories(sections);
+  var scopeHtml = '';
+  var itemIdx = 0;
+  cats.forEach(function(cat, ci) {
+    scopeHtml += '<div class="cat-row">'
+      + '<div class="cat-num">' + String(ci+1).padStart(2,'0') + '</div>'
+      + '<div class="cat-name">' + cat.label + '<span class="cat-en">' + cat.en + '</span></div>'
+      + '<div class="cat-total">' + comma(cat.total) + '</div>'
+      + '</div>';
+    scopeHtml += '<div class="scope-group">';
+    cat.groups.forEach(function(g) {
+      itemIdx++;
+      scopeHtml += '<div class="scope-row">'
+        + '<div class="scope-num">' + String(itemIdx).padStart(2,'0') + '</div>'
+        + '<div class="scope-name">' + g.label
+        + (g.subNames.length ? '<small>' + g.subNames.slice(0,4).join(' · ') + (g.subNames.length>4?'…':'') + '</small>' : '')
+        + '</div>'
+        + '<div class="scope-amount">' + comma(g.total) + '</div>'
+        + '</div>';
+    });
+    scopeHtml += '</div>';
+  });
+
+  var payRates = [{key:'deposit',label:'DEPOSIT',ko:'계약금',cls:'deposit',pct:10},
+                  {key:'start',  label:'START',  ko:'착공금',cls:'start',  pct:30},
+                  {key:'interim',label:'INTERIM',ko:'중도금',cls:'interim', pct:40},
+                  {key:'balance',label:'BALANCE',ko:'잔  금',cls:'balance', pct:20}];
+  var payHtml = '';
+  payRates.forEach(function(p) {
+    payHtml += '<div class="payment-cell '+p.cls+'">'
+      + '<div class="payment-label">'+p.label+'</div>'
+      + '<div class="payment-name">'+p.ko+'</div>'
+      + '<div class="payment-percent">'+p.pct+'<span class="pct">%</span></div>'
+      + '<div class="payment-amount">' + (t>0 ? comma(t*p.pct/100)+' 원' : '—') + '</div>'
+      + '</div>';
+  });
+
+  var period = '';
+  if (c['cl-start'] && c['cl-end']) period = c['cl-start'] + ' ~ ' + c['cl-end'];
+  else if (c['cl-area']) period = '약 ' + Math.max(4, Math.ceil(parseInt(c['cl-area']||'0')/6)) + '주';
+  else period = '착공 후 협의';
+
+  var docDate = c['cl-date'] || d.date || '';
+
+  document.getElementById('doc-wrap').innerHTML = '<div class="page">'
+
+    /* Header */
+    + '<div class="header">'
+    + '<div><div class="brand">DAHAM · INTERIOR</div><div class="brand-sub">CONSTRUCTION COMPANY</div></div>'
+    + '<div class="header-right"><div class="doc-no">EST. NO. ' + d.docNo + '</div><div>' + docDate + '</div></div>'
+    + '</div>'
+
+    /* Title */
+    + '<div class="title-block">'
+    + '<div class="title-en">ESTIMATE SUMMARY</div>'
+    + '<div class="title-ko">견 적 요 약 서</div>'
+    + '<div class="title-tagline">가치있는 공간을 위한 다함의 제안</div>'
+    + '</div>'
+
+    /* Info grid */
+    + '<div class="info-grid">'
+    + '<div class="info-cell"><div class="info-label">PROJECT</div><div class="info-value">' + (c['cl-addr']||'—') + '</div></div>'
+    + '<div class="info-cell"><div class="info-label">AREA</div><div class="info-value">' + (c['cl-area']||'—') + '</div></div>'
+    + '<div class="info-cell"><div class="info-label">CLIENT</div><div class="info-value">' + (c['cl-name']||'—') + ' 님</div></div>'
+    + '<div class="info-cell"><div class="info-label">CONTACT</div><div class="info-value">' + (c['cl-tel']||'—') + '</div></div>'
+    + '</div>'
+
+    /* Scope */
+    + '<div class="section-title"><div class="section-bar"></div><div class="section-num">01</div>'
+    + '<div class="section-name">공사 범위 및 금액</div><div class="section-name-en">SCOPE OF WORK</div></div>'
+    + '<div class="scope">' + scopeHtml + '</div>'
+
+    /* Total */
+    + '<div class="total-block">'
+    + '<div class="breakdown">'
+    + '<div><span class="label">공사 합계 (소계)</span><span class="amount">' + comma(d.subtotal||0) + ' 원</span></div>'
+    + '<div><span class="label">디자인, 관리비 ' + (d.profitRate||0) + '%</span><span class="amount">' + comma(d.profit||0) + ' 원</span></div>'
+    + '</div>'
+    + '<div class="grand"><div class="grand-label">TOTAL</div>'
+    + '<div class="grand-amount"><span class="won">₩</span>' + comma(d.grandTotal) + '</div></div>'
+    + '</div>'
+
+    /* Payment */
+    + '<div class="section-title"><div class="section-bar"></div><div class="section-num">02</div>'
+    + '<div class="section-name">결제 조건</div><div class="section-name-en">PAYMENT TERMS</div></div>'
+    + '<div class="payment">' + payHtml + '</div>'
+
+    /* Section 03 */
+    + '<div class="section-title"><div class="section-bar"></div><div class="section-num">03</div>'
+    + '<div class="section-name">공사 조건</div><div class="section-name-en">PROJECT TERMS</div></div>'
+
+    /* Bottom cards */
+    + '<div class="bottom-grid">'
+    + '<div class="bottom-card"><div class="label">A/S 보증</div><div class="value">준공일로부터 1년<br>전 공정 무상 하자보수</div></div>'
+    + '<div class="bottom-card"><div class="label">예상 공사 기간</div><div class="value">' + period + '</div></div>'
+    + '</div>'
+
+    /* Offer */
+    + '<div class="offer"><div class="offer-tag">SPECIAL</div>'
+    + '<div class="offer-text">14일 이내 계약 진행 시 <strong>실링팬 1대 무료 증정 + 시공</strong></div></div>'
+
+    /* Footer */
+    + '<div class="footer">'
+    + '<div><div class="footer-brand">DAHAM INTERIOR</div>'
+    + '<div class="footer-info"><span>대표 최일성</span>  ·  010-2059-0347<br>'
+    + '경상북도 구미시 신시로10길 75-2<br>사업자등록번호 497-34-01080</div></div>'
+    + '<div class="footer-sns">Instagram <span class="ig">@daham.co</span><br>Web  daham.co</div>'
+    + '</div>'
+
+    + '</div>';
+}
+
+/* ── 초기 실행 ── */
+(function(){
+  var d = null;
+  try { d = JSON.parse(localStorage.getItem('daham_estimate_print') || 'null'); } catch(e){}
+  if (!d || !d.sections || !d.sections.length) {
+    document.getElementById('doc-wrap').innerHTML =
+      '<div class="empty-state">견적 데이터를 불러올 수 없습니다.<br>견적서 페이지에서 <strong>견적 요약서</strong> 버튼을 눌러 다시 시도하세요.</div>';
+  } else {
+    render(d);
+  }
+})();
+</script>
+</body>
+</html>

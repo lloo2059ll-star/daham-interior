@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAHAM — 상세 견적서</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Cormorant+Garamond:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans KR',sans-serif; background:#f5f5f5; padding:20px; color:#1a1a1a; line-height:1.5; }
+
+.toolbar {
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; height:44px; margin:-20px -20px 20px;
+  background:#fff; border-bottom:2px solid #E85D1F;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.tb-brand { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:600; color:#E85D1F; letter-spacing:.1em; }
+.tb-btn { font-size:11px; font-weight:500; padding:6px 14px; cursor:pointer; border:1.5px solid #ddd; background:#fff; color:#555; transition:all .15s; }
+.tb-btn:hover { border-color:#1a1a1a; color:#1a1a1a; }
+.tb-btn.primary { border-color:#E85D1F; background:#E85D1F; color:#fff; }
+.tb-btn.primary:hover { background:#c94e18; }
+
+.page {
+  width:210mm; min-height:297mm; margin:0 auto 20px;
+  background:#fff; padding:18mm 16mm;
+  box-shadow:0 4px 24px rgba(0,0,0,.08); position:relative;
+  page-break-after:always;
+}
+.page:last-child { page-break-after:auto; }
+.page::before { content:''; position:absolute; top:0; left:0; right:0; height:6px; background:linear-gradient(90deg,#E85D1F 0%,#F49B5C 100%); }
+
+/* Cover */
+.cover { display:flex; flex-direction:column; justify-content:space-between; min-height:calc(297mm - 36mm); }
+.cover-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.cover-brand { font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:600; letter-spacing:.08em; color:#E85D1F; }
+.cover-brand-sub { font-size:11px; letter-spacing:.3em; color:#888; margin-top:4px; }
+.cover-meta { text-align:right; font-size:11px; color:#666; line-height:1.8; }
+.cover-meta .doc-no { font-family:'Inter Tight',sans-serif; font-size:13px; color:#1a1a1a; font-weight:600; letter-spacing:.08em; }
+.cover-center { text-align:center; margin:80px 0; }
+.cover-en { font-family:'Cormorant Garamond',serif; font-size:13px; letter-spacing:.5em; color:#E85D1F; margin-bottom:16px; }
+.cover-title { font-family:'Noto Serif KR',serif; font-size:48px; font-weight:500; letter-spacing:.2em; color:#1a1a1a; margin-bottom:24px; }
+.cover-tagline { font-size:14px; color:#666; letter-spacing:.05em; line-height:1.8; }
+.cover-project { background:linear-gradient(135deg,#FFF5EE 0%,#FFFAF6 100%); border-left:4px solid #E85D1F; padding:24px 28px; margin:40px 0; }
+.cover-project-label { font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:.3em; color:#E85D1F; margin-bottom:8px; }
+.cover-project-name { font-family:'Noto Serif KR',serif; font-size:22px; font-weight:500; color:#1a1a1a; margin-bottom:6px; }
+.cover-project-addr { font-size:13px; color:#666; }
+.cover-info-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0; background:#fafafa; border:1px solid #eee; }
+.cover-info-cell { padding:16px 18px; border-right:1px solid #eee; }
+.cover-info-cell:last-child { border-right:none; }
+.cover-info-label { font-size:9.5px; letter-spacing:.2em; color:#999; margin-bottom:6px; font-weight:500; }
+.cover-info-value { font-size:14px; color:#1a1a1a; font-weight:500; }
+.cover-bottom { border-top:1px solid #e5e5e5; padding-top:20px; display:flex; justify-content:space-between; align-items:flex-end; }
+.cover-company { font-size:11px; color:#666; line-height:1.7; }
+.cover-company strong { font-family:'Cormorant Garamond',serif; font-size:14px; color:#1a1a1a; font-weight:600; letter-spacing:.05em; }
+
+/* Common header */
+.header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:16px; border-bottom:1px solid #e5e5e5; margin-bottom:28px; }
+.h-brand { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:600; letter-spacing:.1em; color:#E85D1F; }
+.h-meta { font-size:10.5px; color:#666; text-align:right; }
+
+.section-header { display:flex; align-items:center; gap:14px; margin-bottom:18px; padding-bottom:10px; border-bottom:2px solid #1a1a1a; }
+.section-num { font-family:'Inter Tight',sans-serif; font-size:22px; font-weight:700; color:#E85D1F; letter-spacing:-.01em; }
+.section-name { font-size:16px; font-weight:700; letter-spacing:.1em; color:#1a1a1a; }
+.section-en { margin-left:auto; font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:.25em; color:#aaa; }
+
+/* Item */
+.item { margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid #efefef; }
+.item:last-child { border-bottom:none; margin-bottom:0; }
+.item-head { display:flex; align-items:baseline; gap:12px; margin-bottom:10px; }
+.item-num { font-family:'Inter Tight',sans-serif; font-size:13px; color:#E85D1F; font-weight:700; min-width:24px; flex-shrink:0; }
+.item-name { font-size:14px; font-weight:700; letter-spacing:.05em; color:#1a1a1a; flex:1; }
+.item-amount { font-family:'Inter Tight',sans-serif; font-size:17px; font-weight:700; color:#1a1a1a; letter-spacing:-.02em; white-space:nowrap; }
+.item-amount .won { font-size:11px; color:#888; font-weight:400; margin-right:2px; letter-spacing:0; }
+.item-bullets { list-style:none; padding:0; margin:0 0 0 36px; }
+.item-bullets li { font-size:11.5px; padding:3px 0; line-height:1.65; display:flex; align-items:baseline; }
+.item-bullets li::before { content:'·'; color:#E85D1F; margin-right:8px; font-size:14px; font-weight:700; flex-shrink:0; }
+.item-bullets .b-sub { font-weight:600; color:#1a1a1a; margin-right:3px; }
+.item-bullets .b-sep { color:#ccc; margin:0 5px; }
+.item-bullets .b-det { color:#777; }
+
+/* Summary table */
+.summary-table { width:100%; border-collapse:collapse; margin-bottom:24px; }
+.summary-table th { background:#1a1a1a; color:#fff; padding:12px 14px; text-align:left; font-size:11px; letter-spacing:.15em; font-weight:500; }
+.summary-table th:last-child { text-align:right; }
+.summary-table td { padding:12px 14px; border-bottom:1px solid #eee; font-size:12.5px; }
+.summary-table td:last-child { text-align:right; font-family:'Inter Tight',sans-serif; font-size:14px; font-weight:600; letter-spacing:-.01em; }
+.summary-table .num { font-family:'Inter Tight',sans-serif; color:#E85D1F; font-weight:700; width:30px; }
+
+.total-summary { background:#fafafa; border:1px solid #eee; margin-bottom:24px; }
+.total-row { display:grid; grid-template-columns:1fr auto; align-items:center; padding:12px 20px; border-bottom:1px solid #eee; }
+.total-row:last-child { border-bottom:none; }
+.total-row.grand { background:#1a1a1a; color:#fff; padding:18px 20px; }
+.total-row .label { font-size:12.5px; color:#555; letter-spacing:.05em; }
+.total-row.grand .label { color:#E85D1F; font-size:11px; letter-spacing:.3em; font-weight:500; }
+.total-row .value { font-family:'Inter Tight',sans-serif; font-size:15px; color:#1a1a1a; font-weight:600; letter-spacing:-.01em; }
+.total-row.grand .value { color:#fff; font-size:28px; font-weight:700; letter-spacing:-.02em; }
+.total-row.grand .won { color:#E85D1F; font-size:18px; margin-right:4px; font-weight:500; letter-spacing:0; }
+
+.schedule-table { width:100%; border-collapse:collapse; margin-top:12px; }
+.schedule-table th { background:#fafafa; padding:10px 12px; text-align:left; font-size:11px; color:#666; letter-spacing:.1em; border-bottom:2px solid #1a1a1a; font-weight:500; }
+.schedule-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; font-size:12px; color:#1a1a1a; }
+
+
+.promise { background:linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 100%); color:#fff; padding:28px 32px; margin-top:30px; }
+.promise-en { font-family:'Cormorant Garamond',serif; font-size:11px; letter-spacing:.4em; color:#E85D1F; margin-bottom:10px; }
+.promise-title { font-family:'Noto Serif KR',serif; font-size:18px; margin-bottom:14px; letter-spacing:.05em; }
+.promise-list { list-style:none; font-size:12px; line-height:2; color:#ddd; }
+.promise-list li::before { content:'◆ '; color:#E85D1F; }
+
+.footer { border-top:1px solid #e5e5e5; padding-top:14px; margin-top:30px; display:flex; justify-content:space-between; align-items:center; font-size:10.5px; color:#888; }
+.footer-page { font-family:'Inter Tight',sans-serif; color:#E85D1F; font-weight:600; letter-spacing:.05em; }
+
+.empty-state { text-align:center; padding:60px 20px; color:#888; font-size:14px; line-height:2; }
+
+@media print {
+  @page { size:A4 portrait; margin:0; }
+  body { background:#fff; padding:0; margin:0; }
+  .toolbar { display:none; }
+  .toast { display:none!important; }
+  .page { box-shadow:none; margin:0; width:210mm; min-height:auto; }
+  /* 커버는 단독 페이지 */
+  .page-cover { page-break-after:always; min-height:297mm; }
+  /* 상세 항목: 자연 흐름 */
+  .page-detail { page-break-after:auto; }
+  /* 요약·약속 페이지: 새 페이지에서 시작 */
+  .page-summary, .page-promise { page-break-before:always; }
+  /* 항목 내 텍스트 잘림 방지 */
+  .item { page-break-inside:auto; orphans:3; widows:3; }
+  .item-head { page-break-after:avoid; }
+  /* 섹션 헤더 고립 방지 */
+  .section-header { page-break-after:avoid; }
+  /* 여백 축소 */
+  .page { padding:12mm 14mm; }
+  .header { margin-bottom:16px; padding-bottom:10px; }
+  .section-header { margin-bottom:12px; padding-bottom:8px; }
+  .item { margin-bottom:14px; padding-bottom:10px; }
+  .item-head { margin-bottom:6px; }
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+<script src="auth.js"></script></head>
+<body>
+
+<div class="toolbar">
+  <div class="tb-brand">DAHAM · INTERIOR</div>
+  <div style="display:flex;gap:6px">
+    <button class="tb-btn" onclick="history.back()">← 견적서</button>
+    <button class="tb-btn primary" onclick="window.print()">인쇄 / PDF</button>
+  </div>
+</div>
+
+<div id="doc-wrap"></div>
+
+<script>
+var d = null;
+try { d = JSON.parse(localStorage.getItem('daham_estimate_print') || 'null'); } catch(e){}
+
+if (!d || !d.sections || !d.sections.length) {
+  document.getElementById('doc-wrap').innerHTML =
+    '<div class="empty-state">견적 데이터를 불러올 수 없습니다.<br>견적서 페이지에서 <strong>상세 견적서</strong> 버튼을 눌러 다시 시도하세요.</div>';
+} else {
+  render(d);
+}
+
+function fmt(n) { return Math.round(n/100)*100; }
+function comma(n) { return fmt(n).toLocaleString('ko-KR'); }
+
+function hdr(docNo, projAddr) {
+  return '<div class="header"><div class="h-brand">DAHAM · INTERIOR</div>'
+    + '<div class="h-meta">EST. NO. ' + docNo + '  ·  ' + (projAddr||'') + '</div></div>';
+}
+
+function footerTag(cur, total) {
+  return '<div class="footer"><div>DAHAM INTERIOR  ·  대표 최일성  ·  010-2059-0347</div>'
+    + '<div class="footer-page">' + String(cur).padStart(2,'0') + ' / ' + String(total).padStart(2,'0') + '</div></div>';
+}
+
+function render(d) {
+  var c = d.client || {};
+  var sections = d.sections || [];
+  var docNo = d.docNo || '';
+  var projAddr = c['cl-addr'] || '';
+  var docDate = c['cl-date'] || d.date || '';
+  var totalPages = 4; // cover + detail(flowing) + summary + promise
+
+  var html = '';
+
+  /* ── PAGE 1: COVER ── */
+  html += '<div class="page page-cover"><div class="cover">'
+    + '<div>'
+    + '<div class="cover-top">'
+    + '<div><div class="cover-brand">DAHAM · INTERIOR</div><div class="cover-brand-sub">CONSTRUCTION COMPANY</div></div>'
+    + '<div class="cover-meta"><div class="doc-no">EST. NO. ' + docNo + '</div><div>' + docDate + '</div></div>'
+    + '</div>'
+    + '<div class="cover-center">'
+    + '<div class="cover-en">DETAILED ESTIMATE</div>'
+    + '<div class="cover-title">상 세 견 적 서</div>'
+    + '<div class="cover-tagline">가치있는 공간을 위한 다함의 제안<br><span style="color:#999;font-size:12px;">A proposal for your valued space</span></div>'
+    + '</div>'
+    + '<div class="cover-project">'
+    + '<div class="cover-project-label">PROJECT</div>'
+    + '<div class="cover-project-name">' + (c['cl-addr']||'—') + (c['cl-area']?' '+c['cl-area']:'') + ' 인테리어</div>'
+    + '<div class="cover-project-addr">' + (c['cl-addr']||'') + '</div>'
+    + '</div>'
+    + '<div class="cover-info-grid">'
+    + '<div class="cover-info-cell"><div class="cover-info-label">CLIENT</div><div class="cover-info-value">' + (c['cl-name']||'—') + ' 님</div></div>'
+    + '<div class="cover-info-cell"><div class="cover-info-label">ISSUED</div><div class="cover-info-value">' + docDate + '</div></div>'
+    + '<div class="cover-info-cell"><div class="cover-info-label">VALID</div><div class="cover-info-value">발행일로부터 14일</div></div>'
+    + '</div>'
+    + '</div>'
+    + '<div class="cover-bottom">'
+    + '<div class="cover-company"><strong>DAHAM INTERIOR</strong><br>대표 최일성  ·  010-2059-0347<br>경상북도 구미시 신시로10길 75-2<br>사업자등록번호 497-34-01080  ·  Instagram @daham.co</div>'
+    + '</div>'
+    + '</div></div>';
+
+  /* ── DETAIL: 단일 흐름 ── */
+  html += '<div class="page page-detail">' + hdr(docNo, projAddr)
+    + '<div class="section-header"><div class="section-num">01</div>'
+    + '<div class="section-name">공사 범위 상세</div>'
+    + '<div class="section-en">SCOPE OF WORK · DETAIL</div></div>';
+
+  sections.forEach(function(sec, idx) {
+    html += '<div class="item">'
+      + '<div class="item-head">'
+      + '<span class="item-num">' + String(idx+1).padStart(2,'0') + '</span>'
+      + '<span class="item-name">' + sec.name + '</span>'
+      + '<span class="item-amount"><span class="won">₩</span>' + comma(sec.total) + '</span>'
+      + '</div>';
+
+    if (sec.items && sec.items.length) {
+      html += '<ul class="item-bullets">';
+      sec.items.forEach(function(item) {
+        html += '<li>'
+          + '<span class="b-sub">' + (item.sub||'') + '</span>'
+          + (item.det ? '<span class="b-sep">—</span><span class="b-det">' + item.det + '</span>' : '')
+          + '</li>';
+      });
+      html += '</ul>';
+    }
+    html += '</div>';
+  });
+
+  html += '</div>';
+
+  /* ── SUMMARY PAGE ── */
+  var tableRows = '';
+  sections.forEach(function(sec, i) {
+    tableRows += '<tr><td class="num">' + String(i+1).padStart(2,'0') + '</td>'
+      + '<td>' + sec.name + '</td><td>' + comma(sec.total) + '</td></tr>';
+  });
+
+  var t = d.grandTotal || 0;
+  var payRates = [{ko:'계약금',pct:10},{ko:'착공금',pct:30},{ko:'중도금',pct:40},{ko:'잔금',pct:20}];
+  var payRows = '';
+  payRates.forEach(function(p) {
+    payRows += '<tr><td><strong>' + p.ko + '</strong></td><td>' + p.pct + '%</td>'
+      + '<td>' + (p.ko==='계약금'?'계약 체결 즉시':p.ko==='착공금'?'착공 시':p.ko==='중도금'?'공사 중간 단계':'공사 완료 시') + '</td>'
+      + '<td>' + (t>0 ? comma(t*p.pct/100)+' 원' : '—') + '</td></tr>';
+  });
+
+  html += '<div class="page page-summary">' + hdr(docNo, projAddr)
+    + '<div class="section-header"><div class="section-num">02</div><div class="section-name">공사 금액 요약</div><div class="section-en">ESTIMATE SUMMARY</div></div>'
+    + '<table class="summary-table"><thead><tr><th colspan="2">공 종</th><th>금 액</th></tr></thead>'
+    + '<tbody>' + tableRows + '</tbody></table>'
+    + '<div class="total-summary">'
+    + '<div class="total-row"><div class="label">공사 합계 (소계)</div><div class="value">' + comma(d.subtotal) + ' 원</div></div>'
+    + '<div class="total-row"><div class="label">디자인, 관리비 (' + d.profitRate + '%)</div><div class="value">' + comma(d.profit) + ' 원</div></div>'
+    + '<div class="total-row grand"><div class="label">TOTAL · 견적 총액</div><div class="value"><span class="won">₩</span>' + comma(d.grandTotal) + '</div></div>'
+    + '</div>'
+    + '<div class="section-header" style="margin-top:30px"><div class="section-num">03</div><div class="section-name">결제 조건</div><div class="section-en">PAYMENT TERMS</div></div>'
+    + '<table class="schedule-table"><thead><tr><th>구분</th><th>비율</th><th>지급 시점</th><th>금액</th></tr></thead>'
+    + '<tbody>' + payRows + '</tbody></table>'
+    + footerTag(3, totalPages) + '</div>';
+
+  /* ── PROMISE PAGE ── */
+  html += '<div class="page page-promise">' + hdr(docNo, projAddr)
+    + '<div class="promise">'
+    + '<div class="promise-en">DAHAM\'S PROMISE</div>'
+    + '<div class="promise-title">다함이 약속드리는 4가지</div>'
+    + '<ul class="promise-list">'
+    + '<li>공정별 적용 자재 및 시공 사양을 <strong style="color:white;">시방서로 발행</strong>합니다</li>'
+    + '<li>4단계 분할 결제와 <strong style="color:white;">1년 하자보증</strong>을 계약서에 명문화합니다</li>'
+    + '<li>일정 · 사진 · A/S를 <strong style="color:white;">자체 시스템으로 관리</strong>합니다</li>'
+    + '<li>준공 시 <strong style="color:white;">준공확인서 겸 하자보증서</strong>를 발행해드립니다</li>'
+    + '</ul></div>'
+    + '<div style="background:linear-gradient(90deg,#FFF5EE 0%,#FFFAF6 100%);border-left:3px solid #E85D1F;padding:14px 18px;margin-top:24px;">'
+    + '<div style="font-size:10px;color:#E85D1F;letter-spacing:.3em;font-weight:600;margin-bottom:4px;">SPECIAL OFFER</div>'
+    + '<div style="font-size:12px;color:#1a1a1a;"><strong>14일 이내 계약 진행 시</strong> · 실링팬 1대 무료 증정 + 시공</div>'
+    + '</div>'
+    + footerTag(totalPages, totalPages) + '</div>';
+
+  document.getElementById('doc-wrap').innerHTML = html;
+}
+</script>
+</body>
+</html>

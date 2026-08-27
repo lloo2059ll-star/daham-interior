@@ -1,0 +1,17 @@
+
+/* DAHAM V2 shared visual layer */
+.toolbar{
+  background:rgba(255,255,255,.97)!important;
+  border-bottom:1px solid var(--v2-line)!important;
+  box-shadow:none!important;
+  backdrop-filter:blur(10px);
+}
+.toolbar .brand,.brand{font-weight:850!important;letter-spacing:.12em}
+table{border-color:var(--v2-line)!important}
+th{background:#fafbfc!important;color:#667085!important}
+td,th{border-color:#eef0f4!important}
+.toast{border-radius:12px!important}
+.badge,.status{border-radius:999px!important}
+@media(max-width:720px){
+  .toolbar{padding-left:12px!important;padding-right:12px!important}
+}

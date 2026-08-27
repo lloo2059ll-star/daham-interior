@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAHAM — 결제 내역 관리 (내부용)</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-lt:#FFF3EE;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;
+  --line:#e0e0e0;--line-lt:#f2f2f2;
+  --bg:#f0f0f0;--white:#fff;
+  --green:#2E7D32;--green-lt:#E8F5E9;
+  --blue:#1565C0;--blue-lt:#EEF4FF;
+  --red:#C62828;--red-lt:#FFEBEE;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13px}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  position:sticky;top:0;z-index:200;height:48px;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--ink);border-bottom:3px solid var(--orange);
+  box-shadow:0 2px 10px rgba(0,0,0,.2);
+}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.12em;color:var(--orange)}
+.badge{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:#fff;background:var(--red);padding:3px 7px}
+.tb-btn{font-family:var(--sans);font-size:11px;font-weight:500;padding:5px 12px;cursor:pointer;
+  border:1.5px solid rgba(255,255,255,.25);background:transparent;color:rgba(255,255,255,.8);transition:all .15s}
+.tb-btn:hover{border-color:#fff;color:#fff}
+a.tb-btn{text-decoration:none}
+
+/* ── VIEWS ── */
+#list-view{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+#detail-view{max-width:1100px;margin:0 auto;padding:24px 20px 80px;display:none}
+
+/* ── LIST ── */
+.lv-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.lv-title{font-size:18px;font-weight:700}
+.lv-sub{font-size:11px;color:var(--dim);margin-top:3px}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.proj-card{
+  background:var(--white);border:1px solid var(--line);border-top:3px solid var(--line);
+  padding:18px 20px;cursor:pointer;transition:all .15s;
+}
+.proj-card:hover{border-top-color:var(--orange);box-shadow:0 4px 20px rgba(0,0,0,.08);transform:translateY(-1px)}
+.proj-card.has-data{border-top-color:var(--green)}
+.pc-name{font-size:14px;font-weight:700;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-addr{font-size:11px;color:var(--mid);margin-bottom:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-stat{display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px}
+.pc-bar{height:4px;background:var(--line-lt);border-radius:2px;overflow:hidden;margin-bottom:10px}
+.pc-bar-fill{height:100%;background:var(--green);border-radius:2px;transition:width .4s}
+.pc-date{font-size:10px;color:var(--dim);border-top:1px solid var(--line-lt);padding-top:8px}
+.lv-empty{text-align:center;padding:80px 0;color:var(--mid)}
+.lv-empty-icon{font-size:36px;margin-bottom:14px;opacity:.3}
+
+/* ── DETAIL HEADER ── */
+.dv-back{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
+  color:var(--mid);cursor:pointer;border:none;background:none;padding:0;margin-bottom:16px;transition:color .15s}
+.dv-back:hover{color:var(--ink)}
+.proj-hd{background:var(--white);border-left:4px solid var(--orange);padding:18px 24px;
+  margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.proj-hd-name{font-size:20px;font-weight:700}
+.proj-hd-addr{font-size:12px;color:var(--mid);margin-top:2px}
+
+/* ── SUMMARY STRIP ── */
+.sum-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  background:var(--white);margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ss{padding:14px 18px;border-right:1px solid var(--line-lt);text-align:center}
+.ss:last-child{border-right:none}
+.ss-lbl{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.ss-val{font-size:17px;font-weight:800;line-height:1.1}
+.ss.est   .ss-lbl,.ss.est   .ss-val{color:var(--ink)}
+.ss.recv  .ss-lbl,.ss.recv  .ss-val{color:var(--green)}
+.ss.cost  .ss-lbl,.ss.cost  .ss-val{color:var(--blue)}
+.ss.margin.ss-lbl,.ss.margin .ss-val{color:var(--orange)}
+.ss.margin .ss-lbl{color:var(--orange)}
+.ss.margin .ss-val{color:var(--orange)}
+
+/* ── SECTION BLOCK ── */
+.sec-block{background:var(--white);margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.sec-block-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 16px;border-bottom:1.5px solid var(--ink);
+}
+.sec-block-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.sec-block-title.pay{color:var(--blue)}
+.sec-block-title.cost{color:var(--orange)}
+.add-btn{font-family:var(--sans);font-size:11px;font-weight:600;padding:4px 10px;cursor:pointer;
+  border:1.5px solid var(--line);background:var(--white);color:var(--mid);transition:all .15s}
+.add-btn:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse}
+.tbl thead th{
+  font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);padding:7px 10px;text-align:left;background:#fafafa;
+}
+.tbl thead th.tr{text-align:right}
+.tbl tbody tr{border-bottom:1px solid var(--line-lt);transition:background .1s}
+.tbl tbody tr:hover{background:#fafafa}
+.tbl tbody tr.done{background:var(--green-lt)}
+.tbl td{padding:9px 10px;vertical-align:middle}
+.tbl td.tr{text-align:right}
+
+/* col widths — payment table */
+.pt-check{width:42px;text-align:center}
+.pt-label{width:20%}
+.pt-amt  {width:18%}
+.pt-date {width:15%}
+.pt-note {width:auto}
+.pt-del  {width:34px;text-align:center}
+
+/* col widths — cost table */
+.ct-check{width:42px;text-align:center}
+.ct-name {width:12%}
+.ct-type {width:7%;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.ct-est  {width:16%}
+.ct-real {width:16%}
+.ct-mg   {width:13%}
+.ct-note {width:auto}
+/* 인건비/자재비 행 구분 */
+.row-labor{background:#FFF8F6}
+.row-labor:hover{background:#FDECEA!important}
+.row-labor.done{background:#E8F5E9!important}
+.row-mat{background:#F5F8FF}
+.row-mat:hover{background:#E3EDF9!important}
+.row-mat.done{background:#E8F5E9!important}
+.row-sec-border td{border-top:2px solid var(--line)!important}
+.lbl-labor{color:#BF360C;font-weight:700}
+.lbl-mat  {color:#1565C0;font-weight:700}
+
+/* ── INPUTS ── */
+.ci{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink);
+  background:transparent;border:none;border-bottom:1px solid var(--line);
+  outline:none;width:100%;transition:border-color .15s}
+.ci:focus{border-color:var(--orange)}
+.ci.num{text-align:right}
+.ci::placeholder{color:#ddd}
+.ci.sm{font-size:11px;font-weight:400}
+
+/* ── CHECKBOX ── */
+.chk{width:18px;height:18px;cursor:pointer;accent-color:var(--green)}
+
+/* ── MARGIN CELL ── */
+.mg-pos{color:var(--green);font-weight:700;font-size:12px}
+.mg-neg{color:var(--red);font-weight:700;font-size:12px}
+.mg-zero{color:var(--dim);font-size:11px}
+.mg-na{color:var(--dim);font-size:10px}
+.mg-full{color:var(--ink);font-weight:700;font-size:12px}
+
+/* ── EST VALUE (auto, read-only look) ── */
+.est-val{font-size:12px;font-weight:700;color:var(--mid);text-align:right}
+.est-val.active{color:var(--ink)}
+
+/* ── DEL ── */
+.del-btn{font-size:13px;color:#ddd;cursor:pointer;background:none;border:none;transition:color .15s}
+.del-btn:hover{color:var(--red)}
+
+/* ── FOOT ── */
+.tbl-foot{padding:10px 12px;background:#fafafa;border-top:1.5px solid var(--ink);
+  display:flex;justify-content:flex-end;gap:24px}
+.ft-item{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.ft-lbl{font-size:8px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.ft-val{font-size:14px;font-weight:800}
+.ft-val.g{color:var(--green)}
+.ft-val.b{color:var(--blue)}
+.ft-val.o{color:var(--orange)}
+
+/* ── EMPTY ── */
+.tbl-empty{text-align:center;padding:24px;color:var(--dim);font-size:12px}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:8px 20px;font-size:11px;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+
+@media(max-width:760px){
+  .sum-strip{grid-template-columns:1fr 1fr}
+  .ss{border-bottom:1px solid var(--line-lt)}
+  .ct-cat,.ct-note{display:none}
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+</head>
+<body>
+
+<div class="toolbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="index.html" class="tb-btn">← 홈</a>
+    <span class="brand">DAHAM</span>
+    <span class="badge">내부전용</span>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="tb-btn" id="btn-back" onclick="showList()" style="display:none">← 목록</button>
+    <button class="tb-btn" onclick="init()">새로고침</button>
+  </div>
+</div>
+
+<!-- LIST VIEW -->
+<div id="list-view">
+  <div class="lv-hd">
+    <div>
+      <div class="lv-title">결제 내역 관리</div>
+      <div class="lv-sub">견적서 프로젝트별 결제 일정 · 시공비 · 마진 내역 (내부 전용)</div>
+    </div>
+    <div id="proj-count" style="font-size:11px;color:var(--dim);padding-top:4px"></div>
+  </div>
+  <div id="proj-grid" class="proj-grid"></div>
+</div>
+
+<!-- DETAIL VIEW -->
+<div id="detail-view">
+  <button class="dv-back" onclick="showList()">← 목록으로</button>
+
+  <div class="proj-hd">
+    <div class="proj-hd-name" id="dv-name"></div>
+    <div class="proj-hd-addr" id="dv-addr"></div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="sum-strip">
+    <div class="ss est">
+      <div class="ss-lbl">총 견적 금액</div>
+      <div class="ss-val" id="ss-est">—</div>
+    </div>
+    <div class="ss recv">
+      <div class="ss-lbl">총 수령액</div>
+      <div class="ss-val" id="ss-recv">—</div>
+    </div>
+    <div class="ss cost">
+      <div class="ss-lbl">총 시공비</div>
+      <div class="ss-val" id="ss-cost">—</div>
+    </div>
+    <div class="ss margin">
+      <div class="ss-lbl">총 마진</div>
+      <div class="ss-val" id="ss-margin">—</div>
+    </div>
+  </div>
+
+  <!-- ① 결제 일정 -->
+  <div class="sec-block">
+    <div class="sec-block-hd">
+      <span class="sec-block-title pay">① 결제 일정 — 계약금 · 착수금 · 중도금 · 잔금</span>
+      <div style="display:flex;gap:6px">
+        <button class="add-btn" onclick="autoSetPayments()" style="border-color:#1565C0;color:#1565C0">⟳ 자동 설정</button>
+        <button class="add-btn" onclick="addPayment()">+ 항목 추가</button>
+      </div>
+    </div>
+    <table class="tbl" id="pay-tbl">
+      <thead>
+        <tr>
+          <th class="pt-check">완료</th>
+          <th class="pt-label">항목</th>
+          <th class="pt-amt tr">수령 금액</th>
+          <th class="pt-date">수령일</th>
+          <th class="pt-note">메모</th>
+          <th class="pt-del"></th>
+        </tr>
+      </thead>
+      <tbody id="pay-tbody"></tbody>
+    </table>
+    <div class="tbl-foot" id="pay-foot" style="display:none">
+      <div class="ft-item">
+        <div class="ft-lbl">수령액 합계</div>
+        <div class="ft-val g" id="ft-recv">—</div>
+      </div>
+      <div class="ft-item" id="ft-uncol-wrap">
+        <div class="ft-lbl">미수금</div>
+        <div class="ft-val" id="ft-uncol" style="color:var(--red)">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 공종별 시공 내역 -->
+  <div class="sec-block">
+    <div class="sec-block-hd">
+      <span class="sec-block-title cost">② 공종별 시공 내역 — 견적 금액 vs 실사용 금액</span>
+      <button class="add-btn" onclick="addExtraCost()">+ 기타 추가</button>
+    </div>
+    <table class="tbl" id="cost-tbl">
+      <thead>
+        <tr>
+          <th class="ct-check">완료</th>
+          <th class="ct-name">공종</th>
+          <th class="ct-type">구분</th>
+          <th class="ct-est tr">견적 금액 (자동)</th>
+          <th class="ct-real tr">실사용 금액</th>
+          <th class="ct-mg tr">마진</th>
+          <th class="ct-note">메모</th>
+        </tr>
+      </thead>
+      <tbody id="cost-tbody"></tbody>
+    </table>
+    <div class="tbl-foot" id="cost-foot" style="display:none">
+      <div class="ft-item">
+        <div class="ft-lbl">견적 합계</div>
+        <div class="ft-val" id="ft-est-sum" style="color:var(--mid)">—</div>
+      </div>
+      <div class="ft-item">
+        <div class="ft-lbl">시공비 합계</div>
+        <div class="ft-val b" id="ft-cost-sum">—</div>
+      </div>
+      <div class="ft-item">
+        <div class="ft-lbl">마진 합계</div>
+        <div class="ft-val o" id="ft-margin-sum">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PROJ_DB = 'daham_detail_v2';
+const PAY_DB  = 'daham_pay_v2';
+
+var allProjects = [];
+var payData     = {};  /* { projId: { payments:[], costs:{si: {actual,checked,note}}, extras:[] } } */
+var curId       = null;
+
+/* ─── 유틸 ─── */
+function W(n){ return n > 0 ? '₩ ' + n.toLocaleString('ko-KR') : '—'; }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function toNum(s){ return parseInt(String(s).replace(/[^0-9]/g,''),10)||0; }
+function fmt(n){ return n>0?n.toLocaleString('ko-KR'):''; }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2000); }
+function relTime(iso){
+  if(!iso) return '';
+  var d=(Date.now()-new Date(iso).getTime())/1000;
+  if(d<60) return '방금'; if(d<3600) return Math.floor(d/60)+'분 전';
+  if(d<86400) return Math.floor(d/3600)+'시간 전'; return Math.floor(d/86400)+'일 전';
+}
+
+/* ─── 데이터 ─── */
+function loadData(){
+  try{ allProjects=JSON.parse(localStorage.getItem(PROJ_DB)||'[]'); }catch(e){ allProjects=[]; }
+  try{ payData=JSON.parse(localStorage.getItem(PAY_DB)||'{}'); }catch(e){ payData={}; }
+}
+function save(){ localStorage.setItem(PAY_DB,JSON.stringify(payData)); }
+function getPay(id){
+  if(!payData[id]) payData[id]={ payments:[], costs:{}, extras:[] };
+  if(!payData[id].payments) payData[id].payments=[];
+  if(!payData[id].costs)    payData[id].costs={};
+  if(!payData[id].extras)   payData[id].extras=[];
+  return payData[id];
+}
+
+function r100(n){return Math.round(n/100)*100;}
+
+/* 계약서 VAT 설정값 읽기 (daham_settings.vatPct, 기본 10%) */
+function getVatFactor(){
+  try{
+    var s=JSON.parse(localStorage.getItem('daham_settings')||'{}');
+    var vatPct=(s.vatPct!==undefined)?parseFloat(s.vatPct):10;
+    return (1+vatPct/100)/1.1;  // 기존 10% VAT → 설정 VAT로 변환 배율
+  }catch(e){ return 1; }
+}
+
+/* VAT 보정된 섹션 반환 */
+function adjSec(sec, p){
+  var vf=getVatFactor();
+  if(vf===1) return sec;
+  var profitRate=(parseFloat((p.margins||{}).profit)||15)/100;
+  var mat_new=r100((sec.mat||0)*vf);
+  var sub_new=(sec.labor||0)+mat_new;
+  var wp_new=sub_new>0?sub_new+r100(sub_new*profitRate):0;
+  return {name:sec.name,cat:sec.cat,labor:sec.labor||0,mat:mat_new,sub:sub_new,withProfit:wp_new};
+}
+
+/* 프로젝트의 sectionTotals (견적서에서 자동 저장된 값) */
+function getSections(p){ return p.sectionTotals || []; }
+function getActiveSections(p){ return getSections(p).filter(function(s){ return s.withProfit > 0; }); }
+
+/* 섹션 index 찾기 (p.sectionTotals 배열에서) */
+function secIdx(p, name){ return getSections(p).findIndex(function(s){ return s.name===name; }); }
+
+/* ─── 요약 계산 ─── */
+function calcSummary(id){
+  var p   = allProjects.find(function(x){ return x.id===id; });
+  var pay = getPay(id);
+  if(!p) return { est:0, recv:0, cost:0, margin:0 };
+
+  /* 견적 합계 = 최종 계약금액 기준 (디자인, 관리비 포함, VAT 비율 적용) */
+  var est = getSections(p).reduce(function(a,s){ return a+(adjSec(s,p).withProfit||0); }, 0);
+
+  /* 수령액 합계 */
+  var recv = (pay.payments||[]).reduce(function(a,pm){ return a + (pm.checked ? pm.amount||0 : 0); }, 0);
+
+  /* 시공비 합계 */
+  var cost = 0;
+  var activeSec = getActiveSections(p);
+  activeSec.forEach(function(sec, i){
+    var cl=pay.costs[i+'_l']||{}; if(cl.checked) cost += cl.actual||0;
+    var cm=pay.costs[i+'_m']||{}; if(cm.checked) cost += cm.actual||0;
+  });
+  (pay.extras||[]).forEach(function(ex){ if(ex.checked) cost += ex.actual||0; });
+
+  return { est:est, recv:recv, cost:cost, margin:(est-cost) };
+}
+
+/* ─── 뷰 ─── */
+function showList(){
+  curId=null;
+  document.getElementById('list-view').style.display='block';
+  document.getElementById('detail-view').style.display='none';
+  document.getElementById('btn-back').style.display='none';
+  renderList();
+}
+function showDetail(id){
+  curId=id;
+  document.getElementById('list-view').style.display='none';
+  document.getElementById('detail-view').style.display='block';
+  document.getElementById('btn-back').style.display='inline-flex';
+  renderDetail();
+}
+function init(){ loadData(); renderList(); toast('새로고침 완료'); }
+
+/* ─── 목록 렌더 ─── */
+function renderList(){
+  var grid=document.getElementById('proj-grid');
+  var cnt=document.getElementById('proj-count');
+  var contracted=allProjects.filter(function(p){ return !!p.contracted; });
+  if(cnt) cnt.textContent='계약완료 '+contracted.length+'건';
+  if(!allProjects.length){
+    grid.innerHTML='<div class="lv-empty"><div class="lv-empty-icon">📋</div>'
+      +'<p style="font-size:14px;font-weight:700;margin-bottom:8px">등록된 프로젝트가 없습니다</p>'
+      +'<p style="font-size:12px;color:var(--dim)">견적서에서 프로젝트를 먼저 생성하세요</p></div>';
+    return;
+  }
+  if(!contracted.length){
+    grid.innerHTML='<div class="lv-empty"><div class="lv-empty-icon">📋</div>'
+      +'<p style="font-size:14px;font-weight:700;margin-bottom:8px">계약완료된 프로젝트가 없습니다</p>'
+      +'<p style="font-size:12px;color:var(--dim)">견적서에서 계약완료 체크 후 돌아오세요</p></div>';
+    return;
+  }
+  var html='';
+  contracted.forEach(function(p){
+    var name=esc((p.client||{})['cl-name']||'고객명 미입력');
+    var addr=esc((p.client||{})['cl-addr']||'주소 미입력');
+    var date=(p.client||{})['cl-date']||'—';
+    var s=calcSummary(p.id);
+    var hasSec=getActiveSections(p).length>0;
+    var hasPay=(getPay(p.id).payments||[]).length>0;
+    var hasData=hasSec||hasPay;
+    var pct=s.est>0?Math.min(100,Math.round(s.recv/s.est*100)):0;
+    html+='<div class="proj-card'+(hasData?' has-data':'')+'" onclick="showDetail(\''+p.id+'\')">';
+    html+='<div class="pc-name">'+addr+'</div>';
+    html+='<div class="pc-addr">'+name+'</div>';
+    if(s.est>0){
+      html+='<div class="pc-stat"><span style="color:var(--mid);font-size:10px">견적: '+W(s.est)+'</span>'
+        +'<span style="color:var(--green);font-weight:700">수령: '+W(s.recv)+'</span></div>';
+      html+='<div class="pc-bar"><div class="pc-bar-fill" style="width:'+pct+'%"></div></div>';
+      if(s.cost>0) html+='<div style="font-size:11px;color:var(--orange);font-weight:700;margin-bottom:6px">마진: '+W(s.margin)+'</div>';
+    }
+    html+='<div class="pc-date">'+date+' · '+relTime(p.updatedAt)+'</div>';
+    html+='</div>';
+  });
+  grid.innerHTML=html;
+}
+
+/* ─── 상세 렌더 ─── */
+function renderDetail(){
+  var p=allProjects.find(function(x){ return x.id===curId; });
+  if(!p){ showList(); return; }
+  document.getElementById('dv-name').textContent=(p.client||{})['cl-addr']||'주소 미입력';
+  document.getElementById('dv-addr').textContent=(p.client||{})['cl-name']||'고객명 미입력';
+  renderPayTable(p);
+  renderCostTable(p);
+  renderSummary();
+}
+
+function renderSummary(){
+  var s=calcSummary(curId);
+  document.getElementById('ss-est').textContent   = s.est>0?W(s.est):'견적 없음';
+  document.getElementById('ss-recv').textContent  = W(s.recv);
+  document.getElementById('ss-cost').textContent  = s.cost>0?W(s.cost):'—';
+  var mEl=document.getElementById('ss-margin');
+  mEl.textContent=s.cost>0?W(s.margin):'—';
+  mEl.style.color=s.margin<0?'var(--red)':'var(--orange)';
+}
+
+/* ─── ① 결제 일정 테이블 ─── */
+function renderPayTable(p){
+  var pay=getPay(curId);
+  var items=pay.payments||[];
+  var tbody=document.getElementById('pay-tbody');
+  var foot=document.getElementById('pay-foot');
+
+  if(!items.length){
+    tbody.innerHTML='<tr><td colspan="6" class="tbl-empty">계약금 · 중도금 · 잔금 항목을 추가하세요</td></tr>';
+    foot.style.display='none'; return;
+  }
+  foot.style.display='flex';
+  var html='', recv=0;
+  items.forEach(function(pm){
+    if(pm.checked) recv+=pm.amount||0;
+    html+='<tr class="'+(pm.checked?'done':'')+'" id="pr_'+pm.id+'">';
+    html+='<td class="pt-check"><input type="checkbox" class="chk"'+(pm.checked?' checked':'')+' onchange="onPayCheck(\''+pm.id+'\',this.checked)"></td>';
+    html+='<td class="pt-label"><input class="ci" type="text" value="'+esc(pm.label)+'" placeholder="항목명" oninput="onPayField(\''+pm.id+'\',\'label\',this.value)"></td>';
+    html+='<td class="pt-amt tr"><input class="ci num" type="text" value="'+fmt(pm.amount)+'" placeholder="0"'
+      +' oninput="onPayNum(\''+pm.id+'\',this)"'
+      +' onfocus="this.value=this.value.replace(/,/g,\'\')"'
+      +' onblur="this.value=fmt(toNum(this.value.replace(/,/g,\'\')))"></td>';
+    html+='<td class="pt-date"><input class="ci sm" type="date" value="'+esc(pm.date)+'" oninput="onPayField(\''+pm.id+'\',\'date\',this.value)"></td>';
+    html+='<td class="pt-note"><input class="ci sm" type="text" value="'+esc(pm.note)+'" placeholder="메모" oninput="onPayField(\''+pm.id+'\',\'note\',this.value)"></td>';
+    html+='<td class="pt-del"><button class="del-btn" onclick="delPayment(\''+pm.id+'\')" title="삭제">✕</button></td>';
+    html+='</tr>';
+  });
+  tbody.innerHTML=html;
+
+  document.getElementById('ft-recv').textContent=W(recv);
+  var est=calcSummary(curId).est;
+  if(est>0){
+    var uncol=Math.max(0,est-recv);
+    document.getElementById('ft-uncol').textContent=uncol>0?W(uncol):'완납 ✓';
+    document.getElementById('ft-uncol').style.color=uncol>0?'var(--red)':'var(--green)';
+    document.getElementById('ft-uncol-wrap').style.display='flex';
+  } else {
+    document.getElementById('ft-uncol-wrap').style.display='none';
+  }
+}
+
+/* ─── ② 공종별 시공 내역 테이블 ─── */
+function renderCostTable(p){
+  var pay=getPay(curId);
+  var secs=getActiveSections(p);
+  var tbody=document.getElementById('cost-tbody');
+  var foot=document.getElementById('cost-foot');
+
+  if(!secs.length && !(pay.extras||[]).length){
+    tbody.innerHTML='<tr><td colspan="7" class="tbl-empty">견적서에서 수량을 입력하면 공종이 자동으로 나타납니다</td></tr>';
+    foot.style.display='none'; return;
+  }
+  foot.style.display='flex';
+
+  var html='', estSum=0, laborCostSum=0, matCostSum=0;
+
+  secs.forEach(function(sec, i){
+    sec=adjSec(sec,p);
+    var lKey=i+'_l', mKey=i+'_m';
+    var cl=pay.costs[lKey]||{actual:0,checked:false,note:''};
+    var cm=pay.costs[mKey]||{actual:0,checked:false,note:''};
+
+    /* 견적 금액 = 계약서 SCOPE OF WORK 기준 (디자인, 관리비 제외) */
+    var estL=sec.labor||0;
+    var estM=sec.mat||0;
+
+    estSum+=(sec.sub||0);
+    if(cl.checked && cl.actual>0) laborCostSum+=cl.actual;
+    if(cm.checked && cm.actual>0) matCostSum+=cm.actual;
+
+    var mgL=estL>0?(cl.actual>0?estL-cl.actual:'100%'):null;
+    var mgM=estM>0?(cm.actual>0?estM-cm.actual:'100%'):null;
+    var isFirst=true;
+
+    /* 인건비 행 */
+    html+='<tr class="row-labor'+(isFirst?' row-sec-border':'')+' '+(cl.checked?'done':'')+'">';
+    html+='<td class="ct-check"><input type="checkbox" class="chk"'+(cl.checked?' checked':'')+' onchange="onCostKey(\''+lKey+'\',\'checked\',this.checked)"></td>';
+    html+='<td class="ct-name" style="font-weight:700;font-size:12px">'+esc(sec.name)+'</td>';
+    html+='<td class="ct-type"><span class="lbl-labor">인건비</span></td>';
+    html+='<td class="ct-est tr"><span class="est-val '+(estL>0?'active':'')+'">'+W(estL)+'</span></td>';
+    html+='<td class="ct-real tr"><input class="ci num" type="text" id="c_'+lKey+'" value="'+fmt(cl.actual)+'" placeholder="0"'
+      +' oninput="onCostKeyNum(\''+lKey+'\','+i+',\'l\',this)"'
+      +' onfocus="this.value=this.value.replace(/,/g,\'\')"'
+      +' onblur="this.value=fmt(toNum(this.value.replace(/,/g,\'\')))"></td>';
+    html+='<td class="ct-mg tr" id="cmg_'+lKey+'">'+mgHtml(mgL)+'</td>';
+    html+='<td class="ct-note"><input class="ci sm" type="text" value="'+esc(cl.note||'')+'" placeholder="메모" oninput="onCostKey(\''+lKey+'\',\'note\',this.value)"></td>';
+    html+='</tr>';
+
+    /* 자재비 행 */
+    html+='<tr class="row-mat '+(cm.checked?'done':'')+'">';
+    html+='<td class="ct-check"><input type="checkbox" class="chk"'+(cm.checked?' checked':'')+' onchange="onCostKey(\''+mKey+'\',\'checked\',this.checked)"></td>';
+    html+='<td class="ct-name" style="font-size:10px;color:var(--dim)"></td>';
+    html+='<td class="ct-type"><span class="lbl-mat">자재비</span></td>';
+    html+='<td class="ct-est tr"><span class="est-val '+(estM>0?'active':'')+'">'+W(estM)+'</span></td>';
+    html+='<td class="ct-real tr"><input class="ci num" type="text" id="c_'+mKey+'" value="'+fmt(cm.actual)+'" placeholder="0"'
+      +' oninput="onCostKeyNum(\''+mKey+'\','+i+',\'m\',this)"'
+      +' onfocus="this.value=this.value.replace(/,/g,\'\')"'
+      +' onblur="this.value=fmt(toNum(this.value.replace(/,/g,\'\')))"></td>';
+    html+='<td class="ct-mg tr" id="cmg_'+mKey+'">'+mgHtml(mgM)+'</td>';
+    html+='<td class="ct-note"><input class="ci sm" type="text" value="'+esc(cm.note||'')+'" placeholder="메모" oninput="onCostKey(\''+mKey+'\',\'note\',this.value)"></td>';
+    html+='</tr>';
+  });
+
+  /* 기타 항목 */
+  (pay.extras||[]).forEach(function(ex){
+    var mg=(ex.est||0)>0?(ex.actual>0?(ex.est||0)-ex.actual:'100%'):null;
+    if(ex.checked && ex.actual>0) matCostSum+=ex.actual;
+    html+='<tr class="row-sec-border '+(ex.checked?'done':'')+'">';
+    html+='<td class="ct-check"><input type="checkbox" class="chk"'+(ex.checked?' checked':'')+' onchange="onExtraCheck(\''+ex.id+'\',this.checked)"></td>';
+    html+='<td class="ct-name"><input class="ci" type="text" value="'+esc(ex.label||'')+'" placeholder="항목명" oninput="onExtraField(\''+ex.id+'\',\'label\',this.value)"></td>';
+    html+='<td class="ct-type" style="color:var(--dim);font-size:9px">기타</td>';
+    html+='<td class="ct-est tr"><input class="ci num" type="text" value="'+fmt(ex.est||0)+'" placeholder="0"'
+      +' oninput="onExtraEst(\''+ex.id+'\',this)"'
+      +' onfocus="this.value=this.value.replace(/,/g,\'\')"'
+      +' onblur="this.value=fmt(toNum(this.value.replace(/,/g,\'\')))"></td>';
+    html+='<td class="ct-real tr"><input class="ci num" type="text" value="'+fmt(ex.actual||0)+'" placeholder="0"'
+      +' oninput="onExtraActual(\''+ex.id+'\',this)"'
+      +' onfocus="this.value=this.value.replace(/,/g,\'\')"'
+      +' onblur="this.value=fmt(toNum(this.value.replace(/,/g,\'\')))"></td>';
+    html+='<td class="ct-mg tr" id="xmg_'+ex.id+'">'+mgHtml(mg)+'</td>';
+    html+='<td class="ct-note" style="display:flex;gap:6px;align-items:center">'
+      +'<input class="ci sm" type="text" value="'+esc(ex.note||'')+'" placeholder="메모" oninput="onExtraField(\''+ex.id+'\',\'note\',this.value)">'
+      +'<button class="del-btn" onclick="delExtra(\''+ex.id+'\')" title="삭제">✕</button>'
+      +'</td>';
+    html+='</tr>';
+  });
+
+  tbody.innerHTML=html;
+  updateCostFoot(estSum, laborCostSum+matCostSum);
+}
+
+function mgHtml(mg){
+  if(mg==='100%') return '<span class="mg-full">100%</span>';
+  if(mg===null) return '<span class="mg-na">—</span>';
+  if(mg>0)  return '<span class="mg-pos">+'+mg.toLocaleString('ko-KR')+'</span>';
+  if(mg<0)  return '<span class="mg-neg">'+mg.toLocaleString('ko-KR')+'</span>';
+  return '<span class="mg-zero">0</span>';
+}
+function updateCostFoot(estSum, costSum){
+  document.getElementById('ft-est-sum').textContent=W(estSum);
+  document.getElementById('ft-cost-sum').textContent=costSum>0?W(costSum):'—';
+  var mgEl=document.getElementById('ft-margin-sum');
+  if(estSum>0){
+    var mg=estSum-costSum;
+    mgEl.textContent=mg<0?'▼ ₩ '+Math.abs(mg).toLocaleString('ko-KR'):W(mg);
+    mgEl.style.color=mg<0?'var(--red)':'var(--orange)';
+  } else {
+    mgEl.textContent='—'; mgEl.style.color='var(--orange)';
+  }
+}
+
+/* ─── 이벤트: 결제 일정 ─── */
+function onPayCheck(id, v){
+  var pm=findPay(id); if(!pm) return;
+  pm.checked=v;
+  if(v&&!pm.date) pm.date=new Date().toISOString().slice(0,10);
+  save(); renderPayTable(allProjects.find(function(x){return x.id===curId;})); renderSummary();
+  toast(v?'✓ 수령 완료':'체크 해제');
+}
+function onPayField(id, k, v){ var pm=findPay(id); if(!pm) return; pm[k]=v; save(); renderSummary(); }
+function onPayNum(id, inp){
+  var pm=findPay(id); if(!pm) return;
+  pm.amount=toNum(inp.value.replace(/,/g,''));
+  save();
+  var tr=document.getElementById('pr_'+id);
+  if(tr&&tr.querySelector('.pt-amt input')) tr.querySelector('.pt-amt input').value=fmt(pm.amount)||'';
+  document.getElementById('ft-recv').textContent=W((getPay(curId).payments||[]).reduce(function(a,p){return a+(p.checked?p.amount||0:0);},0));
+  renderSummary();
+}
+function findPay(id){ return (getPay(curId).payments||[]).find(function(x){return x.id===id;}); }
+
+/* 견적 총액 */
+function getEstTotal(p){
+  return (getSections(p)||[]).reduce(function(a,s){ return a+s.withProfit; },0);
+}
+
+/* 항목별 기본 비율: 계약금10% 착수금30% 중도금40% 잔금20% */
+var PAY_RATIO = { '계약금':0.1, '착수금':0.3, '중도금':0.4, '잔금':0.2 };
+
+function suggestAmt(label, estTotal, existingPayments){
+  if(!estTotal) return 0;
+  var alreadySum=(existingPayments||[]).reduce(function(a,p){ return a+(p.amount||0); },0);
+  if(label==='잔금') return Math.max(0, estTotal - alreadySum);
+  return r100(estTotal*(PAY_RATIO[label]||0));
+}
+
+function autoSetPayments(){
+  var p=allProjects.find(function(x){return x.id===curId;});
+  var est=getEstTotal(p);
+  if(!est){ toast('견적 금액이 없습니다. 견적서에서 수량을 먼저 입력하세요'); return; }
+  var c=r100(est*0.1), s=r100(est*0.3), m=r100(est*0.4), f=est-c-s-m;
+  getPay(curId).payments=[
+    {id:uid(),label:'계약금',amount:c,checked:false,date:'',note:''},
+    {id:uid(),label:'착수금',amount:s,checked:false,date:'',note:''},
+    {id:uid(),label:'중도금',amount:m,checked:false,date:'',note:''},
+    {id:uid(),label:'잔금',  amount:f,checked:false,date:'',note:''},
+  ];
+  save(); renderPayTable(p); renderSummary();
+  toast('✓ 자동설정 — 계약금 '+W(c)+' / 착수금 '+W(s)+' / 중도금 '+W(m)+' / 잔금 '+W(f));
+}
+
+function addPayment(){
+  var p=allProjects.find(function(x){return x.id===curId;});
+  var est=getEstTotal(p);
+  var preset=['계약금','착수금','중도금','잔금'];
+  var existing=(getPay(curId).payments||[]).map(function(pm){return pm.label;});
+  var label=preset.find(function(l){return existing.indexOf(l)<0;});
+  if(!label) label=prompt('항목명 입력','기타')||'기타';
+  var amount=suggestAmt(label, est, getPay(curId).payments);
+  getPay(curId).payments.push({id:uid(),label:label,amount:amount,checked:false,date:'',note:''});
+  save();
+  renderPayTable(p);
+  toast('✓ '+label+' 추가'+(amount?' (제안금액: '+W(amount)+')':''));
+}
+function delPayment(id){
+  dahamConfirm('이 수금 항목을 삭제할까요?', function() {
+    var pay=getPay(curId);
+    pay.payments=pay.payments.filter(function(x){return x.id!==id;});
+    save(); var p=allProjects.find(function(x){return x.id===curId;}); renderPayTable(p); renderSummary();
+  });
+}
+
+/* ─── 이벤트: 시공 내역 ─── */
+function onCostKey(key, field, val){
+  var c=getPay(curId).costs; if(!c[key]) c[key]={actual:0,checked:false,note:''};
+  c[key][field]=val;
+  if(field==='checked' && val && !c[key].date) c[key].date=new Date().toISOString().slice(0,10);
+  save();
+  if(field==='checked'){
+    var p=allProjects.find(function(x){return x.id===curId;}); renderCostTable(p);
+    toast(val?'✓ 완료 처리':'체크 해제');
+  }
+  renderSummary();
+}
+function onCostKeyNum(key, si, type, inp){
+  var c=getPay(curId).costs; if(!c[key]) c[key]={actual:0,checked:false,note:''};
+  var v=toNum(inp.value.replace(/,/g,'')); c[key].actual=v; save();
+  var p=allProjects.find(function(x){return x.id===curId;});
+  var secs=getActiveSections(p);
+  var sec=secs[si]?adjSec(secs[si],p):null;
+  var estL=sec?sec.labor||0:0;
+  var estM=sec?sec.mat||0:0;
+  var estForType=type==='l'?estL:estM;
+  var mgEl=document.getElementById('cmg_'+key);
+  if(mgEl) mgEl.innerHTML=mgHtml(v>0?estForType-v:(estForType>0?'100%':null));
+  var estSum=secs.reduce(function(a,s){return a+(adjSec(s,p).sub||0);},0);
+  var cSum=Object.values(getPay(curId).costs).reduce(function(a,x){return a+(x.checked?x.actual||0:0);},0);
+  cSum+=(getPay(curId).extras||[]).reduce(function(a,x){return a+(x.checked?x.actual||0:0);},0);
+  updateCostFoot(estSum,cSum); renderSummary();
+}
+
+function addExtraCost(){
+  var label=prompt('추가 항목명 입력','기타');
+  if(!label) return;
+  getPay(curId).extras.push({id:uid(),label:label,est:0,actual:0,checked:false,note:''});
+  save(); var p=allProjects.find(function(x){return x.id===curId;}); renderCostTable(p); toast('✓ '+label+' 추가');
+}
+function onExtraCheck(id, v){
+  var ex=findExtra(id); if(!ex) return; ex.checked=v; save();
+  var p=allProjects.find(function(x){return x.id===curId;}); renderCostTable(p); renderSummary();
+}
+function onExtraField(id, k, v){ var ex=findExtra(id); if(!ex) return; ex[k]=v; save(); }
+function onExtraEst(id, inp){
+  var ex=findExtra(id); if(!ex) return;
+  ex.est=toNum(inp.value.replace(/,/g,'')); save();
+  var mg=ex.est>0?(ex.actual>0?ex.est-ex.actual:'100%'):null;
+  var el=document.getElementById('xmg_'+id); if(el) el.innerHTML=mgHtml(mg);
+  var p=allProjects.find(function(x){return x.id===curId;}); refreshCostFoot(p);
+}
+function onExtraActual(id, inp){
+  var ex=findExtra(id); if(!ex) return;
+  ex.actual=toNum(inp.value.replace(/,/g,'')); save();
+  var mg=ex.est>0?(ex.actual>0?ex.est-ex.actual:'100%'):null;
+  var el=document.getElementById('xmg_'+id); if(el) el.innerHTML=mgHtml(mg);
+  var p=allProjects.find(function(x){return x.id===curId;}); refreshCostFoot(p); renderSummary();
+}
+function delExtra(id){
+  dahamConfirm('이 추가 항목을 삭제할까요?', function() {
+    var pay=getPay(curId); pay.extras=pay.extras.filter(function(x){return x.id!==id;});
+    save(); var p=allProjects.find(function(x){return x.id===curId;}); renderCostTable(p); renderSummary();
+  });
+}
+function findExtra(id){ return (getPay(curId).extras||[]).find(function(x){return x.id===id;}); }
+function refreshCostFoot(p){
+  var secs=getActiveSections(p);
+  var estSum=secs.reduce(function(a,s){return a+(adjSec(s,p).sub||0);},0);
+  estSum+=(getPay(curId).extras||[]).reduce(function(a,x){return a+(x.est||0);},0);
+  var cSum=Object.values(getPay(curId).costs).reduce(function(a,x){return a+(x.checked?x.actual||0:0);},0);
+  cSum+=(getPay(curId).extras||[]).reduce(function(a,x){return a+(x.checked?x.actual||0:0);},0);
+  updateCostFoot(estSum,cSum);
+}
+
+/* ─── 초기화 ─── */
+loadData();
+renderList();
+</script>
+<script src="auth.js"></script>
+
+<script>
+(function(){
+  const KEY='daham_workflow_v1';
+  const now=()=>new Date().toISOString();
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{"projects":{}}')}catch(e){return {projects:{}}}};
+  const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
+  const pid=()=>localStorage.getItem('daham_current_project')||new URLSearchParams(location.search).get('project')||'default';
+  window.DAHAM_WORKFLOW={
+    getProject(){const d=load(), id=pid(); return (d.projects[id] ||= {id,updatedAt:now(),estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]})},
+    update(mut){const d=load(),id=pid(); const p=(d.projects[id] ||= {id,estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]}); mut(p); p.updatedAt=now(); save(d); return p},
+    syncEstimate(items){return this.update(p=>{p.estimateItems=items||[]})},
+    syncSchedule(items){return this.update(p=>{p.scheduleItems=items||[]})},
+    syncOrders(items){return this.update(p=>{p.orderItems=items||[]})},
+    key:KEY
+  };
+})();
+</script>
+
+</body>
+</html>

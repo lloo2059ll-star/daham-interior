@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DAHAM — 거래처 관리</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#E65100">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="다함">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-dk:#BF360C;--orange-lt:#FFF3EE;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;--line:#e0e0e0;--line-lt:#f5f5f5;
+  --bg:#f2f2f2;--white:#fff;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13px;min-height:100vh}
+
+/* ── TOOLBAR ── */
+.toolbar{position:sticky;top:0;z-index:100;height:48px;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:2px solid var(--orange);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.14em;color:var(--orange)}
+.tb-btn{font-family:var(--sans);font-size:11px;font-weight:600;padding:6px 14px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .15s;
+  text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.tb-btn:hover{border-color:var(--ink);color:var(--ink)}
+.tb-btn.primary{border-color:var(--orange);background:var(--orange);color:#fff}
+.tb-btn.primary:hover{background:var(--orange-dk)}
+
+/* ── MAIN ── */
+.main{max-width:900px;margin:0 auto;padding:28px 20px 80px}
+
+/* ── 검색/필터 바 ── */
+.filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.search-input{font-family:var(--sans);font-size:12px;border:1.5px solid var(--line);
+  padding:6px 12px;outline:none;flex:1;min-width:180px;color:var(--ink);background:#fff}
+.search-input:focus{border-color:var(--orange)}
+
+/* ── 카테고리 탭 ── */
+.cat-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.cat-tab{font-family:var(--sans);font-size:11px;font-weight:600;padding:5px 12px;
+  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--mid);
+  transition:all .12s;border-radius:20px}
+.cat-tab:hover{border-color:var(--orange);color:var(--orange)}
+.cat-tab.active{border-color:var(--orange);background:var(--orange);color:#fff}
+
+/* ── 카드 그리드 ── */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.contact-card{background:#fff;border-radius:10px;padding:18px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);border:1.5px solid transparent;
+  transition:all .15s;cursor:pointer;position:relative}
+.contact-card:hover{border-color:rgba(230,81,0,.25);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.card-cat{font-size:10px;font-weight:700;letter-spacing:.08em;padding:2px 8px;
+  border-radius:12px;display:inline-block;margin-bottom:10px}
+.card-name{font-size:16px;font-weight:800;margin-bottom:6px;color:var(--ink)}
+.card-tel{font-size:14px;font-weight:600;color:var(--orange);text-decoration:none;display:block;margin-bottom:8px}
+.card-tel:hover{text-decoration:underline}
+.card-note{font-size:11px;color:var(--mid);line-height:1.7;white-space:pre-wrap;
+  border-top:1px solid var(--line-lt);padding-top:8px;margin-top:4px}
+.card-edit{position:absolute;top:12px;right:12px;font-family:var(--sans);
+  font-size:10px;font-weight:600;padding:3px 8px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--dim);transition:all .12s}
+.card-edit:hover{border-color:var(--orange);color:var(--orange)}
+
+.empty{text-align:center;padding:48px;color:var(--dim);font-size:12px;line-height:2;
+  background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);grid-column:1/-1}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:#fff;width:100%;max-width:460px;max-height:90vh;overflow-y:auto}
+.modal-hd{padding:16px 20px;border-bottom:2px solid var(--orange);
+  display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:15px;font-weight:800}
+.modal-close{font-family:var(--sans);font-size:18px;cursor:pointer;color:var(--dim);
+  background:none;border:none;line-height:1;padding:4px}
+.modal-close:hover{color:var(--ink)}
+.modal-body{padding:20px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;
+  color:var(--dim);margin-bottom:6px}
+.field input,.field textarea,.field select{
+  font-family:var(--sans);font-size:13px;color:var(--ink);width:100%;
+  border:1.5px solid var(--line);padding:8px 10px;outline:none;background:#fff;transition:border-color .15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--orange)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.7}
+.modal-ft{padding:12px 20px;border-top:1px solid var(--line);
+  display:flex;justify-content:flex-end;gap:8px}
+.modal-ft button{font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 20px;
+  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .15s}
+.modal-ft button:hover{border-color:var(--ink);color:var(--ink)}
+.modal-ft button.save{border-color:var(--orange);background:var(--orange);color:#fff}
+.modal-ft button.save:hover{background:var(--orange-dk)}
+.modal-ft button.del{border-color:#C62828;color:#C62828}
+.modal-ft button.del:hover{background:#C62828;color:#fff}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:8px 20px;font-size:11px;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+
+/* ── 하단 네비 ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:58px;
+  background:#fff;border-top:1.5px solid var(--line);box-shadow:0 -2px 12px rgba(0,0,0,.08);
+  z-index:300}
+.mobile-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-decoration:none;color:var(--dim);font-size:10px;font-weight:600;gap:2px;
+  padding:6px 0;transition:color .15s;-webkit-tap-highlight-color:transparent}
+.mobile-nav a.active{color:var(--orange)}
+.mobile-nav a .mn-icon{font-size:18px;line-height:1}
+.mobile-nav a .mn-label{font-size:8px;letter-spacing:.02em}
+
+@media(max-width:640px){
+  .mobile-nav{display:flex}
+  body{padding-bottom:58px}
+  .main{padding:16px 14px 70px}
+  .toast{bottom:70px}
+
+  /* 카테고리 탭 가로 스크롤 */
+  .cat-tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    padding-bottom:4px;margin-right:-14px;padding-right:14px}
+  .cat-tabs::-webkit-scrollbar{display:none}
+  .cat-tab{flex-shrink:0;white-space:nowrap;padding:7px 14px;font-size:12px}
+
+  /* 전화 버튼 크게 */
+  .card-tel{display:block;background:#E8F5E9;color:#2E7D32!important;
+    border:1.5px solid #A5D6A7;border-radius:8px;padding:11px 16px;
+    text-align:center;font-size:15px;font-weight:700;margin-bottom:8px;text-decoration:none!important}
+  .card-tel:hover{background:#C8E6C9}
+
+  /* 카드 */
+  .cards{grid-template-columns:1fr}
+  .contact-card{padding:14px 16px}
+  .card-name{font-size:17px}
+  .card-edit{padding:6px 12px;font-size:11px}
+
+  /* 검색 */
+  .filter-bar{flex-direction:column}
+  .search-input{width:100%;font-size:14px;padding:10px 14px}
+
+  /* 툴바 */
+  .toolbar{padding:0 14px}
+  .tb-btn{padding:7px 14px;font-size:12px}
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+</head>
+<body>
+
+<div class="toolbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="index.html" class="tb-btn">← 홈</a>
+    <span class="brand">DAHAM</span>
+  </div>
+  <button class="tb-btn primary" onclick="openModal()">+ 거래처 추가</button>
+</div>
+
+<div class="main">
+
+  <!-- 검색 -->
+  <div class="filter-bar">
+    <input class="search-input" id="search" type="text" placeholder="이름 또는 메모 검색" oninput="renderCards()">
+  </div>
+
+  <!-- 카테고리 탭 -->
+  <div class="cat-tabs" id="cat-tabs"></div>
+
+  <!-- 클라우드 동기화 버튼 -->
+  <div id="sync-bar" style="margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <button onclick="manualPush()" style="font-family:var(--sans);font-size:12px;font-weight:600;
+      padding:8px 16px;border:1.5px solid var(--orange);background:#FFF3EE;color:var(--orange);cursor:pointer;border-radius:6px">
+      ☁ 거래처 저장 (PC)
+    </button>
+    <button onclick="manualSync()" style="font-family:var(--sans);font-size:12px;font-weight:600;
+      padding:8px 16px;border:1.5px solid #0277BD;background:#E3F2FD;color:#0277BD;cursor:pointer;border-radius:6px">
+      ☁ 거래처 불러오기
+    </button>
+    <span id="sync-msg" style="font-size:11px;color:var(--dim)"></span>
+  </div>
+
+  <!-- 카드 목록 -->
+  <div class="cards" id="cards"></div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" style="display:none" onclick="onBgClick(event)">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">거래처 추가</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>공종</label>
+        <select id="m-cat" style="font-family:var(--sans);font-size:13px;border:1.5px solid var(--line);padding:8px 10px;outline:none;width:100%;background:#fff;color:var(--ink)">
+        </select>
+      </div>
+      <div class="field">
+        <label>이름 / 업체명</label>
+        <input type="text" id="m-name" placeholder="홍길동 or 다함타일">
+      </div>
+      <div class="field">
+        <label>연락처</label>
+        <input type="tel" id="m-tel" placeholder="010-0000-0000">
+      </div>
+      <div class="field">
+        <label>메모 (단가, 특이사항 등)</label>
+        <textarea id="m-note" placeholder="예) 도배 평당 35,000원&#10;작업 깔끔하고 빠름&#10;연락 잘 됨"></textarea>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="del" id="btn-del" style="display:none" onclick="deleteRecord()">삭제</button>
+      <button onclick="closeModal()">취소</button>
+      <button class="save" onclick="saveRecord()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="mobile-nav">
+  <a href="index.html" class="mn-item"><span class="mn-icon">🏠</span><span class="mn-label">홈</span></a>
+  <a href="schedule.html" class="mn-item"><span class="mn-icon">📅</span><span class="mn-label">일정</span></a>
+  <a href="consult.html" class="mn-item"><span class="mn-icon">💬</span><span class="mn-label">상담</span></a>
+  <a href="contacts.html" class="mn-item active"><span class="mn-icon">👷</span><span class="mn-label">거래처</span></a>
+  <a href="as.html" class="mn-item"><span class="mn-icon">🔧</span><span class="mn-label">A/S</span></a>
+</nav>
+
+<script>
+var STORE_KEY = 'daham_contacts_v1';
+
+/* ── Supabase 동기화 ── */
+var SUPABASE_URL = 'https://ozgiihtixsjwoxbtotfi.supabase.co';
+var SUPABASE_KEY = 'sb_publishable_aHoQvdLGjD6J36LXb90HhA_d-DyvbAm';
+var _sb = null;
+try{ _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
+
+function cloudPushContacts(){
+  if(!_sb) return;
+  /* index.html과 동일한 구조: id='main', data={...} */
+  _sb.from('daham_backup').select('data').eq('id','main').maybeSingle().then(function(res){
+    var existing = (res.data && res.data.data) ? res.data.data : {};
+    existing[STORE_KEY] = JSON.stringify(records);
+    _sb.from('daham_backup').upsert({ id:'main', data:existing, updated_at:new Date().toISOString() }).then(function(){});
+  });
+}
+
+function cloudPullContacts(cb){
+  if(!_sb){ if(cb) cb(false); return; }
+  _sb.from('daham_backup').select('data').eq('id','main').maybeSingle().then(function(res){
+    if(res.data && res.data.data && res.data.data[STORE_KEY]){
+      try{
+        var remote = JSON.parse(res.data.data[STORE_KEY]);
+        if(Array.isArray(remote) && remote.length > 0){
+          records = remote;
+          localStorage.setItem(STORE_KEY, res.data.data[STORE_KEY]);
+        }
+      }catch(e){}
+    }
+    if(cb) cb(true);
+  }).catch(function(){ if(cb) cb(false); });
+}
+
+var CATS = [
+  '철거','전기','창호','설비','목공','필름','타일','도장','도배','바닥재','주방/가구','중문','청소','기타'
+];
+
+/* 공종별 색상 */
+var CAT_COLOR = {
+  '철거':'#795548','전기':'#F57F17','창호':'#0277BD','설비':'#00838F',
+  '목공':'#5D4037','필름':'#6A1B9A','타일':'#C62828','도장':'#558B2F',
+  '도배':'#2E7D32','바닥재':'#BF360C','주방/가구':'#1565C0','중문':'#4527A0',
+  '청소':'#37474F','기타':'#546E7A'
+};
+
+var records = [];
+var currentCat = 'all';
+var editingId  = null;
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+function load(){
+  try{ records=JSON.parse(localStorage.getItem(STORE_KEY)||'[]'); }catch(e){ records=[]; }
+}
+function save(){
+  localStorage.setItem(STORE_KEY, JSON.stringify(records));
+}
+
+function buildTabs(){
+  var tabs=document.getElementById('cat-tabs');
+  var all=[{key:'all',label:'전체'}].concat(CATS.map(function(c){ return {key:c,label:c}; }));
+  tabs.innerHTML=all.map(function(t){
+    return '<button class="cat-tab'+(t.key===currentCat?' active':'')+'" onclick="setCat(\''+t.key+'\')">'
+      +esc(t.label)+'</button>';
+  }).join('');
+}
+
+function setCat(c){ currentCat=c; buildTabs(); renderCards(); }
+
+function renderCards(){
+  var q=(document.getElementById('search').value||'').trim().toLowerCase();
+  var list=records.filter(function(r){
+    if(currentCat!=='all'&&r.cat!==currentCat) return false;
+    if(q&&(r.name||'').toLowerCase().indexOf(q)<0&&(r.note||'').toLowerCase().indexOf(q)<0) return false;
+    return true;
+  });
+  list.sort(function(a,b){
+    var ci=CATS.indexOf(a.cat)-CATS.indexOf(b.cat);
+    if(ci!==0) return ci;
+    return (a.name||'').localeCompare(b.name||'','ko');
+  });
+
+  var el=document.getElementById('cards');
+  if(!list.length){
+    el.innerHTML='<div class="empty">'+(q||currentCat!=='all'?'조건에 맞는 거래처가 없습니다.':'거래처가 없습니다.<br>상단 "+ 거래처 추가" 버튼으로 등록하세요.')+'</div>';
+    return;
+  }
+
+  el.innerHTML=list.map(function(r){
+    var color=CAT_COLOR[r.cat]||'#555';
+    var telHtml=r.tel
+      ? '<a class="card-tel" href="tel:'+esc(r.tel)+'">📞 '+esc(r.tel)+'</a>'
+      : '<span style="font-size:11px;color:var(--dim)">연락처 없음</span>';
+    var noteHtml=r.note
+      ? '<div class="card-note">'+esc(r.note)+'</div>'
+      : '';
+    return '<div class="contact-card">'
+      +'<button class="card-edit" onclick="openModal(\''+r.id+'\');event.stopPropagation()">수정</button>'
+      +'<div class="card-cat" style="background:'+color+'22;color:'+color+'">'+esc(r.cat||'기타')+'</div>'
+      +'<div class="card-name">'+esc(r.name||'이름 없음')+'</div>'
+      +telHtml
+      +noteHtml
+      +'</div>';
+  }).join('');
+}
+
+function fillCatSelect(){
+  var sel=document.getElementById('m-cat');
+  sel.innerHTML=CATS.map(function(c){
+    return '<option value="'+c+'">'+c+'</option>';
+  }).join('');
+}
+
+function openModal(id){
+  editingId=id||null;
+  var r=id?records.find(function(x){ return x.id===id; }):null;
+  document.getElementById('modal-title').textContent = r?'거래처 수정':'거래처 추가';
+  document.getElementById('btn-del').style.display   = r?'inline-flex':'none';
+  fillCatSelect();
+  document.getElementById('m-cat').value  = r?(r.cat||CATS[0]):currentCat!=='all'?currentCat:CATS[0];
+  document.getElementById('m-name').value = r?(r.name||''):'';
+  document.getElementById('m-tel').value  = r?(r.tel||''):'';
+  document.getElementById('m-note').value = r?(r.note||''):'';
+  document.getElementById('modal-bg').style.display='flex';
+  setTimeout(function(){ document.getElementById('m-name').focus(); },80);
+}
+
+function closeModal(){ document.getElementById('modal-bg').style.display='none'; editingId=null; }
+function onBgClick(e){ if(e.target===document.getElementById('modal-bg')) closeModal(); }
+
+function saveRecord(){
+  var cat  = document.getElementById('m-cat').value;
+  var name = document.getElementById('m-name').value.trim();
+  var tel  = document.getElementById('m-tel').value.trim();
+  var note = document.getElementById('m-note').value.trim();
+  if(!name){ showToast('이름을 입력해주세요'); return; }
+  if(editingId){
+    var r=records.find(function(x){ return x.id===editingId; });
+    if(r){ r.cat=cat; r.name=name; r.tel=tel; r.note=note; }
+  } else {
+    records.push({id:uid(),cat:cat,name:name,tel:tel,note:note});
+  }
+  save(); cloudPushContacts(); closeModal(); renderCards(); showToast('✓ 저장했습니다');
+}
+
+function deleteRecord(){
+  if(!editingId) return;
+  dahamConfirm('이 연락처를 삭제할까요?', function() {
+    records=records.filter(function(x){ return x.id!==editingId; });
+    save(); cloudPushContacts(); closeModal(); renderCards(); showToast('삭제했습니다');
+  });
+}
+
+function showToast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },2000); }
+
+function setSyncMsg(m){ document.getElementById('sync-msg').textContent=m; }
+
+function manualPush(){
+  if(!records.length){ setSyncMsg('저장할 거래처가 없습니다'); return; }
+  setSyncMsg('저장 중...');
+  if(!_sb){ setSyncMsg('❌ Supabase 연결 실패'); return; }
+  _sb.from('daham_backup').upsert({ id:'contacts', data:records, updated_at:new Date().toISOString() }).then(function(r){
+    if(r.error){ setSyncMsg('❌ '+r.error.message); }
+    else { setSyncMsg('✓ '+records.length+'개 저장 완료'); }
+  }).catch(function(e){ setSyncMsg('❌ '+(e.message||e)); });
+}
+
+function manualSync(){
+  setSyncMsg('불러오는 중...');
+  if(!_sb){ setSyncMsg('❌ Supabase 연결 실패'); return; }
+  _sb.from('daham_backup').select('data').eq('id','contacts').maybeSingle().then(function(res){
+    if(res.error){ setSyncMsg('❌ '+res.error.message); return; }
+    if(!res.data){ setSyncMsg('❌ 저장된 거래처 없음 — PC에서 먼저 저장하세요'); return; }
+    var arr = res.data.data;
+    if(typeof arr==='string'){ try{ arr=JSON.parse(arr); }catch(e){ setSyncMsg('❌ 파싱오류'); return; } }
+    if(!Array.isArray(arr)||!arr.length){ setSyncMsg('❌ 거래처 데이터 없음'); return; }
+    records = arr;
+    localStorage.setItem(STORE_KEY, JSON.stringify(arr));
+    buildTabs(); renderCards();
+    setSyncMsg('✓ '+arr.length+'개 불러옴');
+  }).catch(function(e){ setSyncMsg('❌ '+(e.message||e)); });
+}
+
+load();
+buildTabs();
+renderCards();
+
+/* 클라우드에서 최신 데이터 pull — 로컬보다 클라우드가 더 많으면 반영 */
+cloudPullContacts(function(ok){
+  if(ok){ buildTabs(); renderCards(); }
+});
+</script>
+<script src="auth.js"></script>
+</body>
+</html>

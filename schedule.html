@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>다함인테리어 — 공사일정표</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#E65100">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="다함">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-lt:#FFF3EE;--orange-dk:#BF360C;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;
+  --line:#e0e0e0;--line-lt:#f2f2f2;
+  --bg:#f4f4f4;--white:#fff;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13px;min-height:100vh}
+
+/* ── TOOLBAR ── */
+.toolbar{position:sticky;top:0;z-index:200;height:48px;padding:0 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--white);border-bottom:2.5px solid var(--orange);
+  box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.12em;color:var(--orange);user-select:none}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-right{display:flex;align-items:center;gap:6px}
+.save-dot{width:6px;height:6px;border-radius:50%;background:transparent;transition:background .4s;flex-shrink:0}
+
+/* ── BUTTONS ── */
+.btn{font-family:var(--sans);font-size:12px;font-weight:500;padding:6px 14px;cursor:pointer;
+  border:1.5px solid var(--line);background:var(--white);color:var(--ink);
+  transition:all .15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.btn:hover{border-color:var(--ink)}
+.btn.orange{border-color:var(--orange);background:var(--orange);color:#fff}
+.btn.orange:hover{background:var(--orange-dk);border-color:var(--orange-dk)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--mid)}
+.btn.ghost:hover{color:var(--orange);background:var(--orange-lt)}
+.btn.sm{font-size:11px;padding:4px 10px}
+.btn.danger{color:#e53935;border-color:#e53935}
+.btn.danger:hover{background:#e53935;color:#fff}
+
+/* ── LAYOUT ── */
+.app-body{display:flex;min-height:calc(100vh - 48px)}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:204px;min-width:204px;flex-shrink:0;
+  background:var(--white);border-right:1.5px solid var(--line);
+  position:sticky;top:48px;height:calc(100vh - 48px);overflow-y:auto;
+  padding:10px 0;
+}
+.sb-hd{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dim);padding:8px 14px 4px}
+.sb-item{display:flex;align-items:center;gap:8px;padding:7px 12px;
+  cursor:pointer;font-size:12px;font-weight:500;color:var(--ink);
+  border-left:3px solid transparent;transition:all .1s;user-select:none;
+  background:none;border-top:none;border-right:none;border-bottom:none;
+  width:100%;text-align:left;font-family:var(--sans)}
+.sb-item:hover{background:var(--orange-lt)}
+.sb-item.active{background:#FFF3EE;border-left-color:var(--orange);color:var(--orange);font-weight:700}
+.sb-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block}
+.sb-cnt{margin-left:auto;font-size:10px;color:var(--dim);font-weight:400;flex-shrink:0}
+.sb-add{width:100%;display:flex;align-items:center;gap:6px;padding:8px 12px;
+  font-family:var(--sans);font-size:12px;font-weight:600;color:var(--orange);
+  background:none;border:none;cursor:pointer;text-align:left;margin-top:2px}
+.sb-add:hover{background:var(--orange-lt)}
+.sb-sep{border:none;border-top:1px solid var(--line-lt);margin:6px 0}
+
+/* ── MAIN CONTENT ── */
+#main-content{flex:1;overflow-y:auto;padding:14px 20px 80px;min-width:0}
+
+/* ── INFO PANEL ── */
+.info-panel{background:var(--white);border:1px solid var(--line);margin-bottom:12px}
+.ip-hd{display:flex;align-items:center;justify-content:space-between;
+  padding:10px 18px;cursor:pointer;user-select:none}
+.ip-hd:hover{background:var(--orange-lt)}
+.ip-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange)}
+.ip-bd{padding:14px 18px;border-top:1px solid var(--line-lt);
+  display:grid;grid-template-columns:repeat(4,1fr);gap:10px 18px}
+.ip-bd.closed{display:none}
+.field{display:flex;flex-direction:column;gap:4px}
+.field.span2{grid-column:span 2}
+.field.span4{grid-column:span 4}
+.field-lbl{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.field-inp{font-family:var(--sans);font-size:13px;color:var(--ink);
+  border:none;border-bottom:1.5px solid var(--line);outline:none;
+  padding:3px 0;background:transparent;width:100%}
+.field-inp:focus{border-bottom-color:var(--orange)}
+
+/* ── CAL NAV ── */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;
+  padding:4px 0 10px;gap:12px}
+.cal-nav-title{font-size:13px;font-weight:600;color:var(--mid)}
+
+/* ── LEGEND ── */
+#proj-legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+
+/* ── CALENDAR ── */
+.cal-months{display:flex;flex-direction:column;gap:0}
+.cal-month{background:var(--white);border:1.5px solid #ccc;margin-bottom:14px;overflow:hidden}
+.cal-mhd{background:var(--ink);color:#fff;padding:10px 16px;font-size:15px;font-weight:700;letter-spacing:.02em}
+.cal-wdhd-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid #bbb}
+.cal-wdhd{text-align:center;font-size:10px;font-weight:600;letter-spacing:.06em;
+  padding:6px 0;color:var(--mid);background:#f0f0f0;border-right:1px solid #ccc}
+.cal-wdhd:last-child{border-right:none}
+.cal-wdhd.sun{color:#e53935}
+.cal-wdhd.sat{color:#1565C0}
+.cal-week-group{border-bottom:1.5px solid #ccc}
+.cal-week-group:last-child{border-bottom:none}
+.cal-drow{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day{border-right:1px solid #d0d0d0;min-height:56px;padding:6px 8px;
+  cursor:pointer;transition:background .1s;font-size:13px;font-weight:500}
+.cal-holi{font-size:8px;color:#C62828;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-day.holiday{background:#fff5f5}
+.cal-day.holiday:hover{background:#ffe0e0}
+.cal-day:last-child{border-right:none}
+.cal-day:hover{background:var(--orange-lt)}
+.cal-day.other-m{color:#ccc}
+.cal-day.today .cal-dn{background:var(--orange);color:#fff;width:22px;height:22px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+.cal-day.sun{color:#e53935}
+.cal-day.sat{color:#1565C0}
+.cal-day.other-m.sun,.cal-day.other-m.sat{color:#ddd}
+.cal-dn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.cal-trow{position:relative}
+.cbar{position:absolute;height:26px;display:flex;align-items:center;padding:0 8px;
+  font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;cursor:pointer;transition:filter .12s;z-index:1;
+  -webkit-print-color-adjust:exact;print-color-adjust:exact}
+.cbar:hover{filter:brightness(1.12)}
+.cbar.done{opacity:.6}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.38);
+  z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);padding:24px;width:100%;max-width:460px;
+  box-shadow:0 8px 40px rgba(0,0,0,.2);max-height:90vh;overflow-y:auto}
+.modal-title{font-size:14px;font-weight:700;margin-bottom:18px;
+  padding-bottom:10px;border-bottom:1px solid var(--line-lt)}
+.modal-date-hint{font-size:11px;color:var(--orange);font-weight:600;margin-bottom:12px}
+.modal-body{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;margin-bottom:18px}
+.modal-body .span2{grid-column:span 2}
+.mf-lbl{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dim);margin-bottom:4px}
+.mf-inp{font-family:var(--sans);font-size:13px;border:none;
+  border-bottom:1.5px solid var(--line);outline:none;
+  padding:4px 0;background:transparent;width:100%;color:var(--ink)}
+.mf-inp:focus{border-bottom-color:var(--orange)}
+select.mf-inp{cursor:pointer}
+.modal-foot{display:flex;justify-content:space-between;gap:8px;align-items:center}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:9px 20px;font-size:11px;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+
+/* ── PRINT ── */
+@media print{
+  @page{size:A4 portrait;margin:6mm}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  html,body{height:100%;background:#fff}
+  .toolbar,.btn,#sidebar,.cal-nav,.ip-hd,.mobile-nav{display:none!important}
+  .ip-bd.closed{display:grid!important}
+  .app-body{display:block;height:100%}
+  #main-content{
+    padding:0;overflow:visible;
+    display:flex;flex-direction:column;
+    height:277mm;
+  }
+  .info-panel{border:none;margin-bottom:4px;flex-shrink:0}
+  .cal-months{
+    flex:1;
+    display:flex;flex-direction:column;
+  }
+  .cal-month{
+    flex:1;
+    margin-bottom:4px;
+    page-break-inside:avoid;
+    display:flex;flex-direction:column;
+    overflow:hidden;
+  }
+  .cal-month:not(.has-tasks){display:none!important}
+  .cal-wdhd-row,.cal-week-group{flex-shrink:0}
+  .cal-week-group{flex:1;display:flex;flex-direction:column}
+  .cal-drow{flex:1}
+  .cal-day{min-height:0!important;height:100%;padding:2px 4px!important;font-size:10px}
+  .cal-mhd{padding:5px 10px!important;font-size:11px!important;flex-shrink:0}
+  .cal-trow{flex-shrink:0}
+  .cbar{height:15px!important;font-size:8px!important}
+  .cal-dn{font-size:10px!important;width:16px!important;height:16px!important}
+  .ip-toggle{display:none!important}
+}
+
+/* ── 하단 네비 ── */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:58px;
+  background:#fff;border-top:1.5px solid var(--line);box-shadow:0 -2px 12px rgba(0,0,0,.08);z-index:300}
+.mobile-nav a{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-decoration:none;color:var(--dim);font-size:10px;font-weight:600;gap:2px;
+  padding:6px 0;transition:color .15s;-webkit-tap-highlight-color:transparent}
+.mobile-nav a.active{color:var(--orange)}
+.mobile-nav a .mn-icon{font-size:18px;line-height:1}
+.mobile-nav a .mn-label{font-size:8px;letter-spacing:.02em}
+
+/* ── MOBILE ── */
+@media(max-width:640px){
+  .mobile-nav{display:flex}
+  body{padding-bottom:58px}
+  .app-body{flex-direction:column}
+  #sidebar{width:100%;min-width:0;height:auto;position:relative;top:0;
+    border-right:none;border-bottom:1px solid var(--line);
+    display:flex;flex-wrap:nowrap;overflow-x:auto;padding:4px 0;-webkit-overflow-scrolling:touch}
+  #sidebar::-webkit-scrollbar{display:none}
+  .sb-hd,.sb-sep{display:none}
+  .sb-item{padding:8px 14px;white-space:nowrap;border-left:none;border-bottom:2px solid transparent;
+    flex-shrink:0;font-size:12px}
+  .sb-item.active{border-left:none;border-bottom-color:var(--orange)}
+  .sb-add{padding:8px 14px;white-space:nowrap;flex-shrink:0;font-size:12px}
+  #main-content{padding:10px 8px 70px}
+  .ip-bd{grid-template-columns:1fr 1fr}
+  .cal-day{min-height:36px;padding:3px 4px}
+  .cbar{height:20px;font-size:9px}
+  .toolbar{padding:0 12px}
+  .btn.sm{padding:7px 12px;font-size:11px}
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="tb-left">
+    <a href="index.html" style="font-size:11px;color:var(--mid);text-decoration:none;border:1.5px solid var(--line);padding:4px 10px;transition:all .15s" onmouseover="this.style.borderColor='#333';this.style.color='#333'" onmouseout="this.style.borderColor='var(--line)';this.style.color='var(--mid)'">← 홈</a>
+    <span class="brand">DAHAM</span>
+    <span id="save-dot" class="save-dot"></span>
+    <span id="sync-dot" title="클라우드 동기화" style="font-size:13px;opacity:.35;transition:all .3s;margin-left:2px">☁</span>
+  </div>
+  <div class="tb-right">
+    <button class="btn ghost sm" onclick="printCalendar()">인쇄/PDF</button>
+    <button class="btn ghost sm" id="tb-share-btn" style="display:none" onclick="shareProject()">🔗 링크 공유</button>
+    <button class="btn sm orange" id="tb-add-btn" style="display:none" onclick="openTaskModal(null,null)">+ 일정 추가</button>
+    <button class="btn sm" id="tb-phase-btn" style="display:none" onclick="loadDefaultPhases()">기본 공정 불러오기</button>
+    <button class="btn sm" id="tb-new-btn" onclick="newProject()">+ 새 현장</button>
+  </div>
+</div>
+
+<!-- APP BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="sb-hd">캘린더</div>
+    <button class="sb-item active" id="sb-all" onclick="showAllCalendar()">
+      <span class="sb-dot" style="background:#444"></span>
+      <span>전체 보기</span>
+      <span class="sb-cnt" id="sb-all-cnt"></span>
+    </button>
+    <hr class="sb-sep">
+    <div class="sb-hd">현장</div>
+    <div id="sb-proj-list"></div>
+    <hr class="sb-sep">
+    <button class="sb-add" onclick="newProject()">＋ 새 현장 추가</button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div id="main-content">
+
+    <!-- Info panel (individual project mode) -->
+    <div id="info-wrap" style="display:none">
+      <div class="info-panel">
+        <div class="ip-hd" onclick="toggleInfo()">
+          <span class="ip-label">현장 정보</span>
+          <span id="ip-toggle" style="font-size:10px;color:var(--dim)">▲</span>
+        </div>
+        <div class="ip-bd" id="ip-bd">
+          <div class="field"><div class="field-lbl">현장명</div>
+            <input class="field-inp" id="f-name" oninput="onInfoInput()" placeholder="고객명 또는 현장명"></div>
+          <div class="field"><div class="field-lbl">연락처</div>
+            <input class="field-inp" id="f-tel" oninput="onInfoInput()" placeholder="010-0000-0000"></div>
+          <div class="field"><div class="field-lbl">착공일</div>
+            <input class="field-inp" id="f-start" type="date" oninput="onDateChange()"></div>
+          <div class="field"><div class="field-lbl">준공(예정)</div>
+            <input class="field-inp" id="f-end" type="date" oninput="onInfoInput()"></div>
+          <div class="field span2"><div class="field-lbl">현장 주소</div>
+            <input class="field-inp" id="f-addr" oninput="onInfoInput()" placeholder="주소"></div>
+          <div class="field"><div class="field-lbl">담당자</div>
+            <input class="field-inp" id="f-manager" oninput="onInfoInput()" placeholder="담당자명"></div>
+          <div class="field"><div class="field-lbl">메모</div>
+            <input class="field-inp" id="f-memo" oninput="onInfoInput()" placeholder="특이사항"></div>
+          <div class="field span4">
+            <div class="field-lbl">현장 색상</div>
+            <div id="proj-color-row" style="display:flex;flex-wrap:wrap;gap:7px;margin-top:6px"></div>
+          </div>
+          <div class="field span4" style="display:flex;justify-content:flex-end;padding-top:2px">
+            <button class="btn sm danger" onclick="deleteCurrentProject()">현장 삭제</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar nav -->
+    <div class="cal-nav">
+      <button class="btn sm" onclick="shiftCal(-1)">◀ 이전달</button>
+      <span class="cal-nav-title" id="cal-nav-title"></span>
+      <button class="btn sm" onclick="shiftCal(1)">다음달 ▶</button>
+    </div>
+
+    <!-- Project color legend (all-projects mode) -->
+    <div id="proj-legend"></div>
+
+    <!-- Calendar area -->
+    <div id="cal-area" class="cal-months"></div>
+  </div>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-bg" id="task-modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">일정 추가</div>
+    <div class="modal-date-hint" id="modal-date-hint"></div>
+    <div class="modal-body">
+      <div class="span2">
+        <div class="mf-lbl">공종 / 작업명</div>
+        <input class="mf-inp" id="m-name" placeholder="예: 목작업, 도배, 타일 시공">
+      </div>
+      <div>
+        <div class="mf-lbl">시작일</div>
+        <input class="mf-inp" id="m-start" type="date">
+      </div>
+      <div>
+        <div class="mf-lbl">종료일</div>
+        <input class="mf-inp" id="m-end" type="date">
+      </div>
+      <div>
+        <div class="mf-lbl">담당 작업자</div>
+        <input class="mf-inp" id="m-worker" placeholder="이름 (선택)">
+      </div>
+      <div>
+        <div class="mf-lbl">진행 상태</div>
+        <select class="mf-inp" id="m-status">
+          <option value="planned">예정</option>
+          <option value="progress">진행중</option>
+          <option value="done">완료</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn sm danger" id="modal-del-btn" onclick="deleteTask()" style="display:none">삭제</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn sm ghost" onclick="closeTaskModal()">취소</button>
+        <button class="btn sm orange" onclick="saveTask()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECT PICKER MODAL (all-view day click) -->
+<div class="modal-bg" id="proj-pick-modal">
+  <div class="modal" style="max-width:320px">
+    <div class="modal-title">어느 현장에 추가할까요?</div>
+    <div id="proj-pick-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:18px"></div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn sm ghost" onclick="closeProjPick()">취소</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 공유 링크 모달 -->
+<div id="share-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;width:100%;max-width:480px;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="padding:16px 20px;border-bottom:2px solid #E65100;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:800">🔗 공유 링크</div>
+      <button onclick="closeShareModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#aaa;line-height:1">✕</button>
+    </div>
+    <div style="padding:20px">
+      <div style="font-size:12px;color:#555;margin-bottom:10px">아래 링크를 복사해서 카톡으로 전송하세요</div>
+      <input id="share-url-input" type="text" readonly
+        style="width:100%;font-size:12px;padding:10px 12px;border:1.5px solid #e0e0e0;border-radius:6px;color:#1a1a1a;background:#f9f9f9;font-family:monospace">
+      <button onclick="copyShareUrl()"
+        style="margin-top:12px;width:100%;padding:13px;background:#E65100;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+        링크 복사
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════ 공휴일 ════ */
+var FIXED_HOL={
+  '01-01':'신정','03-01':'삼일절','05-05':'어린이날',
+  '06-06':'현충일','08-15':'광복절','10-03':'개천절',
+  '10-09':'한글날','12-25':'크리스마스'
+};
+var LUNAR_HOL={
+  /* 설날 연휴 */
+  '2024-02-09':'설날연휴','2024-02-10':'설날','2024-02-11':'설날연휴','2024-02-12':'대체공휴일',
+  '2025-01-28':'설날연휴','2025-01-29':'설날','2025-01-30':'설날연휴',
+  '2026-02-16':'설날연휴','2026-02-17':'설날','2026-02-18':'설날연휴',
+  '2027-02-05':'설날연휴','2027-02-06':'설날','2027-02-07':'설날연휴','2027-02-08':'대체공휴일',
+  '2028-01-25':'설날연휴','2028-01-26':'설날','2028-01-27':'설날연휴',
+  '2029-02-11':'설날연휴','2029-02-12':'설날','2029-02-13':'설날연휴','2029-02-14':'대체공휴일',
+  '2030-02-01':'설날연휴','2030-02-02':'설날','2030-02-03':'설날연휴','2030-02-04':'대체공휴일',
+  /* 부처님오신날 */
+  '2024-05-15':'부처님오신날',
+  '2025-05-05':'부처님오신날','2025-05-06':'대체공휴일',
+  '2026-05-24':'부처님오신날','2026-05-25':'대체공휴일',
+  '2027-05-13':'부처님오신날',
+  '2028-05-02':'부처님오신날',
+  '2029-05-20':'부처님오신날',
+  '2030-05-09':'부처님오신날',
+  /* 추석 연휴 */
+  '2024-09-16':'추석연휴','2024-09-17':'추석','2024-09-18':'추석연휴',
+  '2025-10-05':'추석연휴','2025-10-06':'추석','2025-10-07':'추석연휴','2025-10-08':'대체공휴일',
+  '2026-09-24':'추석연휴','2026-09-25':'추석','2026-09-26':'추석연휴','2026-09-28':'대체공휴일',
+  '2027-10-14':'추석연휴','2027-10-15':'추석','2027-10-16':'추석연휴','2027-10-18':'대체공휴일',
+  '2028-10-02':'추석연휴','2028-10-03':'추석','2028-10-04':'추석연휴','2028-10-05':'대체공휴일',
+  '2029-09-21':'추석연휴','2029-09-22':'추석','2029-09-23':'추석연휴','2029-09-24':'대체공휴일',
+  '2030-09-11':'추석연휴','2030-09-12':'추석','2030-09-13':'추석연휴',
+  /* 어린이날 대체 */
+  '2024-05-06':'대체공휴일',
+  '2028-05-07':'대체공휴일',
+  '2029-05-07':'대체공휴일',
+  '2030-05-06':'대체공휴일',
+  /* 삼일절 대체 */
+  '2025-03-03':'대체공휴일',
+  '2026-03-02':'대체공휴일',
+  /* 현충일 대체 */
+  '2026-06-08':'대체공휴일',
+  '2027-06-07':'대체공휴일',
+  /* 광복절 대체 */
+  '2026-08-17':'대체공휴일',
+  '2027-08-16':'대체공휴일',
+  /* 개천절 대체 */
+  '2026-10-05':'대체공휴일',
+  '2027-10-04':'대체공휴일',
+  /* 한글날 대체 */
+  '2027-10-11':'대체공휴일',
+  /* 신정 대체 */
+  '2028-01-03':'대체공휴일',
+  /* 크리스마스 대체 */
+  '2027-12-27':'대체공휴일'
+};
+function getHoliday(ds){
+  return LUNAR_HOL[ds]||FIXED_HOL[ds.slice(5)]||null;
+}
+
+/* ════ CONSTANTS ════ */
+var DB_KEY    = 'daham_schedule_v1';
+var SUPA_URL  = 'https://famqvwnsustbxuizohni.supabase.co';
+var SUPA_KEY  = 'sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
+var SHARE_URL = 'https://ozgiihtixsjwoxbtotfi.supabase.co';
+var SHARE_KEY = 'sb_publishable_aHoQvdLGjD6J36LXb90HhA_d-DyvbAm';
+var _sb = null;
+
+/* ── 주말 제외 날짜 유틸 ── */
+function isNonWorkDay(d){
+  if(d.getDay()===0||d.getDay()===6) return true;
+  var ds=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  return !!getHoliday(ds);
+}
+function toWorkDay(dateStr){
+  var d=new Date(dateStr+'T00:00:00');
+  while(isNonWorkDay(d)) d.setDate(d.getDate()+1);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function workDayEnd(startStr, dur){
+  var d=new Date(startStr+'T00:00:00');
+  var worked=1;
+  while(worked<dur){
+    d.setDate(d.getDate()+1);
+    if(!isNonWorkDay(d)) worked++;
+  }
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function nextWorkDay(dateStr){
+  var d=new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate()+1);
+  while(isNonWorkDay(d)) d.setDate(d.getDate()+1);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+
+/* ── 공정 순서 + 견적 섹션 매핑 ── */
+var PHASE_MAP = [
+  {name:'철거',          dur:2, secs:['철거']},
+  {name:'마루철거',      dur:1, secs:['철거']},
+  {name:'전기',          dur:1, secs:['전기/조명']},
+  {name:'창호',          dur:1, secs:['샷시']},
+  {name:'설비 (배관)',   dur:1, secs:['설비']},
+  {name:'목공',          dur:4, secs:['목작업','문/문틀','인테리어철물','중문']},
+  {name:'필름·유리',    dur:2, secs:['필름']},
+  {name:'타일',          dur:4, secs:['거실욕실','안방욕실','타일류']},
+  {name:'욕실천장',      dur:1, secs:['거실욕실','안방욕실']},
+  {name:'위생도기',      dur:1, secs:['설비']},
+  {name:'도장',          dur:1, secs:['탄성코트']},
+  {name:'도배',          dur:3, secs:['도배']},
+  {name:'조명',          dur:1, secs:['전기/조명']},
+  {name:'바닥재',        dur:1, secs:['바닥']},
+  {name:'주방·붙박이장', dur:2, secs:['싱크대','가구']},
+  {name:'중문',          dur:1, secs:['중문']},
+  {name:'입주청소',      dur:1, secs:['기타 및 요청사항']}
+];
+
+/* sectionTotals: [{name, sub}, ...] — null이면 전체 공정 사용 */
+function buildDefaultTasks(startDate, sectionTotals, floorType){
+  var activeSet=null;
+  if(sectionTotals){
+    activeSet={};
+    sectionTotals.forEach(function(s){ if(s.sub>0) activeSet[s.name]=true; });
+  }
+  var includeAC=!activeSet||!!activeSet['시스템에어컨'];
+  var floorName=floorType||'바닥재';
+
+  var tasks=[], cur=toWorkDay(startDate);
+
+  PHASE_MAP.forEach(function(ph){
+    if(activeSet){
+      var hasAmount=ph.secs.some(function(sec){ return activeSet[sec]; });
+      if(!hasAmount) return;
+    }
+    var s=cur, e=workDayEnd(s, ph.dur);
+    var pname=ph.name==='바닥재'?floorName:ph.name;
+    if(ph.name==='바닥재'&&!floorName) return; /* 바닥 자재 없으면 제외 */
+    tasks.push({id:uid(),name:pname,start:s,end:e,worker:'',status:'planned'});
+
+    /* 에어컨 타공: 전기와 같은 날 1일 */
+    if(ph.name==='전기'&&includeAC){
+      tasks.push({id:uid(),name:'에어컨 타공',start:s,end:s,worker:'',status:'planned'});
+    }
+    /* 에어컨 마감: 조명과 같은 날 1일 */
+    if(ph.name==='조명'&&includeAC){
+      tasks.push({id:uid(),name:'에어컨 마감',start:s,end:e,worker:'',status:'planned'});
+    }
+
+    cur=nextWorkDay(e);
+  });
+  return tasks;
+}
+
+/* 견적 qtys로 바닥 자재 타입 감지 (구형 인덱스 키 + 신형 이름 키 모두 지원) */
+function detectFloorTypeFromQtys(qtys){
+  var hasMaru=false, hasJangpan=false;
+  for(var ii=0;ii<=15;ii++){
+    if((parseFloat(qtys['1_'+ii])||0)>0){ hasJangpan=true; break; }
+  }
+  for(var ii=16;ii<=43;ii++){
+    if((parseFloat(qtys['1_'+ii])||0)>0){ hasMaru=true; break; }
+  }
+  Object.keys(qtys).forEach(function(k){
+    if(k.indexOf('바닥|')===0&&(parseFloat(qtys[k])||0)>0){
+      var sub=k.split('|')[1]||'';
+      if(sub.indexOf('마루')>=0) hasMaru=true;
+      if(sub.indexOf('장판')>=0) hasJangpan=true;
+    }
+  });
+  if(hasMaru&&hasJangpan) return '바닥재';
+  if(hasMaru) return '마루';
+  if(hasJangpan) return '장판';
+  return null;
+}
+
+/* 연결된 견적서 데이터 가져오기 */
+function getEstimateData(schedProj){
+  if(!schedProj.estimateId) return null;
+  try{
+    var eps=JSON.parse(localStorage.getItem('daham_detail_v2')||'[]');
+    for(var i=0;i<eps.length;i++){
+      if(eps[i].id===schedProj.estimateId){
+        var ep=eps[i];
+        return {
+          sectionTotals: ep.sectionTotals||null,
+          floorType: ep.floorType||detectFloorTypeFromQtys(ep.qtys||{})
+        };
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
+var COLORS = [
+  '#E65100','#1976D2','#388E3C','#7B1FA2',
+  '#F57C00','#0097A7','#C62828','#5D4037',
+  '#455A64','#AD1457','#00796B','#FBC02D'
+];
+var MONTH_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+var DOW_KO   = ['일','월','화','수','목','금','토'];
+
+/* ════ STATE ════ */
+var allProjects = [];
+var currentId   = null;  // null = all-projects view
+var calOffset   = 0;
+var saveTimer   = null;
+var editTaskId  = null;
+var pendingDate = null;
+
+/* ════ UTILS ════ */
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function nowISO(){ return new Date().toISOString(); }
+function pad(n){ return n<10?'0'+n:String(n); }
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function addDays(s,n){
+  var d=new Date(s+'T00:00:00');
+  d.setDate(d.getDate()+n);
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;'); }
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },2200);
+}
+function fmtDate(s){
+  if(!s) return '';
+  var p=s.split('-'); return p[0]+'년 '+(p[1]*1)+'월 '+(p[2]*1)+'일';
+}
+
+/* ════ STORAGE ════ */
+/* ════ CLOUD SYNC (fetch 기반 — Supabase SDK 제거) ════ */
+var _authToken = (window.DAHAM_AUTH && DAHAM_AUTH.getAccessToken) ? DAHAM_AUTH.getAccessToken() : '';
+var _HDRS = {'apikey':SUPA_KEY,'Authorization':'Bearer '+(_authToken||SUPA_KEY),'Content-Type':'application/json'};
+function initCloud(){ /* SDK 불필요 */ }
+function setSyncDot(state){
+  var el=document.getElementById('sync-dot');
+  if(!el) return;
+  if(state==='up'){ el.textContent='↑'; el.style.opacity='1'; el.style.color='var(--orange)'; }
+  else if(state==='ok'){ el.textContent='☁'; el.style.opacity='.35'; el.style.color='inherit'; }
+  else if(state==='err'){ el.textContent='⚠'; el.style.opacity='1'; el.style.color='#e53935'; }
+}
+function cloudPush(){
+  setSyncDot('up');
+  var str=JSON.stringify(allProjects);
+  var ts=new Date().toISOString();
+  localStorage.setItem(DB_KEY+'_ts', ts);
+  fetch(SUPA_URL+'/rest/v1/sync_data',{
+    method:'POST',
+    headers:Object.assign({},_HDRS,{'Prefer':'resolution=merge-duplicates,return=minimal'}),
+    body:JSON.stringify({key:DB_KEY,value:str,updated_at:ts})
+  }).then(function(r){ setSyncDot(r.ok?'ok':'err'); }).catch(function(){ setSyncDot('err'); });
+}
+function cloudPull(onDone){
+  fetch(SUPA_URL+'/rest/v1/sync_data?key=eq.'+encodeURIComponent(DB_KEY)+'&select=value,updated_at',{
+    headers:_HDRS
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    var row=Array.isArray(data)&&data[0];
+    if(!row){ setSyncDot('ok'); onDone(); return; }
+    var localTs=localStorage.getItem(DB_KEY+'_ts')||'';
+    if(row.updated_at>localTs){
+      try{
+        allProjects=JSON.parse(row.value);
+        migrate();
+        localStorage.setItem(DB_KEY,row.value);
+        localStorage.setItem(DB_KEY+'_ts',row.updated_at);
+        showToast('☁ 클라우드에서 동기화됨');
+      }catch(e){}
+    }
+    setSyncDot('ok'); onDone();
+  }).catch(function(){ setSyncDot('err'); onDone(); });
+}
+function migrate(){
+  allProjects.forEach(function(p,pi){
+    if(!p.color) p.color=COLORS[pi%COLORS.length];
+    if(!p.tasks) p.tasks=[];
+    p.tasks.forEach(function(t){
+      if(!t.end&&t.dur){ t.end=addDays(t.start,t.dur-1); }
+      if(!t.end&&!t.dur){ t.end=t.start; }
+    });
+    /* 중복 일정 제거: 같은 이름+시작일+종료일은 첫 번째만 유지 */
+    var seen={};
+    p.tasks=p.tasks.filter(function(t){
+      var key=(t.name||'')+'|'+(t.start||'')+'|'+(t.end||'');
+      if(seen[key]) return false;
+      seen[key]=true; return true;
+    });
+  });
+}
+
+function loadDB(){
+  try{ allProjects=JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }catch(e){ allProjects=[]; }
+  migrate();
+}
+function saveDB(){
+  try{ localStorage.setItem(DB_KEY,JSON.stringify(allProjects)); }catch(e){}
+  cloudPush();
+}
+
+/* ════ 링크 공유 ════ */
+function shareProject(){
+  var p=getProj(); if(!p){ showToast('현장을 먼저 선택해주세요'); return; }
+  autoSave();
+  var shareId = 'share_'+uid();
+  var payload = { info: p.info||{}, tasks: p.tasks||[], color: p.color||'#E65100', sharedAt: nowISO() };
+  showToast('링크 생성 중...');
+  fetch(SHARE_URL+'/rest/v1/daham_backup',{
+    method:'POST',
+    headers:{'apikey':SHARE_KEY,'Authorization':'Bearer '+SHARE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify({id:shareId,data:payload,updated_at:nowISO()})
+  }).then(function(r){
+    if(!r.ok){ showToast('공유 실패'); return; }
+    var _origin = (location.origin && location.origin !== 'null') ? location.origin : 'https://daham1.netlify.app';
+    var url = _origin + '/schedule-view.html?id=' + shareId;
+    openShareModal(url);
+  }).catch(function(){ showToast('공유 실패'); });
+}
+
+function openShareModal(url){
+  var ov = document.getElementById('share-overlay');
+  var inp = document.getElementById('share-url-input');
+  inp.value = url;
+  ov.style.display = 'flex';
+  setTimeout(function(){ inp.select(); },80);
+}
+function closeShareModal(){
+  document.getElementById('share-overlay').style.display='none';
+}
+function copyShareUrl(){
+  var inp = document.getElementById('share-url-input');
+  inp.select(); inp.setSelectionRange(0,9999);
+  try{
+    document.execCommand('copy');
+    showToast('✓ 링크 복사됐습니다 — 카톡에 붙여넣기 하세요');
+  }catch(e){
+    navigator.clipboard && navigator.clipboard.writeText(inp.value);
+    showToast('✓ 복사됐습니다');
+  }
+}
+
+/* ════ FORM ════ */
+function collectInfo(){
+  return {
+    name:    document.getElementById('f-name').value,
+    tel:     document.getElementById('f-tel').value,
+    addr:    document.getElementById('f-addr').value,
+    manager: document.getElementById('f-manager').value,
+    memo:    document.getElementById('f-memo').value,
+    start:   document.getElementById('f-start').value,
+    end:     document.getElementById('f-end').value
+  };
+}
+function applyInfo(info){
+  document.getElementById('f-name').value    = info.name    ||'';
+  document.getElementById('f-tel').value     = info.tel     ||'';
+  document.getElementById('f-addr').value    = info.addr    ||'';
+  document.getElementById('f-manager').value = info.manager ||'';
+  document.getElementById('f-memo').value    = info.memo    ||'';
+  document.getElementById('f-start').value   = info.start   ||'';
+  document.getElementById('f-end').value     = info.end     ||'';
+}
+function toggleInfo(){
+  var bd=document.getElementById('ip-bd');
+  var tg=document.getElementById('ip-toggle');
+  bd.classList.toggle('closed');
+  tg.textContent=bd.classList.contains('closed')?'▼':'▲';
+}
+
+/* ════ AUTOSAVE ════ */
+function autoSave(){
+  if(!currentId) return;
+  var p=getProj(); if(!p) return;
+  p.info=collectInfo();
+  p.updatedAt=nowISO();
+  saveDB(); flashDot();
+}
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(autoSave,600); }
+function flashDot(){
+  var d=document.getElementById('save-dot');
+  if(!d) return;
+  d.style.background='#43a047';
+  clearTimeout(d._t);
+  d._t=setTimeout(function(){ d.style.background='transparent'; },1800);
+}
+function getProj(){
+  for(var i=0;i<allProjects.length;i++){
+    if(allProjects[i].id===currentId) return allProjects[i];
+  }
+  return null;
+}
+
+/* ════ VIEW SWITCHING ════ */
+function showAllCalendar(){
+  autoSave();
+  currentId=null; calOffset=0;
+  document.getElementById('info-wrap').style.display='none';
+  document.getElementById('tb-add-btn').style.display='none';
+  document.getElementById('tb-phase-btn').style.display='none';
+  document.getElementById('tb-share-btn').style.display='none';
+  document.getElementById('tb-new-btn').style.display='inline-flex';
+  renderSidebar();
+  renderCalendar();
+}
+
+function openProject(id){
+  autoSave();
+  for(var i=0;i<allProjects.length;i++){
+    if(allProjects[i].id===id){
+      currentId=id; calOffset=0;
+      applyInfo(allProjects[i].info);
+      renderProjColorPicker(allProjects[i].color||COLORS[0]);
+      document.getElementById('info-wrap').style.display='block';
+      document.getElementById('tb-add-btn').style.display='inline-flex';
+      document.getElementById('tb-phase-btn').style.display='inline-flex';
+      document.getElementById('tb-share-btn').style.display='inline-flex';
+      document.getElementById('tb-new-btn').style.display='none';
+      renderSidebar();
+      renderCalendar();
+      document.getElementById('main-content').scrollTop=0;
+      return;
+    }
+  }
+}
+
+/* ════ SIDEBAR ════ */
+function renderSidebar(){
+  var total=0;
+  allProjects.forEach(function(p){ total+=(p.tasks||[]).length; });
+
+  var allItem=document.getElementById('sb-all');
+  if(allItem) allItem.className='sb-item'+(currentId===null?' active':'');
+  var cntEl=document.getElementById('sb-all-cnt');
+  if(cntEl) cntEl.textContent=total?total+'건':'';
+
+  var list=document.getElementById('sb-proj-list');
+  if(!list) return;
+  var h='';
+  allProjects.forEach(function(p){
+    var active=p.id===currentId;
+    var cnt=(p.tasks||[]).length;
+    var name=esc((p.info&&p.info.name)||'현장명 미입력');
+    var color=p.color||COLORS[0];
+    h+='<button class="sb-item'+(active?' active':'')+'" '
+      +'onclick="openProject(\''+p.id+'\')" '
+      +'style="border-left-color:'+(active?color:'transparent')+'">'
+      +'<span class="sb-dot" style="background:'+color+'"></span>'
+      +'<span style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">'+name+'</span>'
+      +'<span class="sb-cnt">'+cnt+'</span>'
+      +'</button>';
+  });
+  if(!allProjects.length){
+    h='<div style="padding:8px 12px;font-size:11px;color:var(--dim)">현장이 없습니다</div>';
+  }
+  list.innerHTML=h;
+}
+
+/* ════ PROJECT CRUD ════ */
+function newProject(){
+  var p={
+    id:uid(), createdAt:nowISO(), updatedAt:nowISO(),
+    color: COLORS[allProjects.length%COLORS.length],
+    info:{name:'',tel:'',addr:'',manager:'최일성',memo:'',start:'',end:''},
+    tasks:[]
+  };
+  allProjects.unshift(p);
+  saveDB();
+  openProject(p.id);
+  setTimeout(function(){ var el=document.getElementById('f-name'); if(el) el.focus(); },120);
+}
+function deleteCurrentProject(){
+  if(!currentId) return;
+  dahamConfirm('이 현장을 삭제하시겠습니까?', function(){
+    allProjects=allProjects.filter(function(p){ return p.id!==currentId; });
+    saveDB();
+    showAllCalendar();
+    showToast('✓ 현장 삭제 완료');
+  });
+}
+
+/* ════ 기본 공정 불러오기 ════ */
+function loadDefaultPhases(){
+  var p=getProj(); if(!p) return;
+  var startDate=document.getElementById('f-start').value||(p.info&&p.info.start)||'';
+  if(!startDate){
+    showToast('착공일을 먼저 입력해주세요');
+    document.getElementById('f-start').focus();
+    return;
+  }
+  function doLoad(){
+    var estData=getEstimateData(p);
+    var newTasks=buildDefaultTasks(startDate, estData?estData.sectionTotals:null, estData?estData.floorType:null);
+    p.tasks=newTasks; /* 기존 일정 교체 */
+    p.updatedAt=nowISO();
+    saveDB(); flashDot();
+    renderCalendar();
+    renderSidebar();
+    var msg=estData
+      ? '✓ 견적서 기준 공정 '+newTasks.length+'개로 설정됐습니다'
+      : '✓ 기본 공정 '+newTasks.length+'개로 설정됐습니다';
+    showToast(msg);
+  }
+  if(p.tasks&&p.tasks.length>0){
+    dahamConfirm('기존 일정('+p.tasks.length+'개)이 삭제되고\n기본 공정으로 교체됩니다.\n계속하시겠습니까?', doLoad);
+  } else {
+    doLoad();
+  }
+}
+
+/* ════ INFO / DATE CHANGE ════ */
+function onDateChange(){ autoSave(); renderCalendar(); }
+function onInfoInput(){
+  var el=document.getElementById('f-name');
+  renderSidebar();
+  scheduleSave();
+}
+
+/* ════ PROJECT COLOR ════ */
+function renderProjColorPicker(selected){
+  var el=document.getElementById('proj-color-row');
+  if(!el) return;
+  var h='';
+  COLORS.forEach(function(c){
+    h+='<div onclick="setProjectColor(\''+c+'\')" style="'
+      +'width:22px;height:22px;border-radius:50%;background:'+c+';cursor:pointer;flex-shrink:0;'
+      +'border:3px solid '+(c===selected?'var(--ink)':'transparent')+';'
+      +'transition:transform .12s" '
+      +'onmouseover="this.style.transform=\'scale(1.2)\'" '
+      +'onmouseout="this.style.transform=\'scale(1)\'"></div>';
+  });
+  el.innerHTML=h;
+}
+function setProjectColor(c){
+  var p=getProj(); if(!p) return;
+  p.color=c; saveDB(); flashDot();
+  renderProjColorPicker(c);
+  renderSidebar();
+  renderCalendar();
+}
+
+/* ════ CALENDAR ════ */
+function shiftCal(n){ calOffset+=n; renderCalendar(); }
+
+function getBaseMonth(){
+  var base;
+  if(currentId){
+    var p=getProj();
+    base=(p&&p.info&&p.info.start)?p.info.start:todayStr();
+  } else {
+    base=todayStr();
+  }
+  var d=new Date(base+'T00:00:00');
+  if(isNaN(d.getTime())) d=new Date(); /* 잘못된 날짜 형식이면 오늘로 대체 */
+  var y=d.getFullYear(), m=d.getMonth()+calOffset;
+  while(m>11){ m-=12; y++; }
+  while(m<0){ m+=12; y--; }
+  return {year:y, month:m};
+}
+
+function getWeeksForMonth(year, month){
+  var weeks=[], first=new Date(year,month,1), last=new Date(year,month+1,0);
+  var cur=new Date(first);
+  cur.setDate(cur.getDate()-cur.getDay());
+  var guard=0;
+  while(guard++<12){
+    var week=[];
+    for(var d=0;d<7;d++){ week.push(new Date(cur)); cur.setDate(cur.getDate()+1); }
+    weeks.push(week);
+    if(cur>last&&cur.getDay()===0) break;
+  }
+  return weeks;
+}
+
+function dstr(d){
+  return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+}
+function hexToRgba(hex,a){
+  hex=hex.replace('#','');
+  if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+
+var _calRenderPending=false;
+function renderCalendar(){
+  if(_calRenderPending) return;
+  _calRenderPending=true;
+  requestAnimationFrame(function(){ _calRenderPending=false; _doRenderCalendar(1); });
+}
+function printCalendar(){
+  _doRenderCalendar(2);
+  window.print();
+  _doRenderCalendar(1);
+}
+function _doRenderCalendar(numMonths){
+  var container=document.getElementById('cal-area');
+  if(!container) return;
+  var base=getBaseMonth();
+  var today=todayStr();
+
+  // nav title — 1개월 표시
+  var navEl=document.getElementById('cal-nav-title');
+  if(navEl) navEl.textContent=base.year+'년 '+MONTH_KO[base.month];
+
+  var html='';
+
+  if(currentId){
+    // ── Individual project view ──
+    document.getElementById('proj-legend').innerHTML='';
+    var p=getProj();
+    var pc=p?p.color||COLORS[0]:COLORS[0];
+    var tasks=(p&&p.tasks)?p.tasks.map(function(t){
+      return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,
+              status:t.status||'planned',color:pc};
+    }):[];
+    for(var mi=0;mi<numMonths;mi++){
+      var mo=base.month+mi, yr=base.year;
+      while(mo>11){ mo-=12; yr++; }
+      html+=renderMonth(yr, mo, tasks, today, true);
+    }
+  } else {
+    // ── All-projects view ──
+    var legendEl=document.getElementById('proj-legend');
+    var lh='';
+    allProjects.forEach(function(p){
+      var pc=p.color||COLORS[0];
+      var name=esc((p.info&&p.info.name)||'현장명 미입력');
+      var cnt=(p.tasks||[]).length;
+      lh+='<div onclick="openProject(\''+p.id+'\')" style="'
+        +'display:flex;align-items:center;gap:7px;padding:5px 12px;'
+        +'background:var(--white);border:1.5px solid '+pc+';cursor:pointer;'
+        +'font-size:11px;font-weight:600;border-radius:20px;transition:background .12s" '
+        +'onmouseover="this.style.background=\''+pc+'22\'" '
+        +'onmouseout="this.style.background=\'var(--white)\'">'
+        +'<span style="width:11px;height:11px;border-radius:50%;background:'+pc
+        +';display:inline-block;flex-shrink:0"></span>'
+        +name
+        +'<span style="font-weight:400;color:var(--dim);font-size:10px">'+cnt+'건</span>'
+        +'</div>';
+    });
+    legendEl.innerHTML=lh||'<span style="font-size:11px;color:var(--dim)">현장을 추가하면 일정이 표시됩니다</span>';
+
+    var allTasks=[];
+    allProjects.forEach(function(p){
+      var pc=p.color||COLORS[0];
+      (p.tasks||[]).forEach(function(t){
+        allTasks.push({id:t.id,name:t.name||'',start:t.start,end:t.end||t.start,
+          color:pc,status:t.status||'planned',
+          projName:(p.info&&p.info.name)||'현장명 미입력',projId:p.id});
+      });
+    });
+    for(var mi=0;mi<numMonths;mi++){
+      var mo=base.month+mi, yr=base.year;
+      while(mo>11){ mo-=12; yr++; }
+      html+=renderMonth(yr, mo, allTasks, today, false);
+    }
+  }
+
+  container.innerHTML=html;
+}
+
+function renderMonth(year, month, tasks, today, isProject){
+  var weeks=getWeeksForMonth(year, month);
+  var LANE_H=28, LANE_PAD=3;
+
+  var monthStart=dstr(new Date(year,month,1));
+  var monthEnd=dstr(new Date(year,month+1,0));
+  var weekData=weeks.map(function(week){
+    var weekStart=dstr(week[0]), weekEnd=dstr(week[6]);
+    var clampStart=weekStart<monthStart?monthStart:weekStart;
+    var clampEnd=weekEnd>monthEnd?monthEnd:weekEnd;
+    var bars=[];
+    tasks.forEach(function(t){
+      var ts=t.start, te=t.end||t.start;
+      if(ts>clampEnd||te<clampStart) return;
+      var bs=ts<clampStart?clampStart:ts;
+      var be=te>clampEnd?clampEnd:te;
+      var bsD=new Date(bs+'T00:00:00'), beD=new Date(be+'T00:00:00');
+      var sc=bsD.getDay();
+      var ec=beD.getDay();
+      bars.push({id:t.id,name:t.name,color:t.color||COLORS[0],
+        status:t.status,projName:t.projName||'',projId:t.projId||'',
+        startCol:sc,endCol:ec,isCont:ts<weekStart,isCont2:te>weekEnd});
+    });
+    bars.sort(function(a,b){ return a.startCol-b.startCol; });
+    var laneEnd=[];
+    bars.forEach(function(bar){
+      var lane=0;
+      while(laneEnd[lane]!==undefined&&laneEnd[lane]>=bar.startCol) lane++;
+      laneEnd[lane]=bar.endCol; bar.lane=lane;
+    });
+    return {bars:bars,numLanes:laneEnd.length||0};
+  });
+
+  var hasTasks=weekData.some(function(wd){ return wd.bars.length>0; });
+  var html='<div class="cal-month'+(hasTasks?' has-tasks':'')+'">';
+  html+='<div class="cal-mhd">'+year+'년 '+MONTH_KO[month]+'</div>';
+  html+='<div class="cal-wdhd-row">';
+  ['sun','','','','','','sat'].forEach(function(cls,i){
+    html+='<div class="cal-wdhd '+cls+'">'+DOW_KO[i]+'</div>';
+  });
+  html+='</div>';
+
+  weeks.forEach(function(week,wi){
+    var wd=weekData[wi];
+    html+='<div class="cal-week-group"><div class="cal-drow">';
+    week.forEach(function(day,di){
+      var ds=dstr(day);
+      var holi=getHoliday(ds);
+      var cls='cal-day'+(ds===today?' today':'')+(day.getMonth()!==month?' other-m':'')
+        +(di===0?' sun':di===6?' sat':'')+(holi?' holiday':'');
+      var clickFn=isProject?'dayClick(\''+ds+'\')':'dayClickAll(\''+ds+'\')';
+      var isOther=day.getMonth()!==month;
+      html+='<div class="'+cls+'" onclick="'+clickFn+'">'
+        +(isOther?'':'<div class="cal-dn">'+day.getDate()+'</div>'
+        +(holi?'<div class="cal-holi">'+esc(holi)+'</div>':''))
+        +'</div>';
+    });
+    html+='</div>';
+
+    var tRowH=wd.numLanes>0?(wd.numLanes*LANE_H+LANE_PAD*2):6;
+    html+='<div class="cal-trow" style="height:'+tRowH+'px">';
+    wd.bars.forEach(function(bar){
+      var span=bar.endCol-bar.startCol+1;
+      var lPct=(bar.startCol/7*100).toFixed(3);
+      var wPct=(span/7*100).toFixed(3);
+      var top=bar.lane*LANE_H+LANE_PAD;
+      var rL=bar.isCont?'0':'5px', rR=bar.isCont2?'0':'5px';
+      var clsDone=bar.status==='done'?' done':'';
+      var pL=bar.isCont?'3px':'8px';
+      var label, clickFn;
+      if(isProject){
+        label=bar.isCont?'':esc(bar.name);
+        clickFn='editTaskById(\''+bar.id+'\')';
+      } else {
+        label=bar.isCont?'':
+          '<span style="opacity:.75;font-size:8px;margin-right:3px">'+esc(bar.projName)+'</span>'+esc(bar.name);
+        clickFn='goToProjectTask(\''+bar.projId+'\',\''+bar.id+'\')';
+      }
+      var bgColor=hexToRgba(bar.color||'#555',0.75);
+      html+='<div class="cbar'+clsDone+'" style="left:calc('+lPct+'% + 1px);width:calc('+wPct
+        +'% - 2px);top:'+top+'px;background:'+bgColor+';border-left:3px solid '+bar.color+';border-radius:'+rL+' '+rR+' '+rR+' '+rL
+        +';padding-left:'+pL+'" onclick="event.stopPropagation();'+clickFn+'">'+label+'</div>';
+    });
+    html+='</div></div>';
+  });
+
+  html+='</div>';
+  return html;
+}
+
+/* ════ DAY CLICK ════ */
+function dayClick(dateStr){ openTaskModal(null, dateStr); }
+
+function dayClickAll(dateStr){
+  if(!allProjects.length) return;
+  if(allProjects.length===1){
+    openProject(allProjects[0].id);
+    setTimeout(function(){ openTaskModal(null,dateStr); },80);
+    return;
+  }
+  pendingDate=dateStr;
+  showProjPick();
+}
+
+/* ════ PROJECT PICKER ════ */
+function showProjPick(){
+  var list=document.getElementById('proj-pick-list');
+  if(!list) return;
+  var h='';
+  allProjects.forEach(function(p){
+    var pc=p.color||COLORS[0];
+    h+='<button onclick="pickProj(\''+p.id+'\')" style="display:flex;align-items:center;gap:10px;'
+      +'padding:10px 14px;background:var(--white);border:1.5px solid var(--line);cursor:pointer;'
+      +'font-family:var(--sans);font-size:13px;font-weight:600;text-align:left;width:100%;'
+      +'transition:border-color .12s" '
+      +'onmouseover="this.style.borderColor=\''+pc+'\'" '
+      +'onmouseout="this.style.borderColor=\'var(--line)\'">'
+      +'<span style="width:14px;height:14px;border-radius:50%;background:'+pc
+      +';flex-shrink:0;display:inline-block"></span>'
+      +esc((p.info&&p.info.name)||'현장명 미입력')+'</button>';
+  });
+  document.getElementById('proj-pick-list').innerHTML=h;
+  document.getElementById('proj-pick-modal').classList.add('open');
+}
+function closeProjPick(){
+  document.getElementById('proj-pick-modal').classList.remove('open');
+}
+function pickProj(projId){
+  var d=pendingDate; pendingDate=null;
+  closeProjPick();
+  openProject(projId);
+  setTimeout(function(){ openTaskModal(null,d||todayStr()); },80);
+}
+
+/* ════ TASK MODAL ════ */
+function editTaskById(id){ openTaskModal(id,null); }
+function editTask(ev,id){ if(ev) ev.stopPropagation(); editTaskById(id); }
+
+function openTaskModal(id,defaultDate){
+  var p=getProj(); if(!p) return;
+  editTaskId=id;
+  if(id){
+    var task=null;
+    for(var i=0;i<p.tasks.length;i++){
+      if(p.tasks[i].id===id){ task=p.tasks[i]; break; }
+    }
+    if(!task) return;
+    document.getElementById('modal-title').textContent='일정 편집';
+    document.getElementById('modal-date-hint').textContent='';
+    document.getElementById('m-name').value  =task.name   ||'';
+    document.getElementById('m-start').value =task.start  ||'';
+    document.getElementById('m-end').value   =task.end    ||task.start||'';
+    document.getElementById('m-worker').value=task.worker ||'';
+    document.getElementById('m-status').value=task.status ||'planned';
+    document.getElementById('modal-del-btn').style.display='inline-flex';
+  } else {
+    var startDate=defaultDate||todayStr();
+    document.getElementById('modal-title').textContent='일정 추가';
+    document.getElementById('modal-date-hint').textContent=
+      defaultDate?fmtDate(defaultDate)+' 시작':'';
+    document.getElementById('m-name').value  ='';
+    document.getElementById('m-start').value =startDate;
+    document.getElementById('m-end').value   =startDate;
+    document.getElementById('m-worker').value='';
+    document.getElementById('m-status').value='planned';
+    document.getElementById('modal-del-btn').style.display='none';
+  }
+  document.getElementById('task-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('m-name').focus(); },60);
+}
+function closeTaskModal(){
+  document.getElementById('task-modal').classList.remove('open');
+  editTaskId=null;
+}
+function saveTask(){
+  var p=getProj();
+  if(!p){ showToast('⚠ 현장을 먼저 선택하세요'); return; }
+  if(!p.tasks) p.tasks=[];
+  var name  =document.getElementById('m-name').value.trim();
+  var start =document.getElementById('m-start').value;
+  var end   =document.getElementById('m-end').value;
+  var worker=document.getElementById('m-worker').value.trim();
+  var status=document.getElementById('m-status').value;
+  if(!name){ showToast('⚠ 작업명을 입력하세요'); return; }
+  if(!start){ showToast('⚠ 시작일을 입력하세요'); return; }
+  if(!end||end<start) end=start;
+  if(editTaskId){
+    for(var i=0;i<p.tasks.length;i++){
+      if(p.tasks[i].id===editTaskId){
+        p.tasks[i].name=name; p.tasks[i].start=start; p.tasks[i].end=end;
+        p.tasks[i].worker=worker; p.tasks[i].status=status;
+        break;
+      }
+    }
+    showToast('✓ 수정 완료');
+  } else {
+    p.tasks.push({id:uid(),name:name,start:start,end:end,worker:worker,status:status});
+    showToast('✓ 일정 추가');
+  }
+  p.updatedAt=nowISO();
+  saveDB(); flashDot();
+  closeTaskModal();
+  renderCalendar();
+  renderSidebar();
+}
+function deleteTask(){
+  var p=getProj(); if(!p||!editTaskId) return;
+  var taskId=editTaskId;
+  dahamConfirm('이 일정을 삭제하시겠습니까?', function(){
+    p.tasks=p.tasks.filter(function(t){ return t.id!==taskId; });
+    p.updatedAt=nowISO();
+    saveDB(); flashDot();
+    closeTaskModal();
+    renderCalendar();
+    renderSidebar();
+    showToast('✓ 삭제 완료');
+  });
+}
+
+/* ════ 계약완료 프로젝트 자동 동기화 ════ */
+function syncContractedProjects(){
+  var estProjects;
+  try{ estProjects=JSON.parse(localStorage.getItem('daham_detail_v2')||'[]'); }catch(e){ return; }
+
+  var linked={};
+  allProjects.forEach(function(p){ if(p.estimateId) linked[p.estimateId]=p; });
+
+  var added=0, updated=0;
+  estProjects.forEach(function(ep){
+    if(!ep.contracted) return;
+    var c=ep.client||{};
+    var newName=c['cl-name']||c['cl-addr']||'';
+    var newAddr=c['cl-addr']||'';
+
+    if(linked[ep.id]){
+      // 현장명/주소가 바뀐 경우 업데이트
+      var sp=linked[ep.id];
+      if(sp.info&&(sp.info.name!==newName||sp.info.addr!==newAddr)){
+        sp.info.name=newName;
+        sp.info.addr=newAddr;
+        sp.updatedAt=nowISO();
+        updated++;
+      }
+      return;
+    }
+
+    var startD=c['cl-start']||'';
+    var color=COLORS[Math.floor(Math.random()*COLORS.length)];
+    allProjects.push({
+      id:uid(), createdAt:nowISO(), updatedAt:nowISO(),
+      estimateId:ep.id, color:color,
+      info:{name:newName,tel:c['cl-tel']||'',addr:newAddr,
+            manager:'최일성',memo:'',start:startD,end:c['cl-end']||''},
+      tasks:[]
+    });
+    added++;
+  });
+
+  if(added>0||updated>0){ saveDB(); }
+  if(added>0){ showToast('✓ 계약완료 현장 '+added+'건이 일정표에 등록됐습니다'); }
+}
+
+/* ════ NAVIGATE TO TASK ════ */
+function goToProjectTask(projId,taskId){
+  openProject(projId);
+  setTimeout(function(){ editTaskById(taskId); },80);
+}
+
+/* ════ CLOSE MODALS ON BG ════ */
+document.getElementById('task-modal').addEventListener('click',function(e){
+  if(e.target===this) closeTaskModal();
+});
+document.getElementById('proj-pick-modal').addEventListener('click',function(e){
+  if(e.target===this) closeProjPick();
+});
+
+/* ════ BOOT ════ */
+(function(){
+  initCloud();
+  loadDB();
+  var imp=localStorage.getItem('daham_schedule_import');
+  if(imp){
+    try{
+      var d=JSON.parse(imp);
+      localStorage.removeItem('daham_schedule_import');
+      if(d.name||d.addr){
+        var startD=d.start||'';
+        var p={
+          id:uid(), createdAt:nowISO(), updatedAt:nowISO(),
+          estimateId: d.estimateId||null,
+          color: COLORS[allProjects.length%COLORS.length],
+          info:{name:d.name||'',tel:d.tel||'',addr:d.addr||'',
+                manager:'최일성',memo:'',start:startD,end:d.end||''},
+          tasks:[]
+        };
+        allProjects.unshift(p);
+        saveDB();
+        openProject(p.id);
+        showToast('✓ 견적서 정보로 일정표를 생성했습니다');
+        return;
+      }
+    }catch(e){}
+  }
+  cloudPull(function(){
+    syncContractedProjects();
+    renderSidebar();
+    showAllCalendar();
+  });
+}());
+</script>
+
+<nav class="mobile-nav">
+  <a href="index.html"><span class="mn-icon">🏠</span><span class="mn-label">홈</span></a>
+  <a href="schedule.html" class="active"><span class="mn-icon">📅</span><span class="mn-label">일정</span></a>
+  <a href="consult.html"><span class="mn-icon">💬</span><span class="mn-label">상담</span></a>
+  <a href="contacts.html"><span class="mn-icon">👷</span><span class="mn-label">거래처</span></a>
+  <a href="as.html"><span class="mn-icon">🔧</span><span class="mn-label">A/S</span></a>
+</nav>
+<script src="auth.js"></script>
+
+<script>
+(function(){
+  const KEY='daham_workflow_v1';
+  const now=()=>new Date().toISOString();
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{"projects":{}}')}catch(e){return {projects:{}}}};
+  const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
+  const pid=()=>localStorage.getItem('daham_current_project')||new URLSearchParams(location.search).get('project')||'default';
+  window.DAHAM_WORKFLOW={
+    getProject(){const d=load(), id=pid(); return (d.projects[id] ||= {id,updatedAt:now(),estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]})},
+    update(mut){const d=load(),id=pid(); const p=(d.projects[id] ||= {id,estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]}); mut(p); p.updatedAt=now(); save(d); return p},
+    syncEstimate(items){return this.update(p=>{p.estimateItems=items||[]})},
+    syncSchedule(items){return this.update(p=>{p.scheduleItems=items||[]})},
+    syncOrders(items){return this.update(p=>{p.orderItems=items||[]})},
+    key:KEY
+  };
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DAHAM — 로그인</title>
+<style>
+:root{
+  --navy:#001c43;
+  --navy2:#03234e;
+  --ink:#071f45;
+  --muted:#9aa6bc;
+  --line:#d7ddea;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;background:#fff;color:var(--ink)}
+body{min-height:100vh;overflow-x:hidden}
+.login-shell{min-height:100vh;display:grid;grid-template-columns:55.2% 44.8%;background:#fff}
+.visual{
+  min-height:100vh;
+  background-image:url('login-bg.png');
+  background-size:cover;
+  background-position:center center;
+  background-repeat:no-repeat;
+}
+.panel{min-height:100vh;position:relative;display:flex;flex-direction:column;background:#fff}
+.brand-top{position:absolute;top:40px;left:0;right:0;text-align:center;font-size:13px;font-weight:700;letter-spacing:.33em;color:#0b2348;white-space:nowrap}
+.login-center{width:min(470px,calc(100% - 72px));margin:auto;padding:108px 0 138px}
+.welcome{font-size:18px;color:#98a4ba;margin:0 0 6px;text-align:center;font-weight:400}
+h1{font-size:48px;line-height:1.05;letter-spacing:-.04em;margin:0 0 50px;text-align:center;color:#001d45;font-weight:800}
+.field{margin-bottom:25px}
+.field label{display:block;font-size:14px;font-weight:700;color:#142c50;margin:0 0 10px 2px}
+.input-wrap{height:60px;border:1px solid #c8cfdd;border-radius:7px;display:flex;align-items:center;background:#fff;transition:.18s ease}
+.input-wrap:focus-within{border-color:#7e8da8;box-shadow:0 0 0 3px rgba(10,42,83,.05)}
+.icon{width:22px;height:22px;margin-left:20px;flex:0 0 auto;color:#9aa7bd}
+.input-wrap input{min-width:0;flex:1;border:0;outline:0;height:100%;padding:0 16px;font-size:15px;color:#132946;background:transparent;font-family:inherit}
+.input-wrap input::placeholder{color:#b4bdcd}
+.eye{border:0;background:transparent;width:56px;height:100%;display:grid;place-items:center;cursor:pointer;color:#92a0b8;padding:0}
+.eye svg{width:22px;height:22px}
+.btn{width:100%;height:60px;border:0;border-radius:6px;background:linear-gradient(100deg,#001d43,#032854);color:#fff;font-size:17px;font-weight:700;letter-spacing:.08em;cursor:pointer;margin-top:5px;box-shadow:0 7px 16px rgba(0,28,67,.08)}
+.btn:hover{filter:brightness(1.04)}
+.btn:active{transform:translateY(1px)}
+.msg{min-height:21px;margin-top:10px;text-align:center;font-size:13px;color:#c62828}
+.help{display:flex;align-items:center;gap:14px;margin-top:13px;color:#8793aa;font-size:14px;justify-content:center;white-space:nowrap}
+.help:before,.help:after{content:"";height:1px;background:#d5dbe6;flex:1}
+.help-icon{width:19px;height:19px;flex:0 0 auto}
+.footer{position:absolute;left:0;right:0;bottom:0;height:84px;border-top:1px solid #e4e8ef;display:grid;place-items:center;color:#98a3b7;font-size:12px;letter-spacing:.25em;white-space:nowrap}
+@media(max-width:980px){
+  .login-shell{grid-template-columns:1fr}
+  .visual{display:none}
+  .panel{min-height:100vh}
+  .login-center{width:min(470px,calc(100% - 40px));padding-top:120px}
+  .brand-top{top:32px;font-size:11px}
+}
+@media(max-width:520px){
+  .login-center{width:calc(100% - 32px);padding:105px 0 110px}
+  h1{font-size:39px;margin-bottom:38px}
+  .welcome{font-size:16px}
+  .input-wrap,.btn{height:56px}
+  .help{font-size:12px;gap:10px}
+  .footer{height:66px;font-size:10px}
+}
+</style>
+</head>
+<body>
+<div class="login-shell">
+  <section class="visual" aria-label="DAHAM INTERIOR COMPANY"></section>
+  <main class="panel">
+    <div class="brand-top">DAHAM INTERIOR COMPANY</div>
+    <div class="login-center">
+      <p class="welcome">Welcome Back</p>
+      <h1>로그인</h1>
+      <form id="form" novalidate>
+        <div class="field">
+          <label for="username">아이디</label>
+          <div class="input-wrap">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path></svg>
+            <input id="username" autocomplete="username" placeholder="이메일 아이디를 입력하세요" required autofocus>
+          </div>
+        </div>
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <div class="input-wrap">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+            <input id="password" type="password" autocomplete="current-password" placeholder="비밀번호를 입력하세요" required>
+            <button class="eye" id="togglePassword" type="button" aria-label="비밀번호 보기">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.7"></circle></svg>
+            </button>
+          </div>
+        </div>
+        <button class="btn" type="submit">로그인</button>
+        <div class="msg" id="msg"></div>
+      </form>
+      <div class="help">
+        <svg class="help-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 13v-2a8 8 0 0 1 16 0v2"></path><path d="M4 13h2.5v5H5a1 1 0 0 1-1-1v-4Zm16 0h-2.5v5H19a1 1 0 0 0 1-1v-4Z"></path><path d="M17.5 18c-.8 2-2.6 3-5.5 3"></path></svg>
+        <span>계정 문의는 관리자에게 연락하세요</span>
+      </div>
+    </div>
+    <footer class="footer">© DAHAM INTERIOR COMPANY</footer>
+  </main>
+</div>
+<script src="auth.js"></script>
+<script>
+const form=document.getElementById('form');
+const username=document.getElementById('username');
+const password=document.getElementById('password');
+const msg=document.getElementById('msg');
+const togglePassword=document.getElementById('togglePassword');
+
+// 기존 계정 생성/로그인 구조는 그대로 유지합니다.
+(async()=>{if(!await DAHAM_AUTH.hasAccount()) location.replace('signup.html');})();
+
+togglePassword.addEventListener('click',()=>{
+  const show=password.type==='password';
+  password.type=show?'text':'password';
+  togglePassword.setAttribute('aria-label',show?'비밀번호 숨기기':'비밀번호 보기');
+});
+
+form.addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  msg.textContent='';
+  try{
+    await DAHAM_AUTH.login(username.value,password.value);
+    location.href='index.html';
+  }catch(err){
+    msg.textContent=err && err.message ? err.message : '로그인에 실패했습니다.';
+  }
+});
+</script>
+</body>
+</html>

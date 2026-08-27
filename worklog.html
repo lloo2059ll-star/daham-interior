@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DAHAM — 업무일지</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#E65100">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="다함">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-dk:#BF360C;--orange-lt:#FFF3EE;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;--line:#e0e0e0;--line-lt:#f5f5f5;
+  --bg:#f2f2f2;--white:#fff;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13px;min-height:100vh}
+
+/* ── TOOLBAR ── */
+.toolbar{position:sticky;top:0;z-index:100;height:48px;padding:0 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:2px solid var(--orange);box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.14em;color:var(--orange)}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-right{display:flex;align-items:center;gap:6px}
+.tb-btn{font-family:var(--sans);font-size:11px;font-weight:600;padding:6px 14px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .15s;
+  text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.tb-btn:hover{border-color:var(--ink);color:var(--ink)}
+.tb-btn.primary{border-color:var(--orange);background:var(--orange);color:#fff}
+.tb-btn.primary:hover{background:var(--orange-dk)}
+
+/* ════════════════════
+   CARD VIEW (목록)
+════════════════════ */
+#card-view{max-width:960px;margin:0 auto;padding:28px 16px 80px}
+.cv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.cv-title{font-size:20px;font-weight:800}
+.cv-sub{font-size:12px;color:var(--dim);margin-top:3px}
+
+.proj-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+
+/* 전체 보기 카드 */
+.card-all{background:var(--white);border:1px solid var(--line);border-top:3px solid var(--ink);
+  padding:22px 20px 18px;cursor:pointer;transition:all .15s;position:relative}
+.card-all:hover{border-top-color:var(--orange);box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateY(-2px)}
+
+/* 현장 카드 */
+.proj-card{background:var(--white);border:1px solid var(--line);border-top:3px solid var(--line);
+  padding:22px 20px 18px;cursor:pointer;transition:all .15s;position:relative}
+.proj-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.09);transform:translateY(-2px)}
+
+.pc-badge{font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 8px;
+  color:#fff;display:inline-block;margin-bottom:10px}
+.pc-name{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:4px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-addr{font-size:11px;color:var(--mid);margin-bottom:12px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pc-stats{display:flex;gap:16px;margin-bottom:14px}
+.pc-stat{text-align:center}
+.pc-stat-n{font-size:20px;font-weight:800;font-family:'Bebas Neue',sans-serif;line-height:1}
+.pc-stat-l{font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:.04em}
+.pc-foot{display:flex;align-items:center;justify-content:space-between;
+  border-top:1px solid var(--line-lt);padding-top:10px;margin-top:4px}
+.pc-last{font-size:10px;color:var(--dim)}
+.pc-enter{font-family:var(--sans);font-size:10px;font-weight:600;padding:4px 12px;
+  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--mid);
+  transition:all .12s}
+.pc-enter:hover{border-color:var(--orange);color:var(--orange)}
+
+/* 새 현장 없음 */
+.cv-empty{text-align:center;padding:56px 20px;color:var(--dim);font-size:12px;
+  line-height:2;background:#fff;border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);grid-column:1/-1}
+
+/* ════════════════════
+   LOG VIEW (상세)
+════════════════════ */
+#log-view{display:none}
+
+/* 현장 정보 헤더 */
+.proj-hd{padding:18px 16px 16px;background:#fff;border-bottom:1.5px solid var(--line);margin-bottom:0}
+.proj-hd-inner{max-width:900px;margin:0 auto;display:flex;align-items:flex-start;
+  gap:16px;flex-wrap:wrap}
+.proj-hd-info{flex:1;min-width:0}
+.proj-hd-name{font-size:16px;font-weight:800;margin-bottom:4px}
+.proj-hd-meta{font-size:11px;color:var(--mid);line-height:1.8}
+.proj-hd-stats{display:flex;gap:16px;flex-shrink:0}
+.phs{text-align:center}
+.phs-n{font-size:22px;font-weight:800;font-family:'Bebas Neue',sans-serif;line-height:1}
+.phs-l{font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:.04em}
+
+.lv-main{max-width:900px;margin:0 auto;padding:20px 16px 100px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:#fff;border-radius:10px;padding:12px 8px;text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer;border:2px solid transparent;transition:all .15s}
+.stat:hover{border-color:rgba(230,81,0,.3)}
+.stat.active{border-color:var(--orange)}
+.stat-n{font-size:22px;font-weight:800;font-family:'Bebas Neue',sans-serif;line-height:1;color:var(--orange)}
+.stat-l{font-size:10px;font-weight:700;color:var(--dim);margin-top:3px}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.month-nav{display:flex;align-items:center;gap:5px}
+.month-btn{font-family:var(--sans);font-size:11px;font-weight:600;padding:5px 10px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .12s}
+.month-btn:hover{border-color:var(--orange);color:var(--orange)}
+.month-label{font-size:12px;font-weight:700;color:var(--ink);min-width:78px;text-align:center}
+.all-toggle{font-family:var(--sans);font-size:11px;font-weight:600;padding:5px 10px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .12s}
+.all-toggle.active{border-color:var(--orange);color:var(--orange);background:var(--orange-lt)}
+.all-toggle:hover{border-color:var(--orange);color:var(--orange)}
+.search-input{font-family:var(--sans);font-size:12px;border:1.5px solid var(--line);
+  padding:6px 10px;outline:none;flex:1;min-width:160px;color:var(--ink);background:#fff}
+.search-input:focus{border-color:var(--orange)}
+.visit-filter{display:flex;gap:4px}
+.vf-btn{font-family:var(--sans);font-size:10px;font-weight:600;padding:4px 10px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .12px;border-radius:20px}
+.vf-btn.active{border-color:var(--orange);background:var(--orange);color:#fff}
+.vf-btn:hover{border-color:var(--orange);color:var(--orange)}
+
+/* DATE GROUP */
+.date-group{margin-bottom:24px}
+.date-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.date-hd-label{font-size:12px;font-weight:800;color:var(--ink)}
+.date-hd-dow{font-size:11px;color:var(--dim)}
+.date-hd-add{font-family:var(--sans);font-size:10px;font-weight:600;padding:3px 10px;
+  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--mid);
+  transition:all .12s;border-radius:20px;display:inline-flex;align-items:center;gap:3px}
+.date-hd-add:hover{border-color:var(--orange);color:var(--orange)}
+.date-hd-line{flex:1;height:1px;background:var(--line)}
+
+/* LOG CARD */
+.log-card{background:#fff;border-radius:8px;padding:14px 16px;margin-bottom:8px;
+  box-shadow:0 1px 6px rgba(0,0,0,.05);border:1.5px solid transparent;
+  border-left:3px solid var(--orange);transition:border-color .12s}
+.log-card:hover{border-color:rgba(230,81,0,.2);border-left-color:var(--orange)}
+.log-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.log-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.log-proj-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
+.log-worker{font-size:11px;color:var(--mid)}
+.visit-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;flex-shrink:0}
+.vb-visit{background:#E8F5E9;color:#2E7D32}
+.vb-remote{background:#E3F2FD;color:#1565C0}
+.vb-none{background:#F5F5F5;color:#757575}
+.log-content{font-size:13px;color:var(--ink);line-height:1.7;white-space:pre-wrap;margin-bottom:8px}
+.log-photos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.log-thumb{width:72px;height:72px;object-fit:cover;border-radius:6px;
+  cursor:pointer;border:1.5px solid var(--line);transition:border-color .12s}
+.log-thumb:hover{border-color:var(--orange)}
+.log-card-actions{display:flex;gap:5px;justify-content:flex-end}
+.act-btn{font-family:var(--sans);font-size:10px;font-weight:600;padding:3px 10px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .12s}
+.act-btn:hover{border-color:var(--orange);color:var(--orange)}
+.act-btn.del:hover{border-color:#C62828;color:#C62828}
+
+/* EMPTY */
+.lv-empty{text-align:center;padding:48px 20px;color:var(--dim);font-size:12px;line-height:2;
+  background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.empty-add-btn{display:inline-flex;align-items:center;gap:5px;margin-top:12px;
+  font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 18px;cursor:pointer;
+  border:1.5px solid var(--orange);background:var(--orange);color:#fff}
+.empty-add-btn:hover{background:var(--orange-dk)}
+
+/* PHOTO VIEWER */
+.viewer-bg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.viewer-img{max-width:100%;max-height:90vh;object-fit:contain;border-radius:4px}
+.viewer-close{position:absolute;top:14px;right:18px;font-size:28px;color:#fff;
+  cursor:pointer;background:none;border:none;line-height:1;opacity:.7}
+.viewer-close:hover{opacity:1}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow-y:auto}
+.modal-hd{padding:14px 20px;border-bottom:2px solid var(--orange);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:#fff;z-index:1}
+.modal-title{font-size:15px;font-weight:800}
+.modal-close{font-family:var(--sans);font-size:20px;cursor:pointer;color:var(--dim);
+  background:none;border:none;line-height:1;padding:4px}
+.modal-close:hover{color:var(--ink)}
+.modal-body{padding:20px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;
+  color:var(--dim);margin-bottom:6px;text-transform:uppercase}
+.field input,.field textarea,.field select{
+  font-family:var(--sans);font-size:13px;color:var(--ink);width:100%;
+  border:1.5px solid var(--line);padding:8px 10px;outline:none;background:#fff;transition:border-color .15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--orange)}
+.field textarea{resize:vertical;min-height:100px;line-height:1.7}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.proj-locked{font-size:13px;font-weight:700;color:var(--orange);
+  padding:8px 10px;background:var(--orange-lt);border:1.5px solid rgba(230,81,0,.2);
+  display:flex;align-items:center;gap:6px}
+.visit-toggle{display:flex}
+.visit-toggle label{flex:1;text-align:center;padding:8px 4px;font-size:12px;font-weight:600;
+  border:1.5px solid var(--line);cursor:pointer;transition:all .15s;user-select:none}
+.visit-toggle label:first-child{border-radius:4px 0 0 4px}
+.visit-toggle label:last-child{border-radius:0 4px 4px 0}
+.visit-toggle label:not(:first-child){border-left:none}
+.visit-toggle input[type=radio]{display:none}
+.visit-toggle input[type=radio]:checked+label{background:var(--orange);border-color:var(--orange);color:#fff}
+.photo-upload-area{border:2px dashed var(--line);border-radius:6px;padding:18px;text-align:center;
+  cursor:pointer;transition:border-color .15s;background:#fafafa}
+.photo-upload-area:hover{border-color:var(--orange)}
+.photo-upload-area p{font-size:11px;color:var(--dim);margin-top:4px}
+.photo-preview-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.preview-item{position:relative;width:72px;height:72px}
+.preview-item img{width:72px;height:72px;object-fit:cover;border-radius:6px;border:1.5px solid var(--line)}
+.preview-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
+  background:#C62828;color:#fff;border:none;cursor:pointer;font-size:11px;
+  display:flex;align-items:center;justify-content:center;font-weight:700}
+.modal-ft{padding:12px 20px;border-top:1px solid var(--line);
+  display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff}
+.modal-ft button{font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 20px;
+  cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .15s}
+.modal-ft button:hover{border-color:var(--ink);color:var(--ink)}
+.modal-ft button.save{border-color:var(--orange);background:var(--orange);color:#fff}
+.modal-ft button.save:hover{background:var(--orange-dk)}
+.modal-ft button.del{border-color:#C62828;color:#C62828}
+.modal-ft button.del:hover{background:#C62828;color:#fff}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:8px 20px;font-size:11px;font-weight:600;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;border-radius:4px;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* MOBILE */
+@media(max-width:600px){
+  .proj-cards{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .visit-filter{display:none}
+  .log-thumb,.preview-item,.preview-item img{width:60px;height:60px}
+  .field-row{grid-template-columns:1fr}
+  .proj-hd-stats{display:none}
+}
+@media(max-width:380px){
+  .proj-cards{grid-template-columns:1fr}
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="tb-left">
+    <a href="index.html" class="tb-btn" id="btn-home">← 홈</a>
+    <button class="tb-btn" id="btn-back" style="display:none" onclick="showCardView()">← 현장 목록</button>
+    <span class="brand">DAHAM</span>
+    <span id="tb-proj-name" style="display:none;font-size:12px;color:var(--mid);font-weight:600;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+  </div>
+  <div class="tb-right">
+    <span id="sync-dot" title="클라우드 동기화" style="font-size:14px;cursor:pointer;opacity:.4;transition:opacity .2s" onclick="manualSync()">☁</span>
+    <button class="tb-btn primary" id="btn-new-log" style="display:none" onclick="openModal(null,null)">+ 새 업무일지</button>
+  </div>
+</div>
+
+<!-- ════ CARD VIEW ════ -->
+<div id="card-view">
+  <div class="cv-header">
+    <div>
+      <div class="cv-title">업무일지</div>
+      <div class="cv-sub" id="cv-sub">현장을 선택하세요</div>
+    </div>
+    <button class="tb-btn primary" onclick="openModal(null,null)" style="flex-shrink:0">+ 새 업무일지</button>
+  </div>
+  <div class="proj-cards" id="proj-card-grid"></div>
+</div>
+
+<!-- ════ LOG VIEW ════ -->
+<div id="log-view">
+  <!-- 현장 정보 헤더 (현장 선택 시만 표시) -->
+  <div id="proj-hd" style="display:none">
+    <div class="proj-hd">
+      <div class="proj-hd-inner">
+        <div class="proj-hd-info">
+          <div class="proj-hd-name" id="phd-name"></div>
+          <div class="proj-hd-meta" id="phd-meta"></div>
+        </div>
+        <div class="proj-hd-stats" id="phd-stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lv-main">
+    <!-- 통계 -->
+    <div class="stats">
+      <div class="stat active" id="stat-all" onclick="setStatFilter('all')">
+        <div class="stat-n" id="cnt-all">0</div><div class="stat-l">전체</div>
+      </div>
+      <div class="stat" id="stat-month" onclick="setStatFilter('month')">
+        <div class="stat-n" id="cnt-month">0</div><div class="stat-l">이번달</div>
+      </div>
+      <div class="stat" id="stat-visit" onclick="setStatFilter('visit')">
+        <div class="stat-n" id="cnt-visit">0</div><div class="stat-l">현장방문</div>
+      </div>
+      <div class="stat" id="stat-photo" onclick="setStatFilter('photo')">
+        <div class="stat-n" id="cnt-photo">0</div><div class="stat-l">사진있음</div>
+      </div>
+    </div>
+
+    <!-- 필터 -->
+    <div class="filter-bar">
+      <div class="month-nav">
+        <button class="month-btn" onclick="shiftMonth(-1)">◀</button>
+        <span class="month-label" id="month-label"></span>
+        <button class="month-btn" onclick="shiftMonth(1)">▶</button>
+      </div>
+      <button class="all-toggle" id="btn-all" onclick="toggleShowAll()">전체 보기</button>
+      <input class="search-input" type="text" id="search" placeholder="담당자 · 내용 검색" oninput="renderLogList()">
+      <div class="visit-filter">
+        <button class="vf-btn active" onclick="setVisitFilter('all')">전체</button>
+        <button class="vf-btn" onclick="setVisitFilter('visit')">방문</button>
+        <button class="vf-btn" onclick="setVisitFilter('remote')">원격</button>
+        <button class="vf-btn" onclick="setVisitFilter('none')">기타</button>
+      </div>
+    </div>
+
+    <div id="log-list"></div>
+  </div>
+</div>
+
+<!-- 사진 뷰어 -->
+<div class="viewer-bg" id="viewer-bg" style="display:none" onclick="closeViewer()">
+  <button class="viewer-close">✕</button>
+  <img class="viewer-img" id="viewer-img" src="" alt="">
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" style="display:none" onclick="onBgClick(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">새 업무일지</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field">
+          <label>날짜</label>
+          <input type="date" id="m-date">
+        </div>
+        <div class="field">
+          <label>담당자</label>
+          <input type="text" id="m-worker" placeholder="이름 입력">
+        </div>
+      </div>
+      <div class="field" id="proj-select-field">
+        <label>현장 (계약 현장 연동)</label>
+        <select id="m-proj-sel" onchange="onProjSelChange()"></select>
+      </div>
+      <div class="field" id="proj-locked-field" style="display:none">
+        <label>현장</label>
+        <div class="proj-locked" id="proj-locked-display"></div>
+      </div>
+      <div class="field" id="proj-text-field" style="display:none">
+        <label>현장명 직접 입력</label>
+        <input type="text" id="m-proj-text" placeholder="현장명을 직접 입력하세요">
+      </div>
+      <div class="field">
+        <label>방문 여부</label>
+        <div class="visit-toggle">
+          <input type="radio" name="visit" id="vt-visit" value="visit">
+          <label for="vt-visit">🏠 현장 방문</label>
+          <input type="radio" name="visit" id="vt-remote" value="remote">
+          <label for="vt-remote">📞 원격/전화</label>
+          <input type="radio" name="visit" id="vt-none" value="none" checked>
+          <label for="vt-none">📋 기타</label>
+        </div>
+      </div>
+      <div class="field">
+        <label>업무 내용</label>
+        <textarea id="m-content" placeholder="오늘 진행한 업무 내용을 입력하세요&#10;예) 거실 도배 시공 완료, 욕실 타일 작업 중, 고객 미팅 등"></textarea>
+      </div>
+      <div class="field">
+        <label>사진 첨부 (최대 5장)</label>
+        <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
+          <div style="font-size:22px">📷</div>
+          <p>클릭하여 사진 선택</p>
+          <p style="font-size:10px">JPG · PNG · HEIC</p>
+        </div>
+        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(this)">
+        <div class="photo-preview-row" id="photo-preview"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="del" id="btn-del" style="display:none" onclick="deleteRecord()">삭제</button>
+      <button onclick="closeModal()">취소</button>
+      <button class="save" onclick="saveRecord()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var LOG_KEY   = 'daham_worklog_v1';
+var SCHED_KEY = 'daham_schedule_v1';
+var SUPA_URL  = 'https://famqvwnsustbxuizohni.supabase.co';
+var SUPA_KEY  = 'sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
+var _authToken = (window.DAHAM_AUTH && DAHAM_AUTH.getAccessToken) ? DAHAM_AUTH.getAccessToken() : '';
+var _HDRS = {'apikey':SUPA_KEY,'Authorization':'Bearer '+(_authToken||SUPA_KEY),'Content-Type':'application/json'};
+var _saveTimer = null;
+var MONTH_KO  = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+var DOW_KO    = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+
+var records       = [];
+var schedProjects = [];
+var activeProjId  = null;   // null = 전체
+var editingId     = null;
+var pendingPhotos = [];
+var modalLockedProj = null;
+var monthOffset   = 0;
+var showAll       = false;
+var visitFilter   = 'all';
+var statFilter    = 'all';
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function pad(n){ return n<10?'0'+n:String(n); }
+function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function fmtDateFull(ds){
+  if(!ds) return '';
+  var p=ds.split('-'), d=new Date(ds+'T00:00:00');
+  return p[0]+'년 '+parseInt(p[1])+'월 '+parseInt(p[2])+'일 '+DOW_KO[d.getDay()];
+}
+function fmtDateShort(ds){
+  if(!ds) return '';
+  var p=ds.split('-');
+  return parseInt(p[1])+'월 '+parseInt(p[2])+'일';
+}
+function relTime(iso){
+  if(!iso) return '';
+  var d=Math.floor((Date.now()-new Date(iso))/60000);
+  if(d<1) return '방금 전';
+  if(d<60) return d+'분 전';
+  var h=Math.floor(d/60);
+  if(h<24) return h+'시간 전';
+  return Math.floor(h/24)+'일 전';
+}
+
+function setSyncDot(state){
+  var el=document.getElementById('sync-dot');
+  if(!el) return;
+  if(state==='up'){ el.textContent='↑'; el.style.opacity='1'; el.style.color='#E65100'; }
+  else if(state==='ok'){ el.textContent='☁'; el.style.opacity='.35'; el.style.color='inherit'; }
+  else if(state==='err'){ el.textContent='⚠'; el.style.opacity='1'; el.style.color='#e53935'; }
+}
+function cloudPush(){
+  setSyncDot('up');
+  var str=JSON.stringify(records);
+  var ts=new Date().toISOString();
+  localStorage.setItem(LOG_KEY+'_ts', ts);
+  fetch(SUPA_URL+'/rest/v1/sync_data',{
+    method:'POST',
+    headers:Object.assign({},_HDRS,{'Prefer':'resolution=merge-duplicates,return=minimal'}),
+    body:JSON.stringify({key:LOG_KEY,value:str,updated_at:ts})
+  }).then(function(r){ setSyncDot(r.ok?'ok':'err'); }).catch(function(){ setSyncDot('err'); });
+}
+function cloudPull(onDone){
+  var keys=[LOG_KEY, SCHED_KEY];
+  var encoded=keys.map(function(k){ return encodeURIComponent(k); }).join(',');
+  fetch(SUPA_URL+'/rest/v1/sync_data?key=in.('+encoded+')&select=key,value,updated_at',{
+    headers:_HDRS
+  }).then(function(r){ return r.json(); })
+  .then(function(data){
+    if(!Array.isArray(data)){ setSyncDot('ok'); onDone(); return; }
+    var updated=false;
+    data.forEach(function(row){
+      if(!row||!row.key) return;
+      var localTs=localStorage.getItem(row.key+'_ts')||'';
+      if(row.updated_at>localTs){
+        try{
+          var parsed=JSON.parse(row.value);
+          if(row.key===LOG_KEY){ records=parsed; updated=true; }
+          else if(row.key===SCHED_KEY){ schedProjects=parsed; }
+          localStorage.setItem(row.key, row.value);
+          localStorage.setItem(row.key+'_ts', row.updated_at);
+        }catch(e){}
+      }
+    });
+    if(updated) showToast('☁ 클라우드에서 동기화됨');
+    setSyncDot('ok'); onDone();
+  }).catch(function(){ setSyncDot('err'); onDone(); });
+}
+function scheduleSave(){
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(cloudPush, 800);
+}
+function manualSync(){
+  try{ schedProjects=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+  var inLogView=document.getElementById('log-view').style.display!=='none';
+  cloudPull(function(){
+    renderCardGrid();
+    if(inLogView) renderLogList();
+  });
+}
+
+function load(){
+  try{ records=JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }catch(e){ records=[]; }
+  try{ schedProjects=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+}
+function save(){
+  localStorage.setItem(LOG_KEY, JSON.stringify(records));
+  scheduleSave();
+}
+
+function getProjName(r){ return r.projName||r.proj||''; }
+function getProjColor(r){
+  if(r.projId){
+    var p=schedProjects.find(function(x){ return x.id===r.projId; });
+    if(p) return p.color||'#E65100';
+  }
+  return '#E65100';
+}
+
+/* ════ CARD VIEW ════ */
+function showCardView(){
+  activeProjId=null;
+  document.getElementById('card-view').style.display='block';
+  document.getElementById('log-view').style.display='none';
+  document.getElementById('btn-home').style.display='inline-flex';
+  document.getElementById('btn-back').style.display='none';
+  document.getElementById('btn-new-log').style.display='none';
+  document.getElementById('tb-proj-name').style.display='none';
+  renderCardGrid();
+}
+
+function showLogView(projId){
+  activeProjId=projId;
+  statFilter='all'; showAll=false; monthOffset=0; visitFilter='all';
+  document.getElementById('card-view').style.display='none';
+  document.getElementById('log-view').style.display='block';
+  document.getElementById('btn-home').style.display='none';
+  document.getElementById('btn-back').style.display='inline-flex';
+  document.getElementById('btn-new-log').style.display='inline-flex';
+
+  // 툴바 현장명
+  var nameEl=document.getElementById('tb-proj-name');
+  if(projId===null){
+    nameEl.textContent='전체 업무일지';
+  } else {
+    var p=schedProjects.find(function(x){ return x.id===projId; });
+    nameEl.textContent=p?(p.info&&p.info.name)||'현장명 미입력':'전체 업무일지';
+  }
+  nameEl.style.display='inline-block';
+
+  // 방문 필터 탭 초기화
+  document.querySelectorAll('.vf-btn').forEach(function(el,i){ el.classList.toggle('active',i===0); });
+  document.getElementById('btn-all').classList.remove('active');
+  document.getElementById('search').value='';
+  ['all','month','visit','photo'].forEach(function(k){
+    document.getElementById('stat-'+k).classList.toggle('active',k==='all');
+  });
+
+  renderProjHd();
+  renderMonthLabel();
+  renderLogList();
+}
+
+function renderCardGrid(){
+  var grid=document.getElementById('proj-card-grid');
+  var total=records.length;
+  document.getElementById('cv-sub').textContent='총 '+total+'건 업무일지 · 현장 '+schedProjects.length+'개';
+
+  var html='';
+  // 전체 보기 카드
+  var lastAll=records.length?records.slice().sort(function(a,b){ return (b.createdAt||'')>(a.createdAt||'')?1:-1; })[0]:null;
+  html+='<div class="card-all" onclick="showLogView(null)">'
+    +'<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--mid);margin-bottom:10px;text-transform:uppercase">전체 현장</div>'
+    +'<div class="pc-name" style="font-size:16px">📋 전체 업무일지</div>'
+    +'<div class="pc-addr">모든 현장의 업무일지를 함께 봅니다</div>'
+    +'<div class="pc-stats">'
+      +'<div class="pc-stat"><div class="pc-stat-n" style="color:var(--ink)">'+records.length+'</div><div class="pc-stat-l">전체</div></div>'
+      +'<div class="pc-stat"><div class="pc-stat-n" style="color:#2E7D32">'+records.filter(function(r){ return r.visitType==='visit'; }).length+'</div><div class="pc-stat-l">방문</div></div>'
+      +'<div class="pc-stat"><div class="pc-stat-n" style="color:#1565C0">'+records.filter(function(r){ return r.photos&&r.photos.length; }).length+'</div><div class="pc-stat-l">사진</div></div>'
+    +'</div>'
+    +'<div class="pc-foot">'
+      +'<span class="pc-last">'+(lastAll?relTime(lastAll.createdAt):'기록 없음')+'</span>'
+      +'<button class="pc-enter" onclick="event.stopPropagation();showLogView(null)">보기 →</button>'
+    +'</div>'
+    +'</div>';
+
+  if(!schedProjects.length){
+    html+='<div class="cv-empty">등록된 계약 현장이 없습니다.<br>일정표에서 현장을 추가하면 여기에 표시됩니다.</div>';
+    grid.innerHTML=html;
+    return;
+  }
+
+  schedProjects.forEach(function(p){
+    var color=p.color||'#E65100';
+    var name=(p.info&&p.info.name)||'현장명 미입력';
+    var addr=(p.info&&p.info.addr)||'';
+    var client=(p.info&&p.info.client)||'';
+    var tasks=p.tasks||[];
+    var done=tasks.filter(function(t){ return t.status==='done'; }).length;
+    var logs=records.filter(function(r){ return r.projId===p.id; });
+    var lastLog=logs.length?logs.slice().sort(function(a,b){ return (b.createdAt||'')>(a.createdAt||'')?1:-1; })[0]:null;
+
+    // 공사 기간
+    var starts=tasks.map(function(t){ return t.start; }).filter(Boolean).sort();
+    var ends=tasks.map(function(t){ return t.end||t.start; }).filter(Boolean).sort();
+    var rangeStr='';
+    if(starts.length&&ends.length) rangeStr=fmtDateShort(starts[0])+' ~ '+fmtDateShort(ends[ends.length-1]);
+
+    html+='<div class="proj-card" style="border-top-color:'+color+'" onclick="showLogView(\''+p.id+'\')"> '
+      +'<div class="pc-name">'+esc(name)+'</div>'
+      +'<div class="pc-addr">'+(addr?esc(addr):client?esc(client):'')+(rangeStr?'<br><span style="font-size:10px;color:var(--dim)">📅 '+esc(rangeStr)+'</span>':'')+'</div>'
+      +'<div class="pc-stats">'
+        +'<div class="pc-stat"><div class="pc-stat-n" style="color:'+color+'">'+logs.length+'</div><div class="pc-stat-l">업무일지</div></div>'
+        +'<div class="pc-stat"><div class="pc-stat-n" style="color:'+color+'">'+tasks.length+'</div><div class="pc-stat-l">전체공정</div></div>'
+        +'<div class="pc-stat"><div class="pc-stat-n" style="color:#2E7D32">'+done+'</div><div class="pc-stat-l">완료</div></div>'
+      +'</div>'
+      +'<div class="pc-foot">'
+        +'<span class="pc-last">'+(lastLog?relTime(lastLog.createdAt):'기록 없음')+'</span>'
+        +'<button class="pc-enter" onclick="event.stopPropagation();showLogView(\''+p.id+'\')">보기 →</button>'
+      +'</div>'
+      +'</div>';
+  });
+  grid.innerHTML=html;
+}
+
+/* ════ LOG VIEW ════ */
+function renderProjHd(){
+  var hdWrap=document.getElementById('proj-hd');
+  if(activeProjId===null){ hdWrap.style.display='none'; return; }
+  var p=schedProjects.find(function(x){ return x.id===activeProjId; });
+  if(!p){ hdWrap.style.display='none'; return; }
+
+  var name=(p.info&&p.info.name)||'현장명 미입력';
+  var addr=(p.info&&p.info.addr)||'';
+  var client=(p.info&&p.info.client)||'';
+  var tasks=p.tasks||[];
+  var done=tasks.filter(function(t){ return t.status==='done'; }).length;
+  var starts=tasks.map(function(t){ return t.start; }).filter(Boolean).sort();
+  var ends=tasks.map(function(t){ return t.end||t.start; }).filter(Boolean).sort();
+  var rangeStr=starts.length&&ends.length?fmtDateShort(starts[0])+' ~ '+fmtDateShort(ends[ends.length-1]):'';
+  var logCnt=records.filter(function(r){ return r.projId===p.id; }).length;
+
+  hdWrap.style.display='block';
+  document.getElementById('phd-name').textContent=name;
+  document.getElementById('phd-name').style.borderLeft='4px solid '+(p.color||'#E65100');
+  document.getElementById('phd-name').style.paddingLeft='10px';
+  document.getElementById('phd-meta').innerHTML=
+    (addr?'📍 '+esc(addr)+'&nbsp; ':'')
+    +(client?'👤 '+esc(client)+'&nbsp; ':'')
+    +(rangeStr?'📅 '+esc(rangeStr):'');
+  document.getElementById('phd-stats').innerHTML=
+    '<div class="phs"><div class="phs-n" style="color:'+(p.color||'#E65100')+'">'+tasks.length+'</div><div class="phs-l">전체공정</div></div>'
+    +'<div class="phs"><div class="phs-n" style="color:#2E7D32">'+done+'</div><div class="phs-l">완료</div></div>'
+    +'<div class="phs"><div class="phs-n" style="color:var(--orange)">'+logCnt+'</div><div class="phs-l">업무일지</div></div>';
+}
+
+/* ── stats / filter ── */
+function updateStats(){
+  var tmStr=todayStr().slice(0,7);
+  var src=getBase();
+  var cnt={all:src.length,month:0,visit:0,photo:0};
+  src.forEach(function(r){
+    if((r.date||'').startsWith(tmStr)) cnt.month++;
+    if(r.visitType==='visit') cnt.visit++;
+    if(r.photos&&r.photos.length) cnt.photo++;
+  });
+  document.getElementById('cnt-all').textContent=cnt.all;
+  document.getElementById('cnt-month').textContent=cnt.month;
+  document.getElementById('cnt-visit').textContent=cnt.visit;
+  document.getElementById('cnt-photo').textContent=cnt.photo;
+}
+function getBase(){
+  return records.filter(function(r){
+    return activeProjId===null || r.projId===activeProjId;
+  });
+}
+function setStatFilter(f){
+  statFilter=f;
+  ['all','month','visit','photo'].forEach(function(k){
+    document.getElementById('stat-'+k).classList.toggle('active',k===f);
+  });
+  if(f==='month'){ showAll=false; monthOffset=0; document.getElementById('btn-all').classList.remove('active'); }
+  if(f!=='all'&&f!=='month'){ showAll=true; document.getElementById('btn-all').classList.add('active'); }
+  if(f==='all'){ showAll=false; document.getElementById('btn-all').classList.remove('active'); }
+  renderLogList();
+}
+function setVisitFilter(v){
+  visitFilter=v;
+  document.querySelectorAll('.vf-btn').forEach(function(el,i){
+    el.classList.toggle('active',['all','visit','remote','none'][i]===v);
+  });
+  renderLogList();
+}
+function shiftMonth(n){ monthOffset+=n; showAll=false; document.getElementById('btn-all').classList.remove('active'); renderMonthLabel(); renderLogList(); }
+function toggleShowAll(){ showAll=!showAll; document.getElementById('btn-all').classList.toggle('active',showAll); renderLogList(); }
+function renderMonthLabel(){
+  var d=new Date(),yr=d.getFullYear(),mo=d.getMonth()+monthOffset;
+  while(mo>11){mo-=12;yr++;} while(mo<0){mo+=12;yr--;}
+  document.getElementById('month-label').textContent=yr+'년 '+MONTH_KO[mo];
+}
+function getYMStr(){
+  var d=new Date(),yr=d.getFullYear(),mo=d.getMonth()+monthOffset;
+  while(mo>11){mo-=12;yr++;} while(mo<0){mo+=12;yr--;}
+  return yr+'-'+pad(mo+1);
+}
+
+function renderLogList(){
+  renderMonthLabel();
+  updateStats();
+  var q=(document.getElementById('search').value||'').trim().toLowerCase();
+  var ymStr=getYMStr();
+  var tmStr=todayStr().slice(0,7);
+  var showProjBadge=(activeProjId===null);
+
+  var list=getBase().filter(function(r){
+    if(statFilter==='month'&&!(r.date||'').startsWith(tmStr)) return false;
+    if(statFilter==='visit'&&r.visitType!=='visit') return false;
+    if(statFilter==='photo'&&(!r.photos||!r.photos.length)) return false;
+    if(statFilter==='all'&&!showAll&&!(r.date||'').startsWith(ymStr)) return false;
+    if(visitFilter!=='all'&&r.visitType!==visitFilter) return false;
+    if(q){ var h=((getProjName(r))+(r.worker||'')+(r.content||'')).toLowerCase(); if(h.indexOf(q)<0) return false; }
+    return true;
+  });
+  list.sort(function(a,b){ return (b.date||'')>(a.date||'')?1:(b.date||'')<(a.date||'')?-1:0; });
+
+  var el=document.getElementById('log-list');
+  if(!list.length){
+    var msg=q?'검색 결과가 없습니다.':(!showAll&&statFilter==='all')?'이 달 업무일지가 없습니다.':'업무일지가 없습니다.';
+    el.innerHTML='<div class="lv-empty">'+msg+'<br>'
+      +'<button class="empty-add-btn" onclick="openModal(null,null)">+ 첫 업무일지 작성</button></div>';
+    return;
+  }
+
+  var groups={},dateOrder=[];
+  list.forEach(function(r){
+    var d=r.date||'';
+    if(!groups[d]){ groups[d]=[]; dateOrder.push(d); }
+    groups[d].push(r);
+  });
+  dateOrder.sort(function(a,b){ return b>a?1:b<a?-1:0; });
+
+  var html='';
+  dateOrder.forEach(function(ds){
+    var addArg=activeProjId?'\''+activeProjId+'\'':'null';
+    html+='<div class="date-group">'
+      +'<div class="date-hd">'
+        +'<span class="date-hd-label">'+esc(fmtDateFull(ds))+'</span>'
+        +'<button class="date-hd-add" onclick="openModal(\''+ds+'\','+addArg+')">+ 이날 추가</button>'
+        +'<span class="date-hd-line"></span>'
+      +'</div>';
+    groups[ds].forEach(function(r){
+      var color=getProjColor(r);
+      var projBadge=showProjBadge&&getProjName(r)
+        ?'<span class="log-proj-badge" style="background:'+color+'22;color:'+color+'">'+esc(getProjName(r))+'</span>':'';
+      var workerHtml=r.worker?'<span class="log-worker">👤 '+esc(r.worker)+'</span>':'';
+      var vbCls=r.visitType==='visit'?'vb-visit':r.visitType==='remote'?'vb-remote':'vb-none';
+      var vbLbl=r.visitType==='visit'?'🏠 현장방문':r.visitType==='remote'?'📞 원격':'📋 기타';
+      var photosHtml='';
+      if(r.photos&&r.photos.length){
+        photosHtml='<div class="log-photos">';
+        r.photos.forEach(function(src,i){
+          photosHtml+='<img class="log-thumb" src="'+src+'" onclick="openViewer(\''+esc(r.id)+'\','+i+')">';
+        });
+        photosHtml+='</div>';
+      }
+      html+='<div class="log-card" style="border-left-color:'+color+'">'
+        +'<div class="log-card-top"><div class="log-meta">'+projBadge+workerHtml+'</div>'
+        +'<span class="visit-badge '+vbCls+'">'+vbLbl+'</span></div>'
+        +(r.content?'<div class="log-content">'+esc(r.content)+'</div>':'')
+        +photosHtml
+        +'<div class="log-card-actions">'
+          +'<button class="act-btn del" onclick="deleteById(\''+esc(r.id)+'\')">삭제</button>'
+          +'<button class="act-btn" onclick="openModal(null,null,\''+esc(r.id)+'\')">수정</button>'
+        +'</div></div>';
+    });
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+/* ── PHOTO VIEWER ── */
+function openViewer(id,idx){
+  var r=records.find(function(x){ return x.id===id; });
+  if(!r||!r.photos||!r.photos[idx]) return;
+  document.getElementById('viewer-img').src=r.photos[idx];
+  document.getElementById('viewer-bg').style.display='flex';
+}
+function closeViewer(){ document.getElementById('viewer-bg').style.display='none'; }
+
+/* ── PHOTO ── */
+function handlePhotos(input){
+  var files=Array.from(input.files||[]);
+  var rem=5-pendingPhotos.length;
+  if(!files.length||rem<=0){ if(rem<=0) showToast('사진은 최대 5장까지 가능합니다'); return; }
+  files.slice(0,rem).forEach(function(f){ compressImage(f,function(d){ pendingPhotos.push(d); renderPhotoPreview(); }); });
+  input.value='';
+}
+function compressImage(file,cb){
+  var r=new FileReader();
+  r.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var MAX=1200,w=img.width,h=img.height;
+      if(w>MAX||h>MAX){ if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
+      var c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      cb(c.toDataURL('image/jpeg',0.75));
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+function renderPhotoPreview(){
+  document.getElementById('photo-preview').innerHTML=pendingPhotos.map(function(src,i){
+    return '<div class="preview-item"><img src="'+src+'"><button class="preview-del" onclick="removePhoto('+i+')">×</button></div>';
+  }).join('');
+}
+function removePhoto(i){ pendingPhotos.splice(i,1); renderPhotoPreview(); }
+
+/* ── MODAL ── */
+function openModal(dateStr, projId, logId){
+  editingId=logId||null;
+  modalLockedProj=null;
+  pendingPhotos=[];
+  var r=logId?records.find(function(x){ return x.id===logId; }):null;
+
+  document.getElementById('modal-title').textContent=r?'업무일지 수정':'새 업무일지';
+  document.getElementById('btn-del').style.display=r?'inline-flex':'none';
+  document.getElementById('m-date').value=dateStr||(r?r.date:null)||todayStr();
+  document.getElementById('m-worker').value=r?(r.worker||''):'';
+  document.getElementById('m-content').value=r?(r.content||''):'';
+
+  populateProjSel();
+  // 수정 모드에서는 자유 선택, 새 추가(날짜/현장탭)에서만 고정
+  var lockId=(!logId)?(projId||activeProjId):null;
+  if(lockId){
+    var lp=schedProjects.find(function(p){ return p.id===lockId; });
+    if(lp){
+      modalLockedProj={id:lp.id,name:(lp.info&&lp.info.name)||'현장명 미입력',color:lp.color||'#E65100'};
+      document.getElementById('proj-select-field').style.display='none';
+      document.getElementById('proj-locked-field').style.display='block';
+      document.getElementById('proj-text-field').style.display='none';
+      document.getElementById('proj-locked-display').innerHTML=
+        '<span style="width:10px;height:10px;border-radius:50%;background:'+modalLockedProj.color+';display:inline-block;flex-shrink:0"></span> '+esc(modalLockedProj.name);
+    } else { showProjSel(r); }
+  } else { showProjSel(r); }
+
+  var vt=(r&&r.visitType)||'none';
+  document.getElementById('vt-visit').checked=(vt==='visit');
+  document.getElementById('vt-remote').checked=(vt==='remote');
+  document.getElementById('vt-none').checked=(vt==='none');
+
+  if(r&&r.photos) pendingPhotos=r.photos.slice();
+  renderPhotoPreview();
+  document.getElementById('modal-bg').style.display='flex';
+}
+function showProjSel(r){
+  document.getElementById('proj-select-field').style.display='block';
+  document.getElementById('proj-locked-field').style.display='none';
+  var sel=document.getElementById('m-proj-sel');
+  if(r&&r.projId){
+    sel.value=r.projId;
+    if(sel.value!==r.projId){ sel.value='__direct__'; document.getElementById('m-proj-text').value=r.projName||r.proj||''; }
+  } else if(r&&(r.projName||r.proj)){
+    sel.value='__direct__'; document.getElementById('m-proj-text').value=r.projName||r.proj||'';
+  } else {
+    sel.value=''; document.getElementById('m-proj-text').value='';
+  }
+  onProjSelChange();
+}
+function populateProjSel(){
+  var sel=document.getElementById('m-proj-sel');
+  sel.innerHTML='<option value="">-- 현장 선택 --</option>';
+  schedProjects.forEach(function(p){
+    sel.innerHTML+='<option value="'+esc(p.id)+'">'
+      +esc((p.info&&p.info.name)||'현장명 미입력')+'</option>';
+  });
+  sel.innerHTML+='<option value="__direct__">✏ 직접 입력...</option>';
+}
+function onProjSelChange(){
+  var v=document.getElementById('m-proj-sel').value;
+  document.getElementById('proj-text-field').style.display=(v==='__direct__')?'block':'none';
+}
+function closeModal(){ document.getElementById('modal-bg').style.display='none'; editingId=null; pendingPhotos=[]; modalLockedProj=null; }
+function onBgClick(e){ if(e.target===document.getElementById('modal-bg')) closeModal(); }
+
+function saveRecord(){
+  var date=document.getElementById('m-date').value;
+  if(!date){ showToast('날짜를 입력해주세요'); return; }
+  var projId=null,projName='';
+  if(modalLockedProj){ projId=modalLockedProj.id; projName=modalLockedProj.name; }
+  else {
+    var sel=document.getElementById('m-proj-sel').value;
+    if(sel&&sel!=='__direct__'){
+      var sp=schedProjects.find(function(p){ return p.id===sel; });
+      if(sp){ projId=sp.id; projName=(sp.info&&sp.info.name)||''; }
+    } else { projName=document.getElementById('m-proj-text').value.trim(); }
+  }
+  var worker=document.getElementById('m-worker').value.trim();
+  var vt=document.querySelector('input[name="visit"]:checked');
+  var visitType=vt?vt.value:'none';
+  var content=document.getElementById('m-content').value.trim();
+  if(!content&&!pendingPhotos.length){ showToast('업무 내용 또는 사진을 입력해주세요'); return; }
+
+  if(editingId){
+    var rec=records.find(function(x){ return x.id===editingId; });
+    if(rec){ rec.date=date;rec.projId=projId;rec.projName=projName;rec.worker=worker;
+             rec.visitType=visitType;rec.content=content;rec.photos=pendingPhotos.slice();
+             rec.updatedAt=new Date().toISOString(); }
+  } else {
+    records.push({id:uid(),date:date,projId:projId,projName:projName,worker:worker,
+      visitType:visitType,content:content,photos:pendingPhotos.slice(),createdAt:new Date().toISOString()});
+  }
+  save(); closeModal();
+  if(document.getElementById('log-view').style.display!=='none') renderLogList();
+  renderCardGrid();
+  showToast('✓ 저장했습니다');
+}
+function deleteById(id){
+  dahamConfirm('이 업무일지를 삭제할까요?', function() {
+    records=records.filter(function(x){ return x.id!==id; });
+    save(); renderLogList(); renderCardGrid(); showToast('삭제했습니다');
+  });
+}
+function deleteRecord(){
+  if(!editingId) return;
+  dahamConfirm('이 업무일지를 삭제할까요?', function() {
+    records=records.filter(function(x){ return x.id!==editingId; });
+    save(); closeModal(); renderLogList(); renderCardGrid(); showToast('삭제했습니다');
+  });
+}
+function showToast(m){
+  var t=document.getElementById('toast');
+  t.textContent=m; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },2200);
+}
+
+load();
+showCardView();
+cloudPull(function(){ renderCardGrid(); });
+</script>
+<script src="auth.js"></script>
+
+<script>
+(function(){
+  const KEY='daham_workflow_v1';
+  const now=()=>new Date().toISOString();
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{"projects":{}}')}catch(e){return {projects:{}}}};
+  const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
+  const pid=()=>localStorage.getItem('daham_current_project')||new URLSearchParams(location.search).get('project')||'default';
+  window.DAHAM_WORKFLOW={
+    getProject(){const d=load(), id=pid(); return (d.projects[id] ||= {id,updatedAt:now(),estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]})},
+    update(mut){const d=load(),id=pid(); const p=(d.projects[id] ||= {id,estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]}); mut(p); p.updatedAt=now(); save(d); return p},
+    syncEstimate(items){return this.update(p=>{p.estimateItems=items||[]})},
+    syncSchedule(items){return this.update(p=>{p.scheduleItems=items||[]})},
+    syncOrders(items){return this.update(p=>{p.orderItems=items||[]})},
+    key:KEY
+  };
+})();
+</script>
+
+</body>
+</html>

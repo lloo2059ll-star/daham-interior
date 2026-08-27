@@ -1,0 +1,15 @@
+
+:root{
+  --v2-bg:#f6f7fb;--v2-card:#fff;--v2-text:#20283a;--v2-muted:#8b93a7;
+  --v2-line:#e8ebf2;--v2-nav:#18223b;--v2-nav2:#233052;--v2-accent:#6f5be7;
+  --v2-accent2:#8b7cf1;--v2-green:#2eae79;--v2-orange:#f1a24b;--v2-red:#ef6b6b;
+}
+html{background:var(--v2-bg)}
+body{background:var(--v2-bg)!important;color:var(--v2-text)!important}
+button,input,select,textarea{font-family:inherit}
+input,select,textarea{border-color:var(--v2-line)!important;border-radius:9px!important}
+button,.btn,.tb-btn,.tb-home{border-radius:9px!important}
+.card,.panel,.section,.box{border-color:var(--v2-line)!important;box-shadow:0 1px 2px rgba(16,24,40,.03)!important}
+@media print{
+  body{background:#fff!important}
+}

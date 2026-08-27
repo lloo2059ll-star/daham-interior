@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DAHAM — 준공확인서 및 하자보증서</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-dk:#BF360C;--orange-lt:#FFF3EE;
+  --green:#2E7D32;--green-lt:#E8F5E9;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;--line:#e0e0e0;--line-lt:#f5f5f5;
+  --bg:#f2f2f2;--white:#fff;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13px}
+
+/* ── TOOLBAR ── */
+.toolbar{position:sticky;top:0;z-index:100;height:48px;padding:0 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:#fff;border-bottom:2px solid var(--orange);
+  box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.14em;color:var(--orange)}
+.tb-btn{font-family:var(--sans);font-size:11px;font-weight:500;padding:6px 14px;cursor:pointer;
+  border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .15s;
+  text-decoration:none;display:inline-flex;align-items:center}
+.tb-btn:hover{border-color:var(--ink);color:var(--ink)}
+.tb-btn.primary{border-color:var(--orange);background:var(--orange);color:#fff}
+.tb-btn.primary:hover{background:var(--orange-dk)}
+
+/* ── EDITOR ── */
+.editor{max-width:820px;margin:32px auto 80px;padding:0 20px}
+.editor-title{font-size:18px;font-weight:700;margin-bottom:4px}
+.editor-sub{font-size:11px;color:var(--dim);margin-bottom:24px}
+.form-sec{background:#fff;border:1px solid var(--line);margin-bottom:14px}
+.form-sec-hd{padding:11px 16px;border-bottom:1px solid var(--line);
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.form-row{display:flex;flex-direction:column;padding:12px 16px;border-bottom:1px solid var(--line-lt)}
+.form-row:last-child{border-bottom:none}
+.form-row.wide{grid-column:span 2}
+.form-row label{font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--dim);margin-bottom:5px}
+.form-row input,.form-row textarea,.form-row select{
+  font-family:var(--sans);font-size:13px;color:var(--ink);
+  border:none;border-bottom:1px solid var(--line);outline:none;
+  padding:4px 0;background:transparent;width:100%;transition:border-color .15s}
+.form-row input:focus,.form-row textarea:focus{border-color:var(--orange)}
+.form-row textarea{resize:vertical;min-height:60px;line-height:1.7}
+
+/* ── 완료 체크 테이블 ── */
+.task-check-row{display:grid;grid-template-columns:auto 1fr auto 160px;
+  align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line-lt)}
+.task-check-row:last-child{border-bottom:none}
+.task-check-row.header{background:#fafafa;font-size:10px;font-weight:700;
+  letter-spacing:.06em;color:var(--dim);padding:8px 16px}
+.task-name{font-size:13px;font-weight:600}
+.task-period{font-size:11px;color:var(--dim)}
+.task-done-wrap{display:flex;align-items:center;gap:6px;justify-content:center}
+.task-done-wrap input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:var(--green)}
+.task-done-label{font-size:11px;font-weight:600;color:var(--green)}
+.task-note{font-family:var(--sans);font-size:11px;border:1px solid var(--line);
+  padding:4px 7px;outline:none;width:100%;color:var(--ink);background:#fff}
+.task-note:focus{border-color:var(--orange)}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:8px 20px;font-size:11px;
+  opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
+.toast.show{opacity:1}
+
+/* ── PREVIEW ── */
+.preview-wrap{max-width:820px;margin:0 auto 80px;padding:0 20px;display:none}
+.preview-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+
+/* ── DOCUMENT ── */
+.doc{background:#fff;border:1px solid var(--line);padding:52px 56px;
+  font-size:12px;line-height:1.8;box-shadow:0 4px 24px rgba(0,0,0,.07)}
+
+.doc-header{border-bottom:3px solid var(--orange);padding-bottom:20px;margin-bottom:32px;
+  display:flex;align-items:flex-end;justify-content:space-between}
+.doc-brand{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.14em;color:var(--orange)}
+.doc-brand-sub{font-size:12px;color:var(--mid);letter-spacing:.06em;margin-top:3px}
+.doc-title-block{text-align:right}
+.doc-title{font-size:34px;font-weight:900;letter-spacing:.06em;color:var(--ink)}
+.doc-title-sub{font-size:11px;color:var(--mid);letter-spacing:.1em;margin-top:4px}
+.doc-no{font-size:11px;color:var(--dim);margin-top:2px}
+
+.sec-title{font-size:13px;font-weight:800;letter-spacing:.06em;color:var(--ink);
+  padding:8px 0 8px 14px;border-left:4px solid var(--orange);margin:28px 0 12px}
+
+.info-tbl{width:100%;border-collapse:collapse;margin-bottom:0}
+.info-tbl th{width:26%;padding:10px 14px;background:#4B5563;color:#fff;
+  font-size:13px;font-weight:700;border:1px solid #4B5563;text-align:left}
+.info-tbl td{padding:10px 14px;border:1px solid var(--line);font-size:13px;font-weight:500}
+.info-tbl tr:nth-child(even) td{background:#fafafa}
+
+/* 완료 확인 테이블 */
+.done-tbl{width:100%;border-collapse:collapse}
+.done-tbl thead th{background:var(--orange);color:#fff;padding:10px 12px;
+  font-size:12px;font-weight:700;border:1px solid var(--orange-dk);text-align:left}
+.done-tbl tbody tr:nth-child(even) td{background:#fafafa}
+.done-tbl td{padding:9px 12px;border:1px solid var(--line);font-size:12px;vertical-align:middle}
+.done-tbl td.phase{font-weight:700}
+.done-tbl td.period{white-space:nowrap;color:var(--mid)}
+.done-chk{display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:50%;font-size:14px;font-weight:700}
+.done-chk.yes{background:var(--green-lt);color:var(--green)}
+.done-chk.no{background:#fff3e0;color:#e65100}
+
+/* 보증 테이블 */
+.warranty-tbl{width:100%;border-collapse:collapse}
+.warranty-tbl th{background:#374151;color:#fff;padding:9px 14px;
+  font-size:12px;font-weight:700;border:1px solid #374151;text-align:left}
+.warranty-tbl td{padding:9px 14px;border:1px solid var(--line);font-size:12px}
+.warranty-tbl tr:nth-child(even) td{background:#fafafa}
+
+/* 특이사항 */
+.special-box{background:#fafafa;border:1px solid var(--line);padding:16px 18px;
+  font-size:13px;line-height:2;white-space:pre-wrap;min-height:60px}
+
+/* 확인란 */
+.confirm-wrap{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:4px}
+.confirm-box{border:1px solid var(--line);padding:20px 24px}
+.confirm-box-title{font-size:11px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:16px;
+  padding-bottom:8px;border-bottom:1px solid var(--line-lt)}
+.confirm-row{display:flex;justify-content:space-between;align-items:flex-end;
+  padding:10px 0;border-bottom:1px solid var(--line-lt);font-size:13px}
+.confirm-row:last-child{border-bottom:none}
+.confirm-lbl{font-weight:600;color:var(--ink)}
+.confirm-val{color:var(--mid);font-size:12px}
+.sign-line{margin-top:20px;border-top:1px solid var(--ink);padding-top:6px;
+  text-align:center;font-size:11px;color:var(--dim);letter-spacing:.06em}
+
+.doc-footer{margin-top:28px;display:flex;justify-content:space-between;align-items:flex-end;
+  border-top:1px solid var(--line);padding-top:20px}
+.sig-block{text-align:right;line-height:2}
+.sig-company{font-size:15px;font-weight:800}
+.sig-detail{font-size:12px;color:var(--mid)}
+.sig-stamp{display:inline-block;margin-top:8px;padding:6px 18px;
+  border:2px solid var(--orange);color:var(--orange);font-size:13px;font-weight:700;letter-spacing:.08em}
+
+/* ── PRINT ── */
+@media print{
+  @page{size:A4 portrait;margin:12mm 14mm}
+  .toolbar,.editor,.preview-topbar,.toast{display:none!important}
+  .preview-wrap{display:block!important;max-width:100%;margin:0;padding:0}
+  body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc{border:none;box-shadow:none;padding:0}
+  .doc-header{padding-bottom:12px;margin-bottom:18px}
+  .doc-brand{font-size:24px}.doc-title{font-size:26px}
+  .sec-title{margin:16px 0 8px;font-size:12px}
+  .info-tbl th,.info-tbl td,.done-tbl th,.done-tbl td,
+  .warranty-tbl th,.warranty-tbl td{padding:7px 10px;font-size:11px}
+  .doc-footer{margin-top:16px;padding-top:12px}
+  .confirm-wrap{page-break-inside:avoid}
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+</head>
+<body>
+
+<div class="toolbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="index.html" class="tb-btn">← 홈</a>
+    <span class="brand">DAHAM</span>
+  </div>
+  <div style="display:flex;gap:6px">
+    <button class="tb-btn" onclick="showPreview()">미리보기</button>
+    <button class="tb-btn primary" onclick="printDoc()">인쇄 / PDF</button>
+  </div>
+</div>
+
+<!-- EDITOR -->
+<div class="editor" id="editor">
+  <div class="editor-title">준공확인서 및 하자보증서</div>
+  <div class="editor-sub">공사 완료 확인 및 하자 보증 조건을 고객과 함께 확인하고 서명받는 문서입니다.</div>
+
+  <!-- 현장 선택 -->
+  <div class="form-sec" style="border-left:3px solid var(--orange)">
+    <div class="form-sec-hd">일정표에서 현장 불러오기</div>
+    <div class="form-row wide" style="border:none;flex-direction:row;align-items:center;gap:12px">
+      <select id="sched-sel" onchange="loadFromSchedule()"
+        style="font-family:var(--sans);font-size:13px;border:1.5px solid var(--line);
+               padding:7px 10px;background:#fff;color:var(--ink);flex:1;outline:none;cursor:pointer">
+        <option value="">-- 현장 선택 --</option>
+      </select>
+      <span style="font-size:11px;color:var(--dim);white-space:nowrap">현장 선택 시 공사 정보 자동 입력</span>
+    </div>
+  </div>
+
+  <!-- 공사 개요 -->
+  <div class="form-sec">
+    <div class="form-sec-hd">공사 개요</div>
+    <div class="form-grid">
+      <div class="form-row wide">
+        <label>공사 현장 주소</label>
+        <input type="text" id="f-addr" placeholder="예) 경남 거창군 거창읍 푸르지오 104동 1103호">
+      </div>
+      <div class="form-row">
+        <label>착공일</label>
+        <input type="date" id="f-start">
+      </div>
+      <div class="form-row">
+        <label>준공일</label>
+        <input type="date" id="f-end">
+      </div>
+      <div class="form-row">
+        <label>고객명</label>
+        <input type="text" id="f-client" placeholder="홍길동">
+      </div>
+      <div class="form-row">
+        <label>연락처</label>
+        <input type="text" id="f-tel" placeholder="010-0000-0000">
+      </div>
+    </div>
+  </div>
+
+  <!-- 공종별 완료 확인 -->
+  <div class="form-sec" id="task-check-sec" style="display:none">
+    <div class="form-sec-hd">공종별 완료 확인 <span style="font-weight:400;color:var(--dim);text-transform:none;letter-spacing:0;font-size:10px">— 완료된 공종에 체크 후 특이사항 입력</span></div>
+    <div class="task-check-row header">
+      <div>완료</div><div>공종 / 기간</div><div></div><div>특이사항</div>
+    </div>
+    <div id="task-check-rows"></div>
+  </div>
+
+  <!-- 특이사항 -->
+  <div class="form-sec">
+    <div class="form-sec-hd">종합 특이사항 (선택)</div>
+    <div class="form-row wide" style="border:none">
+      <label>인수인계 시 협의 사항 또는 추가 요청</label>
+      <textarea id="f-special" placeholder="예) 주방 수전 교체 후 누수 없음 확인, 잔금 수령 예정 등"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div class="preview-wrap" id="preview-wrap">
+  <div class="preview-topbar">
+    <div style="font-size:12px;color:var(--mid)">미리보기 — 실제 인쇄 결과와 유사합니다</div>
+    <button class="tb-btn" onclick="showEditor()">← 편집으로</button>
+  </div>
+  <div class="doc" id="doc"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+var SCHED_KEY = 'daham_schedule_v1';
+var DOW_KO    = ['일','월','화','수','목','금','토'];
+
+var WARRANTY = [
+  {phase:'도배·도장',              period:'1년'},
+  {phase:'바닥재 (마루/장판)',      period:'1년'},
+  {phase:'타일·욕실천장·위생도기', period:'1년'},
+  {phase:'전기·조명',              period:'1년'},
+  {phase:'설비 (배관)',            period:'1년'},
+  {phase:'목공·가구',              period:'1년'},
+  {phase:'창호',                   period:'제작창 1년 · 완성창 제조사 보증'},
+  {phase:'중문',                   period:'1년'},
+  {phase:'에어컨 설치',            period:'제조사 문의'}
+];
+
+var SKIP_TASKS = ['에어컨 타공','에어컨 마감'];
+
+var schedProjects = [];
+var currentSched  = null;
+
+function loadProjects(){
+  try{ schedProjects = JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+}
+
+function populateSelector(){
+  var sel = document.getElementById('sched-sel');
+  sel.innerHTML = '<option value="">-- 현장 선택 --</option>';
+  schedProjects.forEach(function(p){
+    var name = (p.info&&(p.info.name||p.info.addr))||'현장명 미입력';
+    sel.innerHTML += '<option value="'+p.id+'">'+esc(name)+'</option>';
+  });
+}
+
+function loadFromSchedule(){
+  var id = document.getElementById('sched-sel').value;
+  if(!id){ currentSched=null; hideTaskSec(); return; }
+  currentSched = null;
+  schedProjects.forEach(function(p){ if(p.id===id) currentSched=p; });
+  if(!currentSched) return;
+  var info = currentSched.info||{};
+  document.getElementById('f-addr').value   = info.addr||info.name||'';
+  document.getElementById('f-start').value  = info.start||'';
+  document.getElementById('f-end').value    = info.end||'';
+  document.getElementById('f-client').value = info.name||'';
+  document.getElementById('f-tel').value    = info.tel||'';
+  renderTaskChecks();
+  showToast('✓ 불러왔습니다');
+}
+
+function hideTaskSec(){
+  document.getElementById('task-check-sec').style.display='none';
+}
+
+function renderTaskChecks(){
+  var sec  = document.getElementById('task-check-sec');
+  var rows = document.getElementById('task-check-rows');
+  if(!currentSched){ sec.style.display='none'; return; }
+  var tasks = (currentSched.tasks||[]).filter(function(t){
+    return SKIP_TASKS.indexOf(t.name)<0;
+  });
+  if(!tasks.length){ sec.style.display='none'; return; }
+  sec.style.display='block';
+  var html='';
+  tasks.forEach(function(t){
+    var isDone = t.status==='done';
+    var period = fmtPeriod(t.start, t.end);
+    html+='<div class="task-check-row">'
+      +'<div class="task-done-wrap">'
+      +'<input type="checkbox" id="chk-'+t.id+'"'+(isDone?' checked':'')+' onchange="updateCheckLabel(\''+t.id+'\')">'
+      +'</div>'
+      +'<div>'
+        +'<div class="task-name">'+esc(t.name)+'</div>'
+        +'<div class="task-period">'+esc(period)+'</div>'
+      +'</div>'
+      +'<div></div>'
+      +'<input class="task-note" id="note-'+t.id+'" type="text" placeholder="특이사항">'
+      +'</div>';
+  });
+  rows.innerHTML=html;
+}
+
+function updateCheckLabel(id){
+  /* 체크 상태 변경 시 시각 피드백 — 필요 시 확장 가능 */
+}
+
+/* 날짜 포맷 */
+function pad(n){ return n<10?'0'+n:String(n); }
+function fmtD(ds){
+  if(!ds) return '';
+  var p=ds.split('-');
+  return parseInt(p[1])+'월 '+parseInt(p[2])+'일';
+}
+function fmtDFull(ds){
+  if(!ds) return '';
+  var p=ds.split('-');
+  return p[0]+'년 '+parseInt(p[1])+'월 '+parseInt(p[2])+'일';
+}
+function fmtPeriod(s,e){
+  if(!s) return '-';
+  if(!e||s===e) return fmtD(s);
+  return fmtD(s)+' ~ '+fmtD(e);
+}
+
+/* 문서 생성 */
+function buildDoc(){
+  var addr    = document.getElementById('f-addr').value.trim()   || '공사 현장';
+  var start   = document.getElementById('f-start').value;
+  var end     = document.getElementById('f-end').value;
+  var client  = document.getElementById('f-client').value.trim() || '';
+  var tel     = document.getElementById('f-tel').value.trim()    || '';
+  var special = document.getElementById('f-special').value.trim();
+
+  var period  = start&&end ? fmtDFull(start)+' ~ '+fmtDFull(end)
+              : start ? fmtDFull(start)+' ~ 미정' : '미정';
+
+  var today = new Date();
+  var docNo = today.getFullYear()+'-'
+    +String(today.getMonth()+1).padStart(2,'0')
+    +String(today.getDate()).padStart(2,'0');
+
+  /* 공종 완료 행 */
+  var tasks = currentSched ? (currentSched.tasks||[]).filter(function(t){
+    return SKIP_TASKS.indexOf(t.name)<0;
+  }) : [];
+
+  var doneRows='';
+  tasks.forEach(function(t,i){
+    var chkEl = document.getElementById('chk-'+t.id);
+    var noteEl= document.getElementById('note-'+t.id);
+    var isDone= chkEl ? chkEl.checked : t.status==='done';
+    var note  = noteEl ? noteEl.value.trim() : '';
+    doneRows+='<tr>'
+      +'<td style="text-align:center;color:var(--dim);font-size:11px">'+(i+1)+'</td>'
+      +'<td class="phase">'+esc(t.name)+'</td>'
+      +'<td class="period">'+esc(fmtPeriod(t.start,t.end))+'</td>'
+      +'<td style="text-align:center"><span class="done-chk '+(isDone?'yes':'no')+'">'+(isDone?'✓':'○')+'</span></td>'
+      +'<td style="font-size:11px;color:var(--mid)">'+esc(note)+'</td>'
+      +'</tr>';
+  });
+  if(!doneRows) doneRows='<tr><td colspan="5" style="text-align:center;color:var(--dim);padding:20px">일정표를 먼저 불러오세요</td></tr>';
+
+  /* 보증 만료일 계산 */
+  function calcExpiry(startDs, period){
+    if(!startDs) return '준공일 확정 후 산정';
+    var years = parseInt(period);
+    if(isNaN(years)) return '제조사 문의';
+    var d = new Date(startDs+'T00:00:00');
+    d.setFullYear(d.getFullYear()+years);
+    d.setDate(d.getDate()-1);
+    return fmtDFull(d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2));
+  }
+
+  /* 보증 행 */
+  var wRows = WARRANTY.map(function(w){
+    var expiry = calcExpiry(end, w.period);
+    var expiryStyle = end && !isNaN(parseInt(w.period))
+      ? 'font-weight:700;color:#C62828'
+      : 'color:var(--mid);font-size:11px';
+    return '<tr><td>'+w.phase+'</td>'
+      +'<td style="font-weight:700;color:var(--orange-dk)">'+w.period+'</td>'
+      +'<td style="color:var(--mid);font-size:11px">'+(end?esc(fmtDFull(end)):'준공일 기준')+'</td>'
+      +'<td style="'+expiryStyle+'">'+esc(expiry)+'</td>'
+      +'</tr>';
+  }).join('');
+
+  var specialBlock = special
+    ? '<div class="special-box">'+esc(special)+'</div>'
+    : '<div class="special-box" style="color:var(--dim);font-size:12px">해당 없음</div>';
+
+  document.getElementById('doc').innerHTML = `
+    <div class="doc-header">
+      <div>
+        <div class="doc-brand">DAHAM<span style="opacity:.4">·</span>INTERIOR</div>
+        <div class="doc-brand-sub">다함인테리어 &nbsp;·&nbsp; 대표 최일성 &nbsp;·&nbsp; 010-2059-0347</div>
+      </div>
+      <div class="doc-title-block">
+        <div class="doc-title" style="font-size:26px">준공확인서 및 하자보증서</div>
+        <div class="doc-title-sub">COMPLETION &amp; WARRANTY CERTIFICATE</div>
+        <div class="doc-no">발행일 ${docNo}</div>
+      </div>
+    </div>
+
+    <div class="sec-title">1. 공사 개요</div>
+    <table class="info-tbl">
+      <tr><th>공사 현장</th><td>${esc(addr)}</td></tr>
+      <tr><th>공사 기간</th><td>${esc(period)}</td></tr>
+      ${client?`<tr><th>고객명</th><td>${esc(client)}${tel?' &nbsp; '+esc(tel):''}</td></tr>`:''}
+      <tr><th>시공업체</th><td>다함인테리어</td></tr>
+      <tr><th>담당자</th><td>최일성 &nbsp; 010-2059-0347</td></tr>
+      <tr><th>준공일</th><td style="font-weight:700">${end?esc(fmtDFull(end)):'미정'}</td></tr>
+      <tr><th>보증 시작일</th><td style="font-weight:700;color:var(--green)">${end?esc(fmtDFull(end))+' (준공일 기준)':'준공일 기준 적용'}</td></tr>
+    </table>
+
+    <div class="sec-title">2. 공종별 완료 확인</div>
+    <table class="done-tbl">
+      <thead>
+        <tr>
+          <th style="width:4%">No</th>
+          <th style="width:18%">공종</th>
+          <th style="width:22%">공사 기간</th>
+          <th style="width:8%;text-align:center">완료</th>
+          <th>특이사항</th>
+        </tr>
+      </thead>
+      <tbody>${doneRows}</tbody>
+    </table>
+
+    <div class="sec-title">3. 하자 보증 조건</div>
+    <div style="font-size:12px;line-height:2;color:var(--mid);margin-bottom:12px;padding:10px 16px;background:#E8F5E9;border:1px solid #A5D6A7;border-left:4px solid var(--green)">
+      · 시공사(다함인테리어)는 준공일로부터 아래 보증 기간 동안 하자 발생 시 <strong style="color:var(--green)">무상 보수</strong>를 시행할 것을 보증합니다.<br>
+      · 단, 고객의 고의·과실, 천재지변, 정상 마모에 의한 손상은 보증에서 제외됩니다.<br>
+      · 하자 접수: 대표 최일성 &nbsp; 010-2059-0347
+    </div>
+    <table class="warranty-tbl">
+      <thead><tr><th style="width:28%">공종</th><th style="width:12%">보증 기간</th><th style="width:25%">보증 시작일</th><th style="width:25%">만료일</th></tr></thead>
+      <tbody>${wRows.replace(/준공일 기준/g, end?esc(fmtDFull(end)):'준공일 기준')}</tbody>
+    </table>
+
+    <div class="sec-title">4. 특이사항 및 인수인계</div>
+    ${specialBlock}
+
+    <div class="sec-title">5. 준공 확인 및 하자보증 동의</div>
+    <div style="font-size:12px;line-height:2;color:var(--mid);margin-bottom:16px;padding:12px 16px;background:#fafafa;border:1px solid var(--line)">
+      · 상기 공사가 계약서 및 시방서에 따라 완료되었음을 쌍방이 확인합니다.<br>
+      · 시공사는 위 하자 보증 조건에 따라 보증 기간 내 무상 보수를 이행할 것을 확약합니다.<br>
+      · 고객은 공사 내용을 직접 확인하고 이상 없음을 인정하며 인수합니다.<br>
+      · 본 문서 서명 이후 발생하는 추가 공사는 별도 계약에 따릅니다.
+    </div>
+    <div class="confirm-wrap">
+      <div class="confirm-box">
+        <div class="confirm-box-title">시공사 (보증인)</div>
+        <div class="confirm-row"><span class="confirm-lbl">상호</span><span class="confirm-val">다함인테리어</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">대표</span><span class="confirm-val">최일성</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">연락처</span><span class="confirm-val">010-2059-0347</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">주소</span><span class="confirm-val">경북 구미시 신시로10길 75-2</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">준공일</span><span class="confirm-val">${end?esc(fmtDFull(end)):'&nbsp;'}</span></div>
+        <div class="sign-line">서명 / 날인</div>
+      </div>
+      <div class="confirm-box">
+        <div class="confirm-box-title">고객 (인수자)</div>
+        <div class="confirm-row"><span class="confirm-lbl">성명</span><span class="confirm-val">${esc(client)||'&nbsp;'}</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">연락처</span><span class="confirm-val">${esc(tel)||'&nbsp;'}</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">현장</span><span class="confirm-val">${esc(addr)}</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">인수 확인일</span><span class="confirm-val">&nbsp;</span></div>
+        <div class="confirm-row"><span class="confirm-lbl">하자보증 동의</span><span class="confirm-val">동의함 &nbsp; □</span></div>
+        <div class="sign-line">서명 / 날인</div>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <div style="font-size:11px;color:var(--dim);line-height:2">
+        본 문서는 준공 확인 및 하자 보증 효력을 동시에 가집니다.<br>
+        쌍방 서명 후 각 1부씩 보관하시기 바랍니다.
+      </div>
+      <div class="sig-block">
+        <div class="sig-company">다함인테리어</div>
+        <div class="sig-detail">대표 &nbsp; 최일성</div>
+        <div class="sig-detail">TEL &nbsp; 010-2059-0347</div>
+        <div class="sig-detail">경북 구미시 신시로10길 75-2</div>
+        <div><span class="sig-stamp">DAHAM INTERIOR</span></div>
+      </div>
+    </div>
+  `;
+}
+
+function showPreview(){ buildDoc(); document.getElementById('editor').style.display='none'; document.getElementById('preview-wrap').style.display='block'; window.scrollTo(0,0); }
+function showEditor(){ document.getElementById('editor').style.display='block'; document.getElementById('preview-wrap').style.display='none'; }
+function printDoc(){ buildDoc(); document.getElementById('editor').style.display='none'; document.getElementById('preview-wrap').style.display='block'; setTimeout(function(){ window.print(); },120); }
+function showToast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },2000); }
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+loadProjects();
+populateSelector();
+</script>
+<script src="auth.js"></script>
+
+<script>
+(function(){
+  const KEY='daham_workflow_v1';
+  const now=()=>new Date().toISOString();
+  const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{"projects":{}}')}catch(e){return {projects:{}}}};
+  const save=d=>localStorage.setItem(KEY,JSON.stringify(d));
+  const pid=()=>localStorage.getItem('daham_current_project')||new URLSearchParams(location.search).get('project')||'default';
+  window.DAHAM_WORKFLOW={
+    getProject(){const d=load(), id=pid(); return (d.projects[id] ||= {id,updatedAt:now(),estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]})},
+    update(mut){const d=load(),id=pid(); const p=(d.projects[id] ||= {id,estimateItems:[],scheduleItems:[],orderItems:[],alerts:[],settlement:{},completion:{},asItems:[]}); mut(p); p.updatedAt=now(); save(d); return p},
+    syncEstimate(items){return this.update(p=>{p.estimateItems=items||[]})},
+    syncSchedule(items){return this.update(p=>{p.scheduleItems=items||[]})},
+    syncOrders(items){return this.update(p=>{p.orderItems=items||[]})},
+    key:KEY
+  };
+})();
+</script>
+
+</body>
+</html>

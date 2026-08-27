@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>공사일정표 — 다함인테리어</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-lt:#FFF3EE;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;--line:#e0e0e0;--line-lt:#f0f0f0;
+  --bg:#f2f2f2;--white:#fff;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh}
+
+.header{background:var(--orange);color:#fff;padding:18px 20px 14px;text-align:center}
+.header-brand{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.14em;opacity:.9}
+.header-title{font-size:17px;font-weight:800;margin-top:3px}
+.header-sub{font-size:11px;opacity:.75;margin-top:3px}
+
+.wrap{max-width:680px;margin:0 auto;padding:18px 14px 48px}
+
+.info-card{background:#fff;border-radius:10px;padding:18px;margin-bottom:18px;
+  box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.info-label{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--orange);margin-bottom:12px}
+.info-row{display:flex;gap:8px;margin-bottom:8px;align-items:flex-start}
+.info-k{font-size:11px;font-weight:700;color:var(--dim);min-width:56px;padding-top:1px}
+.info-v{font-size:13px;color:var(--ink);font-weight:500;flex:1;line-height:1.5}
+
+/* ── 캘린더 ── */
+.cal-month{background:var(--white);border:1.5px solid #ccc;margin-bottom:14px;overflow:hidden;border-radius:8px}
+.cal-mhd{background:var(--ink);color:#fff;padding:10px 16px;font-size:14px;font-weight:700;letter-spacing:.02em}
+.cal-wdhd-row{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid #bbb}
+.cal-wdhd{text-align:center;font-size:10px;font-weight:600;letter-spacing:.04em;
+  padding:6px 0;color:var(--mid);background:#f0f0f0;border-right:1px solid #ccc}
+.cal-wdhd:last-child{border-right:none}
+.cal-wdhd.sun{color:#e53935}
+.cal-wdhd.sat{color:#1565C0}
+.cal-week-group{border-bottom:1.5px solid #ccc}
+.cal-week-group:last-child{border-bottom:none}
+.cal-drow{display:grid;grid-template-columns:repeat(7,1fr)}
+.cal-day{border-right:1px solid #d0d0d0;min-height:56px;padding:6px 8px;font-size:13px;font-weight:500}
+.cal-day:last-child{border-right:none}
+.cal-day.other-m{color:#ccc}
+.cal-day.today .cal-dn{background:var(--orange);color:#fff;width:22px;height:22px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px}
+.cal-day.sun{color:#e53935}
+.cal-day.sat{color:#1565C0}
+.cal-day.other-m.sun,.cal-day.other-m.sat{color:#ddd}
+.cal-day.holiday{background:#fff5f5}
+.cal-dn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.cal-holi{font-size:7px;color:#C62828;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal-trow{position:relative}
+.cbar{position:absolute;height:26px;display:flex;align-items:center;padding:0 8px;
+  font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis;z-index:1;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+.notice{background:var(--orange-lt);border-left:3px solid var(--orange);
+  padding:11px 14px;border-radius:0 8px 8px 0;margin-top:14px;font-size:12px;
+  color:var(--ink);line-height:1.7}
+.loading{text-align:center;padding:60px 20px;color:var(--dim);font-size:13px}
+.error-msg{text-align:center;padding:60px 20px;color:#C62828;font-size:13px;line-height:1.8}
+
+@media(max-width:480px){
+  .wrap{padding:12px 10px 40px}
+  .cal-day{min-height:30px;padding:3px 3px}
+  .cbar{height:20px;font-size:9px}
+  .cal-dn{font-size:11px}
+}
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .header{background:var(--orange)!important}
+  .cbar{-webkit-print-color-adjust:exact!important}
+}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+<script src="auth.js"></script></head>
+<body>
+
+<div class="header">
+  <div class="header-brand">DAHAM</div>
+  <div class="header-title" id="hd-title">공사일정표</div>
+  <div class="header-sub">다함인테리어</div>
+</div>
+
+<div class="wrap">
+  <div id="content"><div class="loading">일정 불러오는 중...</div></div>
+</div>
+
+<script>
+var SUPA_URL = 'https://ozgiihtixsjwoxbtotfi.supabase.co';
+var SUPA_KEY = 'sb_publishable_aHoQvdLGjD6J36LXb90HhA_d-DyvbAm';
+
+var FIXED_HOL={'01-01':'신정','03-01':'삼일절','05-05':'어린이날','06-06':'현충일','08-15':'광복절','10-03':'개천절','10-09':'한글날','12-25':'크리스마스'};
+var LUNAR_HOL={'2024-02-09':'설날연휴','2024-02-10':'설날','2024-02-11':'설날연휴','2024-02-12':'대체공휴일','2025-01-28':'설날연휴','2025-01-29':'설날','2025-01-30':'설날연휴','2026-02-16':'설날연휴','2026-02-17':'설날','2026-02-18':'설날연휴','2027-02-05':'설날연휴','2027-02-06':'설날','2027-02-07':'설날연휴','2027-02-08':'대체공휴일','2025-05-05':'부처님오신날','2025-05-06':'대체공휴일','2026-05-24':'부처님오신날','2026-05-25':'대체공휴일','2027-05-13':'부처님오신날','2025-10-05':'추석연휴','2025-10-06':'추석','2025-10-07':'추석연휴','2025-10-08':'대체공휴일','2026-09-24':'추석연휴','2026-09-25':'추석','2026-09-26':'추석연휴','2026-09-28':'대체공휴일','2025-03-03':'대체공휴일','2026-03-02':'대체공휴일','2026-06-08':'대체공휴일','2026-08-17':'대체공휴일','2026-10-05':'대체공휴일'};
+var MONTH_KO=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+var DOW_KO=['일','월','화','수','목','금','토'];
+
+function pad(n){return n<10?'0'+n:String(n);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+function fmtDate(s){if(!s)return '';var p=s.split('-');return p[0]+'년 '+(p[1]*1)+'월 '+(p[2]*1)+'일';}
+function dstr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function hexToRgba(hex,a){
+  hex=hex.replace('#','');
+  if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  var r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+function todayStr(){var d=new Date();return dstr(d);}
+function getHoliday(ds){return LUNAR_HOL[ds]||FIXED_HOL[ds.slice(5)]||null;}
+function isNonWorkDay(d){if(d.getDay()===0||d.getDay()===6)return true;return !!getHoliday(dstr(d));}
+
+function getWeeksForMonth(year,month){
+  if(isNaN(year)||isNaN(month)){year=new Date().getFullYear();month=new Date().getMonth();}
+  var weeks=[],cur=new Date(year,month,1);
+  cur.setDate(cur.getDate()-cur.getDay());
+  var last=new Date(year,month+1,0);
+  var guard=0;
+  while(guard++<12){
+    var week=[];
+    for(var d=0;d<7;d++){week.push(new Date(cur));cur.setDate(cur.getDate()+1);}
+    weeks.push(week);
+    if(cur>last&&cur.getDay()===0)break;
+  }
+  return weeks;
+}
+
+function renderMonth(year,month,tasks,today,color){
+  var weeks=getWeeksForMonth(year,month);
+  var LANE_H=28,LANE_PAD=3;
+  var monthStart=dstr(new Date(year,month,1));
+  var monthEnd=dstr(new Date(year,month+1,0));
+  var weekData=weeks.map(function(week){
+    var weekStart=dstr(week[0]),weekEnd=dstr(week[6]);
+    var clampStart=weekStart<monthStart?monthStart:weekStart;
+    var clampEnd=weekEnd>monthEnd?monthEnd:weekEnd;
+    var bars=[];
+    tasks.forEach(function(t){
+      var ts=t.start,te=t.end||t.start;
+      if(ts>clampEnd||te<clampStart)return;
+      var bs=ts<clampStart?clampStart:ts;
+      var be=te>clampEnd?clampEnd:te;
+      var bsD=new Date(bs+'T00:00:00'),beD=new Date(be+'T00:00:00');
+      var sc=bsD.getDay(),ec=beD.getDay();
+      bars.push({name:t.name,color:t.color||color,
+        startCol:sc,endCol:ec,isCont:ts<weekStart,isCont2:te>weekEnd});
+    });
+    bars.sort(function(a,b){return a.startCol-b.startCol;});
+    var laneEnd=[];
+    bars.forEach(function(bar){
+      var lane=0;
+      while(laneEnd[lane]!==undefined&&laneEnd[lane]>=bar.startCol)lane++;
+      laneEnd[lane]=bar.endCol;bar.lane=lane;
+    });
+    return{bars:bars,numLanes:laneEnd.length||0};
+  });
+
+  var html='<div class="cal-month">';
+  html+='<div class="cal-mhd">'+year+'년 '+MONTH_KO[month]+'</div>';
+  html+='<div class="cal-wdhd-row">';
+  ['sun','','','','','','sat'].forEach(function(cls,i){
+    html+='<div class="cal-wdhd '+cls+'">'+DOW_KO[i]+'</div>';
+  });
+  html+='</div>';
+
+  weeks.forEach(function(week,wi){
+    var wd=weekData[wi];
+    html+='<div class="cal-week-group"><div class="cal-drow">';
+    week.forEach(function(day,di){
+      var ds=dstr(day);
+      var holi=getHoliday(ds);
+      var cls='cal-day'+(ds===today?' today':'')+(day.getMonth()!==month?' other-m':'')
+        +(di===0?' sun':di===6?' sat':'')+(holi?' holiday':'');
+      var isOther=day.getMonth()!==month;
+      html+='<div class="'+cls+'">'
+        +(isOther?'':'<div class="cal-dn">'+day.getDate()+'</div>'
+        +(holi?'<div class="cal-holi">'+esc(holi)+'</div>':''))
+        +'</div>';
+    });
+    html+='</div>';
+    var tRowH=wd.numLanes>0?(wd.numLanes*LANE_H+LANE_PAD*2):4;
+    html+='<div class="cal-trow" style="height:'+tRowH+'px">';
+    wd.bars.forEach(function(bar){
+      var span=bar.endCol-bar.startCol+1;
+      var lPct=(bar.startCol/7*100).toFixed(3);
+      var wPct=(span/7*100).toFixed(3);
+      var top=bar.lane*LANE_H+LANE_PAD;
+      var rL=bar.isCont?'0':'5px',rR=bar.isCont2?'0':'5px';
+      var pL=bar.isCont?'3px':'8px';
+      var label=bar.isCont?'':esc(bar.name||'');
+      var bgColor=hexToRgba(bar.color||'#555',0.75);
+      html+='<div class="cbar" style="left:calc('+lPct+'% + 1px);width:calc('+wPct
+        +'% - 2px);top:'+top+'px;background:'+bgColor+';border-left:3px solid '+esc(bar.color)+';border-radius:'+rL+' '+rR+' '+rR+' '+rL
+        +';padding-left:'+pL+'">'+label+'</div>';
+    });
+    html+='</div></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function renderError(msg){
+  document.getElementById('content').innerHTML='<div class="error-msg">'+esc(msg)+'</div>';
+}
+
+function renderSchedule(data){
+  var info=data.info||{};
+  var tasks=(data.tasks||[]).sort(function(a,b){return (a.start||'').localeCompare(b.start||'');});
+  var projColor=data.color||'#E65100';
+
+  var title=info.addr||info.name||'공사일정표';
+  document.getElementById('hd-title').textContent=title;
+  document.title=title+' — 다함인테리어';
+
+  var html='';
+
+  /* 현장 정보 */
+  html+='<div class="info-card"><div class="info-label">현장 정보</div>';
+  if(info.addr) html+=infoRow('주소',info.addr);
+  if(info.name) html+=infoRow('고객명',info.name);
+  if(info.start&&info.end) html+=infoRow('공사기간',fmtDate(info.start)+' ~ '+fmtDate(info.end));
+  else if(info.start) html+=infoRow('착공일',fmtDate(info.start));
+  if(info.manager) html+=infoRow('담당자',info.manager);
+  if(info.memo) html+=infoRow('메모',info.memo);
+  html+='</div>';
+
+  if(!tasks.length){
+    html+='<div class="notice">등록된 공정이 없습니다.</div>';
+    document.getElementById('content').innerHTML=html;
+    return;
+  }
+
+  /* 공사 기간 내 월 목록 */
+  var dates=[];
+  tasks.forEach(function(t){ if(t.start)dates.push(t.start); if(t.end)dates.push(t.end); });
+  dates.sort();
+  var d0=new Date(dates[0]+'T00:00:00');
+  var d1=new Date(dates[dates.length-1]+'T00:00:00');
+  var today=todayStr();
+
+  var yr=d0.getFullYear(), mo=d0.getMonth();
+  while(true){
+    html+=renderMonth(yr,mo,tasks,today,projColor);
+    if(yr===d1.getFullYear()&&mo===d1.getMonth())break;
+    mo++;if(mo>11){mo=0;yr++;}
+    if(yr>d1.getFullYear()+1)break;
+  }
+
+  html+='<div class="notice">위 일정은 공사 진행 상황에 따라 변동될 수 있습니다.<br>문의: 다함인테리어</div>';
+  document.getElementById('content').innerHTML=html;
+}
+
+function infoRow(k,v){
+  return '<div class="info-row"><div class="info-k">'+esc(k)+'</div><div class="info-v">'+esc(v)+'</div></div>';
+}
+
+/* 로드 */
+var shareId=new URLSearchParams(location.search).get('id');
+if(!shareId){
+  renderError('잘못된 링크입니다.');
+} else {
+  var sb=null;
+  try{ sb=supabase.createClient(SUPA_URL,SUPA_KEY); }catch(e){}
+  if(!sb){ renderError('연결 실패. 잠시 후 다시 시도해주세요.'); }
+  else {
+    sb.from('daham_backup').select('data').eq('id',shareId).maybeSingle()
+      .then(function(res){
+        if(res.error||!res.data){ renderError('일정을 찾을 수 없습니다.\n링크가 만료됐거나 잘못된 링크입니다.'); return; }
+        try{
+          var data=res.data.data;
+          if(typeof data==='string')data=JSON.parse(data);
+          renderSchedule(data);
+        }catch(e){ renderError('데이터 오류: '+e.message); }
+      }).catch(function(e){ renderError('불러오기 실패: '+(e.message||e)); });
+  }
+}
+</script>
+</body>
+</html>

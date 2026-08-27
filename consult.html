@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>다함인테리어 — 상담 관리</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#E65100">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="다함">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E65100;--orange-lt:#FFF3EE;--orange-dk:#BF360C;
+  --ink:#1a1a1a;--mid:#555;--dim:#aaa;
+  --line:#e0e0e0;--line-lt:#f5f5f5;--bg:#f0f0f0;--white:#fff;
+  --sans:'Pretendard',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13px;min-height:100vh}
+
+.toolbar{position:sticky;top:0;z-index:200;height:48px;padding:0 20px;display:flex;align-items:center;justify-content:space-between;background:var(--white);border-bottom:2.5px solid var(--orange);box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.12em;color:var(--orange)}
+.tb-home{font-size:11px;color:var(--mid);text-decoration:none;border:1.5px solid var(--line);padding:4px 10px;transition:all .15s}
+.tb-home:hover{border-color:#333;color:#333}
+.tb-add-btn{font-family:var(--sans);font-size:12px;font-weight:700;padding:7px 14px;background:var(--orange);color:#fff;border:none;cursor:pointer;transition:background .15s}
+.tb-add-btn:hover{background:var(--orange-dk)}
+
+.tab-wrap{background:var(--white);border-bottom:1px solid var(--line);padding:0 20px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+.tab-wrap::-webkit-scrollbar{display:none}
+.tab-btn{display:inline-block;padding:11px 13px;font-size:12px;font-weight:600;color:var(--dim);cursor:pointer;border-bottom:2.5px solid transparent;transition:all .15s;border:none;background:none;font-family:var(--sans)}
+.tab-btn.active{color:var(--orange);border-bottom-color:var(--orange)}
+.tab-count{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:4px;background:var(--line-lt);color:var(--mid)}
+.tab-btn.active .tab-count{background:var(--orange-lt);color:var(--orange)}
+
+.main{max-width:1000px;margin:0 auto;padding:20px 16px 100px}
+
+/* 테이블 */
+.tbl-wrap{background:var(--white);border-radius:12px;box-shadow:0 1px 8px rgba(0,0,0,.07);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.consult-table{width:100%;border-collapse:collapse;min-width:600px}
+.consult-table thead tr{background:#fafafa;border-bottom:2px solid var(--line)}
+.consult-table th{padding:11px 14px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--dim);text-align:left;white-space:nowrap}
+.consult-table td{padding:13px 14px;border-bottom:1px solid var(--line-lt);font-size:13px;vertical-align:middle}
+.consult-table tbody tr:last-child td{border-bottom:none}
+.consult-table tbody tr{cursor:pointer;transition:background .1s}
+.consult-table tbody tr:hover{background:#fafafa}
+.ct-num{color:var(--dim);font-size:12px}
+.ct-badge{font-size:9px;font-weight:700;padding:3px 9px;border-radius:4px;white-space:nowrap;display:inline-block}
+.ct-name{font-size:14px;font-weight:800}
+.ct-sub{font-size:11px;color:var(--mid);margin-top:2px}
+.ct-proj{font-size:10px;font-weight:700;color:var(--orange);background:var(--orange-lt);padding:2px 7px;border-radius:4px;text-decoration:none;margin-left:6px;vertical-align:middle}
+.ct-date{font-size:12px;color:var(--mid);white-space:nowrap}
+.empty-state{text-align:center;padding:60px 20px;color:var(--dim)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+
+/* 모바일: 불필요한 컬럼 숨김 */
+@media(max-width:580px){
+  .main{padding:14px 10px 100px}
+  .consult-table{min-width:0}
+  .tbl-wrap{border-radius:8px}
+  .col-hide-mobile{display:none}
+  .consult-table th{padding:9px 10px;font-size:9px}
+  .consult-table td{padding:11px 10px;font-size:12px}
+  .ct-name{font-size:13px}
+}
+
+/* 모달 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-end;justify-content:center}
+.modal-box{background:var(--white);width:100%;max-width:640px;max-height:92vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden}
+@media(min-width:660px){.modal-overlay{align-items:center}.modal-box{border-radius:16px;max-height:88vh}}
+.modal-hd{padding:16px 20px 12px;border-bottom:1px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:16px;font-weight:800}
+.modal-close{font-size:22px;color:var(--dim);background:none;border:none;cursor:pointer;padding:2px;line-height:1}
+.modal-body{overflow-y:auto;padding:20px;flex:1;min-height:0}
+.modal-ft{padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;flex-shrink:0;background:var(--white)}
+
+/* 마일스톤 진행 바 */
+.mbar{padding:14px 20px;background:#fafafa;border-bottom:2px solid var(--line);flex-shrink:0}
+.mbar-label{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+.mbar-steps{display:flex;align-items:center;gap:0;overflow-x:auto}
+.mbar-steps::-webkit-scrollbar{display:none}
+.mstep{display:flex;align-items:center;gap:0;flex-shrink:0}
+.mstep-btn{padding:8px 16px;border:2px solid var(--line);border-radius:0;cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;background:var(--white);color:var(--mid);font-family:var(--sans);white-space:nowrap;position:relative}
+.mstep-btn:first-child,.mstep:first-child .mstep-btn{border-radius:8px 0 0 8px}
+.mstep:not(:first-child) .mstep-btn{border-left:none}
+.mstep-btn:hover{background:#f5f5f5;color:var(--ink);z-index:1}
+.mstep-btn.active{border-color:var(--sc,#757575);background:var(--sb,#F5F5F5);color:var(--sc,#757575);z-index:2}
+/* 계약 버튼 — 단독 오른쪽 */
+.mstep-contract{margin-left:10px;flex-shrink:0}
+.mstep-contract .mstep-btn{border-radius:8px;border:2px solid #2E7D32;color:#2E7D32;background:#fff;font-size:12px;padding:8px 18px}
+.mstep-contract .mstep-btn:hover{background:#E8F5E9}
+.mstep-contract .mstep-btn.active{background:#2E7D32;color:#fff;border-color:#2E7D32}
+.mbar-hint{font-size:10px;color:var(--dim);margin-top:8px}
+
+/* 폼 */
+.sec-title{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--dim);margin-bottom:10px;margin-top:20px}
+.sec-title:first-child{margin-top:0}
+.form-row{margin-bottom:12px}
+.form-row label{display:block;font-size:11px;font-weight:700;color:var(--mid);margin-bottom:5px}
+.form-row input,.form-row textarea,.form-row select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:var(--sans);font-size:13px;outline:none;transition:border-color .15s;background:var(--white);color:var(--ink)}
+.form-row input:focus,.form-row textarea:focus,.form-row select:focus{border-color:var(--orange)}
+.form-row textarea{resize:vertical;min-height:70px;line-height:1.6}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* 마일스톤 이력 테이블 */
+.ms-table{width:100%;border-collapse:collapse;margin-top:4px}
+.ms-table th{font-size:9px;font-weight:700;color:var(--dim);letter-spacing:.05em;padding:4px 8px 8px;text-align:left}
+.ms-table td{padding:6px 8px;border-bottom:1px solid var(--line-lt);vertical-align:middle}
+.ms-table tr:last-child td{border-bottom:none}
+.ms-stage-pill{font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;white-space:nowrap;display:inline-block}
+.ms-dt-inp{font-family:var(--sans);font-size:11px;border:1.5px solid var(--line);border-radius:6px;padding:5px 7px;outline:none;width:100%;min-width:155px;color:var(--ink);background:var(--white)}
+.ms-dt-inp:focus{border-color:var(--orange)}
+.ms-memo-inp{font-family:var(--sans);font-size:12px;border:1.5px solid var(--line);border-radius:6px;padding:5px 8px;outline:none;width:100%;color:var(--ink);background:var(--white)}
+.ms-memo-inp:focus{border-color:var(--orange)}
+.ms-del-btn{background:none;border:none;color:#ccc;font-size:18px;cursor:pointer;padding:2px 5px;line-height:1;transition:color .1s}
+.ms-del-btn:hover{color:#e53935}
+/* 텍스트 노트 */
+.note-row{display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-lt)}
+.note-dot{width:7px;height:7px;border-radius:50%;background:#bbb;flex-shrink:0;margin-top:4px}
+.note-text{flex:1;font-size:11px;color:var(--mid);line-height:1.5}
+.note-time{font-size:10px;color:var(--dim);white-space:nowrap;flex-shrink:0}
+/* 메모 추가 */
+.hist-add-row{display:flex;gap:8px;margin-top:12px}
+.hist-add-row input{flex:1;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:12px;font-family:var(--sans);outline:none}
+.hist-add-row input:focus{border-color:var(--orange)}
+.hist-add-btn{padding:9px 14px;background:var(--orange);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans);white-space:nowrap}
+
+/* 버튼 */
+.btn{font-family:var(--sans);font-size:13px;font-weight:700;padding:12px 20px;border-radius:10px;cursor:pointer;transition:all .15s;border:none}
+.btn-save{background:var(--orange);color:#fff;flex:1}
+.btn-save:hover{background:var(--orange-dk)}
+.btn-del{background:var(--line-lt);color:#C62828;flex:0 0 auto}
+.btn-del:hover{background:#FFEBEE}
+.btn-proj{background:#FFF3EE;color:var(--orange);flex:0 0 auto;border:1.5px solid var(--orange)}
+.btn-proj:hover{background:var(--orange);color:#fff}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+</head>
+<body>
+
+<div class="toolbar">
+  <div style="display:flex;align-items:center;gap:12px">
+    <a class="tb-home" href="index.html">← 홈</a>
+    <span class="brand">DAHAM</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span style="font-size:13px;font-weight:700;color:var(--mid)">상담 관리</span>
+    <span id="sync-dot" title="클라우드 동기화" style="font-size:13px;opacity:.35;transition:all .3s">☁</span>
+    <button class="tb-add-btn" onclick="openAddModal()">+ 상담 추가</button>
+  </div>
+</div>
+
+<div class="tab-wrap" id="tab-wrap"></div>
+<div class="main"><div id="list-area"></div></div>
+
+<div class="modal-overlay" id="modal" style="display:none" onclick="onOverlayClick(event)">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <div class="modal-title" id="modal-title">새 상담</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="mbar" id="mbar"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-ft" id="modal-ft"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var DB_KEY  = 'daham_consult_v1';
+var PROJ_DB = 'daham_detail_v2';
+var SUPA_URL = 'https://famqvwnsustbxuizohni.supabase.co';
+var SUPA_KEY = 'sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
+var _sb = null;
+
+/* 마일스톤 단계 (상단 버튼) */
+var MS_CONFIG = {
+  inquiry:     { label:'상담문의', color:'#757575', bg:'#F5F5F5' },
+  site_check:  { label:'현장실측', color:'#0277BD', bg:'#E1F5FE' },
+  est_meeting: { label:'견적미팅', color:'#E65100', bg:'#FFF3EE' },
+  est_done:    { label:'견적완료', color:'#6A1B9A', bg:'#F3E5F5' },
+  contracted:  { label:'계약',     color:'#2E7D32', bg:'#E8F5E9' },
+};
+var MS_ACTIVE  = ['inquiry','site_check','est_meeting','est_done']; /* 진행 단계 */
+var MS_ORDER   = ['inquiry','site_check','est_meeting','est_done','contracted'];
+
+/* 구버전 상태 호환 */
+var MS_COMPAT = {
+  scheduled:  { label:'상담 예정', color:'#1565C0', bg:'#E3F2FD' },
+  estimating: { label:'견적 진행', color:'#E65100', bg:'#FFF3EE' },
+  pending:    { label:'보류',      color:'#F57F17', bg:'#FFF8E1' },
+  cancelled:  { label:'취소',      color:'#C62828', bg:'#FFEBEE' },
+};
+
+function getStatusCfg(s){
+  return MS_CONFIG[s] || MS_COMPAT[s] || { label:s, color:'#aaa', bg:'#f5f5f5' };
+}
+function isActive(s){ return MS_ACTIVE.indexOf(s)>=0 || ['scheduled','estimating','pending','cancelled'].indexOf(s)>=0; }
+
+var _filter      = 'active';
+var _editId      = null;
+var _records     = [];
+var _modalHist   = []; /* 모달 세션용 이력 작업본 */
+var _curStatus   = 'inquiry'; /* 모달 현재 선택 단계 */
+
+/* ════ CLOUD SYNC ════ */
+function initCloud(){
+  try{
+    var token = window.DAHAM_AUTH && DAHAM_AUTH.getAccessToken ? DAHAM_AUTH.getAccessToken() : '';
+    _sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{
+      global:{headers: token ? {Authorization:'Bearer '+token} : {}} ,
+      auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}
+    });
+  }catch(e){ _sb=null; }
+}
+function setSyncDot(state){
+  var el=document.getElementById('sync-dot');
+  if(!el) return;
+  if(state==='up'){ el.textContent='↑'; el.style.opacity='1'; el.style.color='var(--orange)'; }
+  else if(state==='ok'){ el.textContent='☁'; el.style.opacity='.35'; el.style.color='inherit'; }
+  else if(state==='err'){ el.textContent='⚠'; el.style.opacity='1'; el.style.color='#e53935'; }
+}
+function cloudPush(arr){
+  if(!_sb) return;
+  setSyncDot('up');
+  var str=JSON.stringify(arr);
+  var ts=new Date().toISOString();
+  localStorage.setItem(DB_KEY+'_ts',ts);
+  _sb.from('sync_data').upsert({key:DB_KEY,value:str,updated_at:ts})
+    .then(function(r){ setSyncDot(r.error?'err':'ok'); });
+}
+function cloudPull(onDone){
+  if(!_sb){ onDone&&onDone(); return; }
+  _sb.from('sync_data').select('value,updated_at').eq('key',DB_KEY).maybeSingle()
+    .then(function(r){
+      if(r.error||!r.data){ setSyncDot('ok'); onDone&&onDone(); return; }
+      var localTs=localStorage.getItem(DB_KEY+'_ts')||'';
+      if(r.data.updated_at>localTs){
+        try{
+          var parsed=JSON.parse(r.data.value);
+          localStorage.setItem(DB_KEY,JSON.stringify(parsed));
+          localStorage.setItem(DB_KEY+'_ts',r.data.updated_at);
+          showToast('☁ 클라우드에서 동기화됨');
+          renderTabs(); renderList();
+        }catch(e){}
+      }
+      setSyncDot('ok'); onDone&&onDone();
+    });
+}
+
+/* DB */
+function loadDB(){ try{ return JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }catch(e){ return []; } }
+function saveDB(arr){ try{ localStorage.setItem(DB_KEY,JSON.stringify(arr)); }catch(e){} cloudPush(arr); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function nowISO(){ return new Date().toISOString(); }
+function p2(n){ return n<10?'0'+n:String(n); }
+function localDTStr(){
+  var d=new Date();
+  return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes());
+}
+function fmtDate(iso){ return iso?iso.slice(0,10):''; }
+function fmtDateTime(iso){
+  if(!iso) return '';
+  var d=new Date(iso);
+  return (d.getMonth()+1)+'월 '+d.getDate()+'일 '+d.getHours()+':'+p2(d.getMinutes());
+}
+
+/* 탭 */
+function renderTabs(){
+  var all=loadDB();
+  var ac=all.filter(function(r){ return isActive(r.status); }).length;
+  var cc=all.filter(function(r){ return r.status==='contracted'; }).length;
+  var tabs=[
+    {key:'active',      label:'진행 상담', cnt:ac},
+    {key:'contracted',  label:'계약 완료', cnt:cc},
+    {key:'inquiry',     label:'상담문의',  cnt:all.filter(function(r){return r.status==='inquiry';}).length},
+    {key:'site_check',  label:'현장실측',  cnt:all.filter(function(r){return r.status==='site_check';}).length},
+    {key:'est_meeting', label:'견적미팅',  cnt:all.filter(function(r){return r.status==='est_meeting';}).length},
+    {key:'est_done',    label:'견적완료',  cnt:all.filter(function(r){return r.status==='est_done';}).length},
+  ];
+  document.getElementById('tab-wrap').innerHTML=tabs.map(function(t){
+    var a=_filter===t.key?' active':'';
+    return '<button class="tab-btn'+a+'" onclick="setFilter(\''+t.key+'\')">'
+      +t.label+'<span class="tab-count">'+t.cnt+'</span></button>';
+  }).join('');
+}
+
+/* 리스트 */
+function renderList(){
+  _records=loadDB();
+  var list=_filter==='active'
+    ? _records.filter(function(r){ return isActive(r.status); })
+    : _records.filter(function(r){ return r.status===_filter; });
+
+  list.sort(function(a,b){
+    var da=a.schedDate||'',db=b.schedDate||'';
+    if(da&&db) return da<db?-1:da>db?1:0;
+    if(da&&!db) return -1; if(!da&&db) return 1;
+    return b.createdAt>a.createdAt?1:-1;
+  });
+
+  var el=document.getElementById('list-area');
+  if(!list.length){
+    var lbl=_filter==='active'?'진행 중인 상담':_filter==='contracted'?'계약된 상담':(getStatusCfg(_filter).label||_filter)+' 상담';
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">💬</div>'
+      +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">'+lbl+'이 없습니다</div>'
+      +'<div style="font-size:12px">+ 상담 추가 버튼을 눌러 시작하세요</div></div>';
+    return;
+  }
+  var rows=list.map(function(r,i){
+    var sc=getStatusCfg(r.status);
+    var sched=r.schedDate?r.schedDate+(r.schedTime?' '+r.schedTime:''):'—';
+    var proj=r.projId
+      ?'<a class="ct-proj" href="estimate.html" onclick="event.stopPropagation();sessionStorage.setItem(\'daham_open_proj\',\''+r.projId+'\')">📋 프로젝트</a>':'';
+    return '<tr onclick="openEditModal(\''+r.id+'\')">'
+      +'<td class="ct-num col-hide-mobile">'+(i+1)+'</td>'
+      +'<td><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></td>'
+      +'<td><div class="ct-name">'+escHtml(r.name||'—')+proj+'</div>'+(r.tel?'<div class="ct-sub">'+escHtml(r.tel)+'</div>':'')+'</td>'
+      +'<td><div class="ct-sub">'+escHtml(r.addr||'—')+(r.area?' · '+escHtml(r.area)+'평':'')+'</div>'+(r.works?'<div class="ct-sub">'+escHtml(r.works.slice(0,20))+'</div>':'')+'</td>'
+      +'<td class="ct-date">'+sched+'</td>'
+      +'<td class="ct-date col-hide-mobile">'+(r.moveDate?'🏠 '+r.moveDate:'—')+'</td>'
+      +'<td class="ct-date col-hide-mobile">'+fmtDate(r.createdAt)+'</td>'
+      +'</tr>';
+  }).join('');
+  el.innerHTML='<div class="tbl-wrap"><table class="consult-table">'
+    +'<thead><tr><th class="col-hide-mobile">No.</th><th>단계</th><th>고객명</th><th>주소 · 공종</th><th>상담일</th><th class="col-hide-mobile">이사예정일</th><th class="col-hide-mobile">접수일</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div>';
+}
+function setFilter(k){ _filter=k; renderTabs(); renderList(); }
+
+/* 모달 열기 */
+function openAddModal(){
+  _editId=null; _curStatus='inquiry';
+  _modalHist=[{type:'note',text:'상담 등록',at:nowISO()}];
+  document.getElementById('modal-title').textContent='새 상담 추가';
+  renderMbar();
+  renderModalBody(null);
+  document.getElementById('modal-ft').innerHTML='<button class="btn btn-save" onclick="saveModal()">저장</button>';
+  document.getElementById('modal').style.display='flex';
+}
+function openEditModal(id){
+  _editId=id;
+  var r=_records.find(function(x){return x.id===id;});
+  if(!r) return;
+  _modalHist=(r.history||[]).slice();
+  _curStatus=r.status||'inquiry';
+  document.getElementById('modal-title').textContent=r.name||'상담 상세';
+  renderMbar();
+  renderModalBody(r);
+  var ft='<button class="btn btn-del" onclick="deleteRecord(\''+id+'\')">삭제</button>';
+  ft+='<button class="btn" style="background:#E1F5FE;color:#0277BD;border:1.5px solid #90CAF9;flex:0 0 auto" onclick="goChecklist(\''+id+'\')">📋 현장 체크</button>';
+  if(['est_meeting','est_done','contracted'].indexOf(r.status)>=0||r.projId){
+    if(r.projId) ft+='<button class="btn btn-proj" onclick="openProject(\''+r.projId+'\')">📋 프로젝트</button>';
+    else ft+='<button class="btn" style="background:var(--orange-lt);color:var(--orange);border:1.5px solid var(--orange);flex:0 0 auto" onclick="goEstimateFrom(\''+id+'\')">견적서 작성 →</button>';
+  }
+  ft+='<button class="btn btn-save" onclick="saveModal()">저장</button>';
+  document.getElementById('modal-ft').innerHTML=ft;
+  document.getElementById('modal').style.display='flex';
+}
+function openProject(pid){ sessionStorage.setItem('daham_open_proj',pid); location.href='estimate.html'; }
+function goChecklist(id){
+  var r=_records.find(function(x){return x.id===id;});
+  if(!r) return;
+  localStorage.setItem('daham_prefill_consult',JSON.stringify({
+    id:r.id,
+    name:r.name||'',tel:r.tel||'',addr:r.addr||'',
+    moveDate:r.moveDate||'',area:r.area||'',budget:r.budget||'',
+    checklist:r.checklist||null
+  }));
+  location.href='consult-demo.html';
+}
+function goEstimateFrom(id){
+  var r=_records.find(function(x){return x.id===id;});
+  if(!r) return;
+  localStorage.setItem('daham_consult',JSON.stringify({
+    name:r.name||'',tel:r.tel||'',addr:r.addr||'',
+    movein:r.moveDate||'',consultDate:new Date().toISOString().slice(0,10),
+    area:r.area||'',bath:'',room:'',budget:r.budget||'',
+    scopes:[],scopeDetails:{},env:[],
+    specialReq:r.memo||'',memo:''
+  }));
+  location.href='estimate.html';
+}
+function closeModal(){ document.getElementById('modal').style.display='none'; _editId=null; }
+function onOverlayClick(e){ if(e.target.id==='modal') closeModal(); }
+
+/* 마일스톤 바 렌더 */
+function renderMbar(){
+  /* 진행 단계 버튼 (좌) */
+  var steps=MS_ACTIVE.map(function(s,i){
+    var sc=MS_CONFIG[s];
+    var active=s===_curStatus;
+    var style=active?'style="--sc:'+sc.color+';--sb:'+sc.bg+'"':'';
+    /* 마지막 버튼은 오른쪽 둥근 모서리 */
+    var rStyle=i===MS_ACTIVE.length-1?'border-radius:0 8px 8px 0':'';
+    return '<div class="mstep"><button class="mstep-btn'+(active?' active':'')+'" '+style
+      +' style="'+rStyle+'" onclick="clickMilestone(\''+s+'\')" title="클릭 시 날짜/시간 기록">'+sc.label+'</button></div>';
+  }).join('');
+
+  /* 계약 버튼 (우측 분리) */
+  var cActive=_curStatus==='contracted';
+  var cStyle=cActive?'style="background:#2E7D32;color:#fff"':'';
+  var contract='<div class="mstep mstep-contract"><button class="mstep-btn'+(cActive?' active':'')+'" '+cStyle
+    +' onclick="clickContract()" title="계약 완료 — 프로젝트 자동 생성">✓ 계약</button></div>';
+
+  document.getElementById('mbar').innerHTML=
+    '<div class="mbar-label">진행 단계 — 버튼을 클릭하면 날짜·시간이 이력에 기록됩니다</div>'
+    +'<div class="mbar-steps">'+steps+contract+'</div>';
+}
+
+/* 마일스톤 버튼 클릭 (날짜/시간 기록) */
+function clickMilestone(s){
+  _curStatus=s;
+  renderMbar();
+  /* 이력에 마일스톤 행 추가 */
+  _modalHist.push({type:'milestone', status:s, at:localDTStr(), memo:''});
+  renderHistSection();
+}
+
+/* 계약 버튼 클릭 */
+function clickContract(){
+  _curStatus='contracted';
+  renderMbar();
+  _modalHist.push({type:'milestone', status:'contracted', at:localDTStr(), memo:''});
+  renderHistSection();
+  showToast('저장 시 프로젝트가 자동 생성됩니다');
+}
+
+/* 이력 섹션 */
+function renderHistSection(){
+  var el=document.getElementById('hist-section');
+  if(!el) return;
+
+  var milestones=[], notes=[];
+  _modalHist.forEach(function(h,i){
+    if(h.type==='milestone') milestones.push({h:h,i:i});
+    else notes.push({h:h,i:i});
+  });
+
+  var msHtml='';
+  if(milestones.length){
+    msHtml='<table class="ms-table"><thead><tr>'
+      +'<th>항목</th><th>날짜 / 시간</th><th>메모</th><th></th>'
+      +'</tr></thead><tbody>';
+    milestones.slice().reverse().forEach(function(obj){
+      var h=obj.h, idx=obj.i;
+      var sc=getStatusCfg(h.status);
+      msHtml+='<tr>'
+        +'<td><span class="ms-stage-pill" style="background:'+sc.color+';color:#fff">'+sc.label+'</span></td>'
+        +'<td><input class="ms-dt-inp" type="datetime-local" value="'+escAttr(h.at||'')+'" oninput="updateMs('+idx+',\'at\',this.value)"></td>'
+        +'<td><input class="ms-memo-inp" type="text" placeholder="메모" value="'+escAttr(h.memo||'')+'" oninput="updateMs('+idx+',\'memo\',this.value)"></td>'
+        +'<td><button class="ms-del-btn" onclick="deleteMilestone('+idx+')" title="삭제">×</button></td>'
+        +'</tr>';
+    });
+    msHtml+='</tbody></table>';
+  } else {
+    msHtml='<div style="color:var(--dim);font-size:12px;padding:6px 0">위 단계 버튼을 클릭하면 이력이 기록됩니다</div>';
+  }
+
+  var notesHtml='';
+  if(notes.length){
+    notesHtml='<div style="margin-top:8px">'
+      +notes.slice().reverse().map(function(obj){
+        var h=obj.h;
+        return '<div class="note-row"><div class="note-dot"></div>'
+          +'<div class="note-text">'+escHtml(h.text||'')+'</div>'
+          +'<div class="note-time">'+fmtDateTime(h.at)+'</div></div>';
+      }).join('')+'</div>';
+  }
+
+  el.innerHTML=msHtml+notesHtml
+    +'<div class="hist-add-row">'
+    +'<input id="f-hist-note" placeholder="텍스트 메모 추가...">'
+    +'<button class="hist-add-btn" onclick="addHistNote()">추가</button>'
+    +'</div>';
+}
+
+function deleteMilestone(idx){
+  _modalHist.splice(idx,1);
+  renderHistSection();
+}
+function updateMs(idx,field,val){
+  if(_modalHist[idx]) _modalHist[idx][field]=val;
+}
+
+/* 모달 바디 */
+function renderModalBody(r){
+  var v=function(f){ return r?escAttr(r[f]||''):''; };
+  document.getElementById('modal-body').innerHTML=
+    '<div class="sec-title">상담 이력</div>'
+    +'<div id="hist-section"></div>'
+    +'<div class="sec-title">고객 정보</div>'
+    +'<div class="form-grid">'
+    +'<div class="form-row"><label>고객명</label><input id="f-name" placeholder="홍길동" value="'+v('name')+'"></div>'
+    +'<div class="form-row"><label>연락처</label><input id="f-tel" type="tel" placeholder="010-0000-0000" value="'+v('tel')+'"></div>'
+    +'</div>'
+    +'<div class="form-row"><label>주소</label><input id="f-addr" placeholder="서울시 강남구 ..." value="'+v('addr')+'"></div>'
+    +'<div class="form-grid">'
+    +'<div class="form-row"><label>평수</label><input id="f-area" placeholder="32" value="'+v('area')+'"></div>'
+    +'<div class="form-row"><label>담당자</label><input id="f-manager" placeholder="최일성" value="'+v('manager')+'"></div>'
+    +'</div>'
+    +'<div class="sec-title">상담 일정</div>'
+    +'<div class="form-grid">'
+    +'<div class="form-row"><label>상담 날짜</label><input id="f-sdate" type="date" value="'+v('schedDate')+'"></div>'
+    +'<div class="form-row"><label>상담 시간</label><input id="f-stime" type="time" value="'+v('schedTime')+'"></div>'
+    +'</div>'
+    +'<div class="form-row"><label>장소</label><select id="f-splace">'
+    +['','현장 방문','사무실 방문','전화 상담','화상 상담','기타'].map(function(p){
+      return '<option value="'+p+'"'+((r&&r.schedPlace===p)?' selected':'')+'>'+(p||'-- 선택 --')+'</option>';
+    }).join('')+'</select></div>'
+    +'<div class="sec-title">공사 내용</div>'
+    +'<div class="form-row"><label>희망 공종</label><input id="f-works" placeholder="도배, 바닥, 욕실 등" value="'+v('works')+'"></div>'
+    +'<div class="form-grid">'
+    +'<div class="form-row"><label>예산</label><input id="f-budget" placeholder="1,500만원 예상" value="'+v('budget')+'"></div>'
+    +'<div class="form-row"><label>이사 예정일</label><input id="f-movedate" type="date" value="'+v('moveDate')+'"></div>'
+    +'</div>'
+    +'<div class="form-row"><label>요청사항 / 메모</label><textarea id="f-memo">'+v('memo')+'</textarea></div>';
+  renderHistSection();
+}
+
+/* 저장 */
+function saveModal(){
+  var name    =(document.getElementById('f-name').value||'').trim();
+  var tel     =(document.getElementById('f-tel').value||'').trim();
+  var addr    =(document.getElementById('f-addr').value||'').trim();
+  var area    =(document.getElementById('f-area').value||'').trim();
+  var sdate   =document.getElementById('f-sdate').value||'';
+  var stime   =document.getElementById('f-stime').value||'';
+  var splace  =document.getElementById('f-splace').value||'';
+  var manager =(document.getElementById('f-manager').value||'').trim();
+  var works   =(document.getElementById('f-works').value||'').trim();
+  var budget  =(document.getElementById('f-budget').value||'').trim();
+  var moveDate=document.getElementById('f-movedate').value||'';
+  var memo    =(document.getElementById('f-memo').value||'').trim();
+  var status  =_curStatus;
+
+  if(!name&&!tel){ showToast('고객명 또는 연락처를 입력하세요'); return; }
+
+  var db=loadDB();
+  var projCreated=false, newProjId=null;
+  var isContract=status==='contracted';
+
+  /* 새 상담용 ID를 미리 생성해 프로젝트 연결에 사용 */
+  var newId=_editId?null:uid();
+
+  /* 계약 단계 진입 → 프로젝트 생성 */
+  var prevProjId=null;
+  if(_editId){
+    var prevR=db.find(function(r){return r.id===_editId;});
+    if(prevR) prevProjId=prevR.projId;
+  }
+  if(isContract&&!prevProjId){
+    newProjId=createEstimateProject({name:name,tel:tel,addr:addr,area:area,consultId:_editId||newId});
+    _modalHist.push({type:'note',text:'프로젝트 자동 생성됨',at:nowISO()});
+    projCreated=true;
+  }
+
+  if(_editId){
+    var idx=db.findIndex(function(r){return r.id===_editId;});
+    if(idx<0){closeModal();return;}
+    db[idx]=Object.assign({},db[idx],{
+      name:name,tel:tel,addr:addr,area:area,manager:manager,
+      schedDate:sdate,schedTime:stime,schedPlace:splace,
+      works:works,budget:budget,moveDate:moveDate,memo:memo,status:status,
+      history:_modalHist.slice(),updatedAt:nowISO()
+    });
+    if(newProjId) db[idx].projId=newProjId;
+  } else {
+    db.push({
+      id:newId,createdAt:nowISO(),updatedAt:nowISO(),
+      name:name,tel:tel,addr:addr,area:area,manager:manager,
+      schedDate:sdate,schedTime:stime,schedPlace:splace,
+      works:works,budget:budget,moveDate:moveDate,memo:memo,status:status,
+      projId:newProjId||null,history:_modalHist.slice()
+    });
+  }
+
+  saveDB(db);
+  closeModal();
+  renderTabs();
+  renderList();
+  if(isContract) showToast(projCreated?'✓ 계약 완료! 프로젝트가 생성됐습니다':'✓ 계약 완료! 목록에서 제외됩니다');
+  else showToast('✓ 저장됐습니다');
+}
+
+/* 프로젝트 생성 */
+function createEstimateProject(info){
+  try{
+    var projects=JSON.parse(localStorage.getItem(PROJ_DB)||'[]');
+    var id=uid();
+    projects.push({
+      id:id,createdAt:nowISO(),updatedAt:nowISO(),
+      status:'estimate',contracted:false,completed:false,consultId:info.consultId||null,
+      client:{'cl-name':info.name||'','cl-tel':info.tel||'','cl-date':nowISO().slice(0,10),
+        'cl-movein':'','cl-addr':info.addr||'','cl-area':info.area||'','cl-start':'','cl-end':''},
+      margins:{mat:'5',profit:'15'},qtys:{},sectionTotals:null
+    });
+    localStorage.setItem(PROJ_DB,JSON.stringify(projects));
+    return id;
+  }catch(e){return null;}
+}
+
+/* 텍스트 메모 추가 */
+function addHistNote(){
+  var note=(document.getElementById('f-hist-note').value||'').trim();
+  if(!note) return;
+  _modalHist.push({type:'note',text:note,at:nowISO()});
+  if(_editId){
+    var db=loadDB();
+    var idx=db.findIndex(function(r){return r.id===_editId;});
+    if(idx>=0){db[idx].history=_modalHist.slice();db[idx].updatedAt=nowISO();saveDB(db);_records=db;}
+    renderTabs();renderList();
+  }
+  document.getElementById('f-hist-note').value='';
+  renderHistSection();
+  showToast('✓ 메모 추가됐습니다');
+}
+
+/* 삭제 */
+function deleteRecord(id){
+  dahamConfirm('이 상담 기록을 삭제할까요?\n이 작업은 되돌릴 수 없습니다.', function(){
+    var db=loadDB().filter(function(r){return r.id!==id;});
+    saveDB(db);closeModal();renderTabs();renderList();
+    showToast('✓ 삭제됐습니다');
+  });
+}
+
+function escHtml(s){ var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML; }
+function escAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+var _toastTimer;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(function(){t.classList.remove('show');},2800);
+}
+
+initCloud();
+renderTabs();
+renderList();
+cloudPull();
+</script>
+<script src="auth.js"></script>
+
+<script>
+(function(){
+ const KEY='daham_consult_handoff_v1';
+ window.DAHAM_CONSULT_HANDOFF={
+   save(data){localStorage.setItem(KEY,JSON.stringify({savedAt:new Date().toISOString(),data:data||{}}))},
+   load(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}},
+   clear(){localStorage.removeItem(KEY)}
+ };
+ document.addEventListener('DOMContentLoaded',()=>{
+   if(location.pathname.endsWith('consult.html')){
+     const b=document.createElement('button'); b.textContent='현재 상담·실측을 견적으로 넘기기';
+     b.style.cssText='position:fixed;right:22px;bottom:126px;z-index:9998;padding:11px 14px;border:0;border-radius:10px;background:#14936f;color:#fff;font-weight:800;cursor:pointer';
+     b.onclick=()=>{const d={}; document.querySelectorAll('input,select,textarea').forEach((el,i)=>{const k=el.name||el.id||('field_'+i); if(el.type==='checkbox'||el.type==='radio'){if(el.checked)d[k]=el.value||true}else if(el.value)d[k]=el.value}); DAHAM_CONSULT_HANDOFF.save(d); location.href='estimate.html';};
+     (document.querySelector('main')||document.body).appendChild(b);
+   }
+   if(location.pathname.endsWith('estimate.html')){
+     const h=DAHAM_CONSULT_HANDOFF.load(); if(h?.data){
+       const box=document.createElement('div'); box.style.cssText='margin:12px 0;padding:12px 14px;border:1px solid #d7d2ff;background:#faf9ff;border-radius:12px;font-size:12px';
+       box.innerHTML='<b>상담·실측 연결됨</b> · '+Object.keys(h.data).length+'개 입력값을 견적 참고정보로 불러왔습니다. 기존 견적값은 자동 덮어쓰기하지 않습니다.';
+       (document.querySelector('main')||document.body).prepend(box);
+     }
+   }
+ });
+})();
+</script>
+
+</body>
+</html>

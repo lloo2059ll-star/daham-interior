@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DAHAM — 현장 실측 상담</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Inter+Tight:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --orange:#E85D1F;--orange-dk:#c94e18;--orange-lt:#FFF5EE;--orange-mid:#FDEEE6;
+  --ink:#1a1a1a;--mid:#555;--dim:#999;--line:#e5e5e5;--bg:#f2f2f2;--white:#fff;
+  --green:#2E7D32;--green-lt:#F1F8F1;--blue:#1565C0;--blue-lt:#EEF4FF;
+}
+html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+
+/* ── 툴바 ── */
+.toolbar{position:sticky;top:0;z-index:100;height:54px;background:var(--white);border-bottom:2px solid var(--orange);display:flex;align-items:center;padding:0 24px;gap:16px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--orange);letter-spacing:.1em}
+.tb-title{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.08em}
+.tb-date{font-family:'Inter Tight',sans-serif;font-size:12px;color:var(--dim);margin-left:auto}
+.tb-btn{font-size:12px;font-weight:600;padding:8px 20px;cursor:pointer;border:1.5px solid var(--line);background:var(--white);color:var(--mid);font-family:inherit;transition:all .15s;letter-spacing:.05em}
+.tb-btn:hover{border-color:var(--ink);color:var(--ink)}
+.tb-btn.primary{border-color:var(--orange);background:var(--orange);color:#fff}
+.tb-btn.primary:hover{background:var(--orange-dk)}
+
+/* ── 레이아웃 ── */
+.body{max-width:960px;margin:0 auto;padding:24px 20px 60px}
+
+/* 진행률 */
+.progress-bar{height:4px;background:var(--line);margin-bottom:24px;border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--orange);width:0%;transition:width .4s;border-radius:2px}
+.progress-label{font-size:11px;color:var(--dim);margin-bottom:8px;text-align:right;font-family:'Inter Tight',sans-serif}
+
+/* ── 섹션 카드 ── */
+.card{background:var(--white);box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:14px;overflow:hidden}
+.card-hd{display:flex;align-items:center;padding:16px 20px;cursor:pointer;user-select:none;gap:14px;transition:background .15s}
+.card-hd:hover{background:#fafafa}
+.card-hd.done{background:var(--orange-lt)}
+.card-num{font-family:'Inter Tight',sans-serif;font-size:22px;font-weight:700;color:var(--line);min-width:36px;transition:color .2s}
+.card-hd.done .card-num{color:var(--orange)}
+.card-title{font-size:15px;font-weight:700;letter-spacing:.05em}
+.card-sub{font-size:11px;color:var(--dim);margin-left:4px;font-weight:400}
+.card-check{margin-left:auto;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:all .2s;flex-shrink:0}
+.card-hd.done .card-check{background:var(--orange);border-color:var(--orange);color:#fff}
+.card-toggle{font-size:11px;color:var(--dim);margin-left:8px;transition:transform .2s;flex-shrink:0}
+.card-toggle.open{transform:rotate(180deg)}
+.card-body{padding:20px;border-top:1px solid var(--line);display:none}
+.card-body.open{display:block}
+
+/* ── 폼 공통 ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid.col3{grid-template-columns:1fr 1fr 1fr}
+.form-grid.col1{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.1em}
+.field input,.field select,.field textarea{border:1.5px solid var(--line);padding:10px 14px;font-size:14px;font-family:inherit;color:var(--ink);background:var(--white);outline:none;transition:border-color .15s;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange)}
+.field textarea{resize:vertical;min-height:80px;line-height:1.6}
+.field-note{font-size:11px;color:var(--dim);margin-top:2px}
+
+/* 라디오 그룹 */
+.radio-group{display:flex;gap:8px;flex-wrap:wrap}
+.radio-btn{flex:1;min-width:80px;padding:10px 8px;border:1.5px solid var(--line);text-align:center;cursor:pointer;font-size:13px;font-weight:500;color:var(--mid);transition:all .15s;user-select:none}
+.radio-btn:hover{border-color:var(--orange);color:var(--orange)}
+.radio-btn.sel{border-color:var(--orange);background:var(--orange);color:#fff;font-weight:700}
+
+/* 체크 토글 */
+.scope-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.scope-item{border:1.5px solid var(--line);padding:14px 12px;cursor:pointer;transition:all .15s;user-select:none;text-align:center}
+.scope-item:hover{border-color:var(--orange);background:var(--orange-lt)}
+.scope-item.sel{border-color:var(--orange);background:var(--orange);color:#fff}
+.scope-icon{font-size:20px;margin-bottom:6px}
+.scope-name{font-size:12px;font-weight:700;letter-spacing:.05em}
+.scope-item.sel .scope-sub{color:rgba(255,255,255,.7)}
+.scope-sub{font-size:10px;color:var(--dim);margin-top:2px}
+
+/* 시공범위 상세 */
+.scope-detail{border:1.5px solid var(--orange-mid);background:var(--orange-lt);padding:16px;margin-top:12px;display:none}
+.scope-detail.open{display:block}
+.scope-detail-title{font-size:12px;font-weight:700;color:var(--orange);margin-bottom:12px;letter-spacing:.08em}
+.detail-checks{display:flex;flex-wrap:wrap;gap:8px}
+.dcheck{padding:7px 14px;border:1.5px solid var(--orange-mid);background:var(--white);font-size:12px;font-weight:500;cursor:pointer;color:var(--mid);transition:all .15s}
+.dcheck:hover{border-color:var(--orange);color:var(--orange)}
+.dcheck.sel{background:var(--orange);border-color:var(--orange);color:#fff}
+
+/* 숫자 스테퍼 */
+.stepper{display:flex;align-items:center;gap:0;border:1.5px solid var(--line);overflow:hidden}
+.stepper-btn{width:44px;height:44px;border:none;background:#fafafa;cursor:pointer;font-size:20px;color:var(--mid);display:flex;align-items:center;justify-content:center;transition:background .15s;flex-shrink:0}
+.stepper-btn:hover{background:var(--orange-lt);color:var(--orange)}
+.stepper-val{flex:1;text-align:center;font-size:18px;font-weight:700;font-family:'Inter Tight',sans-serif;color:var(--ink);border:none;border-left:1.5px solid var(--line);border-right:1.5px solid var(--line);height:44px;outline:none;background:var(--white)}
+
+/* 예산 슬라이더 */
+.budget-display{font-family:'Inter Tight',sans-serif;font-size:28px;font-weight:700;color:var(--orange);margin-bottom:8px}
+.budget-sub{font-size:12px;color:var(--dim);margin-bottom:16px}
+.budget-slider{width:100%;-webkit-appearance:none;height:6px;border-radius:3px;background:var(--line);outline:none}
+.budget-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--orange);cursor:pointer;box-shadow:0 2px 6px rgba(232,93,31,.4)}
+.budget-tags{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:6px;font-family:'Inter Tight',sans-serif}
+
+/* 체크박스 리스트 */
+.check-list{display:flex;flex-direction:column;gap:2px}
+.check-item{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;transition:background .15s;border-bottom:1px solid #f5f5f5}
+.check-item:hover{background:#fafafa}
+.check-item:last-child{border-bottom:none}
+.check-box{width:22px;height:22px;border:2px solid var(--line);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;border-radius:3px}
+.check-item.sel .check-box{background:var(--orange);border-color:var(--orange);color:#fff;font-size:13px}
+.check-label{font-size:13px;font-weight:500}
+.check-note{font-size:11px;color:var(--dim);margin-left:auto}
+
+/* 구분선 */
+.divider{height:1px;background:var(--line);margin:18px 0}
+.section-label{font-size:11px;font-weight:700;color:var(--dim);letter-spacing:.15em;margin-bottom:12px}
+
+
+/* 하단 완료 버튼 */
+.bottom-bar{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--line);padding:14px 24px;display:flex;align-items:center;gap:12px;box-shadow:0 -4px 16px rgba(0,0,0,.08);z-index:100}
+.bottom-summary{font-size:12px;color:var(--dim)}
+.bottom-summary strong{color:var(--orange);font-weight:700}
+.complete-btn{margin-left:auto;font-size:14px;font-weight:700;padding:12px 32px;background:var(--orange);color:#fff;border:none;cursor:pointer;font-family:inherit;letter-spacing:.08em;transition:background .15s}
+.complete-btn:hover{background:var(--orange-dk)}
+.complete-btn:disabled{background:var(--line);color:var(--dim);cursor:not-allowed}
+
+/* 완료 오버레이 */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center}
+.overlay.show{display:flex}
+.overlay-card{background:var(--white);padding:40px;max-width:420px;width:90%;text-align:center}
+.overlay-icon{font-size:48px;margin-bottom:16px}
+.overlay-title{font-size:20px;font-weight:700;margin-bottom:8px}
+.overlay-sub{font-size:13px;color:var(--mid);margin-bottom:28px;line-height:1.7}
+.overlay-btn{display:block;width:100%;padding:14px;background:var(--orange);color:#fff;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:10px}
+.overlay-btn.outline{background:var(--white);color:var(--ink);border:1.5px solid var(--line)}
+
+/* 토스트 */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:#fff;padding:12px 24px;font-size:13px;font-weight:600;border-radius:24px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:300;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+<link rel="stylesheet" href="v2-theme.css">
+<link rel="stylesheet" href="v2-suite.css">
+<script defer src="v2-suite.js"></script>
+<script src="auth.js"></script></head>
+<body>
+
+<!-- 툴바 -->
+<div class="toolbar">
+  <span class="tb-brand">DAHAM</span>
+  <span class="tb-title">현장 실측 상담</span>
+  <span class="tb-date" id="tb-date"></span>
+  <button class="tb-btn" id="btn-back" onclick="goBack()" style="display:none">← 뒤로</button>
+  <button class="tb-btn" id="btn-save" onclick="saveChecklist()" style="display:none">저장</button>
+  <button class="tb-btn" onclick="resetAll()">초기화</button>
+  <button class="tb-btn primary" onclick="showComplete()">견적서 작성 →</button>
+</div>
+
+<div class="body">
+
+  <!-- 진행률 -->
+  <div class="progress-label" id="prog-label">0 / 5 섹션 완료</div>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+
+  <!-- ① 고객 정보 -->
+  <div class="card" id="card1">
+    <div class="card-hd" onclick="toggleCard(1)">
+      <span class="card-num">01</span>
+      <div><span class="card-title">고객 정보</span><span class="card-sub">기본 인적사항</span></div>
+      <span class="card-toggle" id="tog1">▼</span>
+      <div class="card-check" id="chk1">✓</div>
+    </div>
+    <div class="card-body open" id="body1">
+      <div class="form-grid">
+        <div class="field">
+          <label>성 명</label>
+          <input type="text" id="c-name" placeholder="고객 성함" oninput="autoCheck(1)">
+        </div>
+        <div class="field">
+          <label>연락처</label>
+          <input type="tel" id="c-tel" placeholder="010-0000-0000" oninput="autoCheck(1)">
+        </div>
+        <div class="field">
+          <label>시공 주소</label>
+          <input type="text" id="c-addr" placeholder="주소 입력" oninput="autoCheck(1)">
+        </div>
+        <div class="field">
+          <label>입주 예정일</label>
+          <input type="date" id="c-date" oninput="autoCheck(1)">
+        </div>
+        <div class="field">
+          <label>상담일</label>
+          <input type="date" id="c-consult" oninput="autoCheck(1)">
+        </div>
+        <div class="field">
+          <label>이사 여부</label>
+          <div class="radio-group" id="rg-movein">
+            <div class="radio-btn" onclick="selRadio('rg-movein',this,'autoCheck(1)')">입주 전</div>
+            <div class="radio-btn" onclick="selRadio('rg-movein',this,'autoCheck(1)')">거주 중</div>
+            <div class="radio-btn" onclick="selRadio('rg-movein',this,'autoCheck(1)')">공실</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 현장 기본 정보 -->
+  <div class="card" id="card2">
+    <div class="card-hd" onclick="toggleCard(2)">
+      <span class="card-num">02</span>
+      <div><span class="card-title">현장 기본 정보</span><span class="card-sub">실측 치수 및 환경</span></div>
+      <span class="card-toggle open" id="tog2">▼</span>
+      <div class="card-check" id="chk2">✓</div>
+    </div>
+    <div class="card-body" id="body2">
+      <div class="section-label">실측 평수</div>
+      <div class="form-grid col3" style="margin-bottom:18px">
+        <div class="field">
+          <label>전용 평수</label>
+          <input type="number" id="area-total" placeholder="0" min="0" step="0.1" oninput="autoCheck(2)">
+        </div>
+        <div class="field">
+          <label>거실+주방 (평)</label>
+          <input type="number" id="area-living" placeholder="0" min="0" step="0.1" oninput="autoCheck(2)">
+        </div>
+        <div class="field">
+          <label>베란다 (평)</label>
+          <input type="number" id="area-veranda" placeholder="0" min="0" step="0.1" oninput="autoCheck(2)">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">공간 구성</div>
+      <div class="form-grid col3" style="margin-bottom:18px">
+        <div class="field">
+          <label>방 개수</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="step('room',-1)">−</button>
+            <input class="stepper-val" id="room" type="number" value="0" min="0" max="10" oninput="autoCheck(2)">
+            <button class="stepper-btn" onclick="step('room',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>욕실 개수</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="step('bath',-1)">−</button>
+            <input class="stepper-val" id="bath" type="number" value="0" min="0" max="5" oninput="autoCheck(2)">
+            <button class="stepper-btn" onclick="step('bath',1)">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>층 수</label>
+          <div class="stepper">
+            <button class="stepper-btn" onclick="step('floor',-1)">−</button>
+            <input class="stepper-val" id="floor" type="number" value="0" min="0" oninput="autoCheck(2)">
+            <button class="stepper-btn" onclick="step('floor',1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">현장 환경</div>
+      <div class="check-list">
+        <div class="check-item" onclick="toggleCheck(this,'autoCheck(2)')">
+          <div class="check-box"></div>
+          <span class="check-label">엘리베이터 있음</span>
+          <span class="check-note">자재 반입 가능 여부</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this,'autoCheck(2)')">
+          <div class="check-box"></div>
+          <span class="check-label">주차 가능</span>
+          <span class="check-note">공사차량 주차 여부</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this,'autoCheck(2)')">
+          <div class="check-box"></div>
+          <span class="check-label">베란다 확장됨</span>
+          <span class="check-note">확장 시공 여부</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this,'autoCheck(2)')">
+          <div class="check-box"></div>
+          <span class="check-label">복도식 아파트</span>
+          <span class="check-note">자재 이동 동선 확인</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="section-label">공사 가능 시간</div>
+      <div class="radio-group" id="rg-time" style="margin-bottom:4px">
+        <div class="radio-btn" onclick="selRadio('rg-time',this,'autoCheck(2)')">9시~18시</div>
+        <div class="radio-btn" onclick="selRadio('rg-time',this,'autoCheck(2)')">9시~17시</div>
+        <div class="radio-btn" onclick="selRadio('rg-time',this,'autoCheck(2)')">협의 필요</div>
+      </div>
+      <div class="field-note">* 관리사무소 규정 확인 필요</div>
+    </div>
+  </div>
+
+  <!-- ③ 시공 범위 -->
+  <div class="card" id="card3">
+    <div class="card-hd" onclick="toggleCard(3)">
+      <span class="card-num">03</span>
+      <div><span class="card-title">시공 범위</span><span class="card-sub">공종별 시공 여부</span></div>
+      <span class="card-toggle open" id="tog3">▼</span>
+      <div class="card-check" id="chk3">✓</div>
+    </div>
+    <div class="card-body" id="body3">
+      <div class="scope-grid">
+        <div class="scope-item" onclick="toggleScope(this,'scope-도배')">
+          <div class="scope-icon">🖼</div>
+          <div class="scope-name">도 배</div>
+          <div class="scope-sub">벽지 시공</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-바닥')">
+          <div class="scope-icon">🪵</div>
+          <div class="scope-name">바 닥</div>
+          <div class="scope-sub">장판·마루·타일</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-욕실')">
+          <div class="scope-icon">🚿</div>
+          <div class="scope-name">욕 실</div>
+          <div class="scope-sub">타일·도기·설비</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-주방')">
+          <div class="scope-icon">🍳</div>
+          <div class="scope-name">주 방</div>
+          <div class="scope-sub">타일·싱크대</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-전기')">
+          <div class="scope-icon">💡</div>
+          <div class="scope-name">전기/조명</div>
+          <div class="scope-sub">조명 교체</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-철거')">
+          <div class="scope-icon">🔨</div>
+          <div class="scope-name">철 거</div>
+          <div class="scope-sub">기존 자재 철거</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-목작업')">
+          <div class="scope-icon">🚪</div>
+          <div class="scope-name">목작업</div>
+          <div class="scope-sub">몰딩·문·가구</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-기타')">
+          <div class="scope-icon">⚙️</div>
+          <div class="scope-name">기 타</div>
+          <div class="scope-sub">샷시·중문 등</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-필름')">
+          <div class="scope-icon">🎞</div>
+          <div class="scope-name">필 름</div>
+          <div class="scope-sub">샤시·문·가구 등</div>
+        </div>
+        <div class="scope-item" onclick="toggleScope(this,'scope-설비')">
+          <div class="scope-icon">🔧</div>
+          <div class="scope-name">설 비</div>
+          <div class="scope-sub">배관·보일러 등</div>
+        </div>
+      </div>
+
+      <!-- 도배 상세 -->
+      <div class="scope-detail" id="scope-도배">
+        <div class="scope-detail-title">도배 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">전체 도배</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">부분 도배</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">베스띠</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">디아망</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">초배지 필요</div>
+        </div>
+      </div>
+      <!-- 바닥 상세 -->
+      <div class="scope-detail" id="scope-바닥">
+        <div class="scope-detail-title">바닥 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">전체</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">거실만</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방만</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">장판</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">강마루</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">타일</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">기존 철거 필요</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">바닥샌딩</div>
+        </div>
+      </div>
+      <!-- 욕실 상세 -->
+      <div class="scope-detail" id="scope-욕실">
+        <div class="scope-detail-title">욕실 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">안방욕실</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">공용욕실</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">전체 철거</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">UBR 철거</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">욕조 있음</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방수 필요</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">도기 교체</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">젠다이 신설</div>
+        </div>
+      </div>
+      <!-- 주방 상세 -->
+      <div class="scope-detail" id="scope-주방">
+        <div class="scope-detail-title">주방 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">벽타일</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">싱크대 교체</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">후드 교체</div>
+        </div>
+      </div>
+      <!-- 전기 상세 -->
+      <div class="scope-detail" id="scope-전기">
+        <div class="scope-detail-title">전기/조명 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">전체 조명</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">거실등</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방등</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">매입등</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">인덕션</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">라인조명</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">실리팽</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">분전함 확인 필요</div>
+        </div>
+      </div>
+      <!-- 철거 상세 -->
+      <div class="scope-detail" id="scope-철거">
+        <div class="scope-detail-title">철거 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">마루 철거</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">붙박이장</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방문</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">몰딩</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">중문</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">싱크대</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">샷시</div>
+        </div>
+      </div>
+      <!-- 목작업 상세 -->
+      <div class="scope-detail" id="scope-목작업">
+        <div class="scope-detail-title">목작업 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">천장몰딩</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">걸레받이</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방문 교체</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">붙박이장</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">신발장</div>
+        </div>
+      </div>
+      <!-- 필름 상세 -->
+      <div class="scope-detail" id="scope-필름">
+        <div class="scope-detail-title">필름 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">거실 샤시</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">안방 샤시</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방/발코니 샤시</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방문/문틀</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">천장몰딩</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">걸레받이</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">중문</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">현관문</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">싱크대 문짝</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">붙박이장 문짝</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">신발장 문짝</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">화장대</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">기타</div>
+        </div>
+      </div>
+
+      <!-- 설비 상세 -->
+      <div class="scope-detail" id="scope-설비">
+        <div class="scope-detail-title">설비 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">거실확장 설비</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">주방확장 설비</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">안방 방확장</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방1 방확장</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방2 방확장</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">방3 방확장</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">보일러 바닥 시공(방통포함)</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">급수 배관 교체</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">욕실 배관 작업</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">싱크대 수전내림</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">수전 이동</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">라디에이터 철거</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">분배기 교체</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">기타 설비시공</div>
+        </div>
+      </div>
+
+      <!-- 기타 상세 -->
+      <div class="scope-detail" id="scope-기타">
+        <div class="scope-detail-title">기타 세부 사항</div>
+        <div class="detail-checks">
+          <div class="dcheck" onclick="this.classList.toggle('sel')">중문 설치</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">샷시 교체</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">발코니</div>
+          <div class="dcheck" onclick="this.classList.toggle('sel')">현관 타일</div>
+        </div>
+      </div>
+
+<div class="divider"></div>
+      <div class="field">
+        <label>시공 범위 메모</label>
+        <textarea id="scope-memo" placeholder="추가 시공 범위나 특이사항을 입력하세요" oninput="autoCheck(3)"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ 예산 -->
+  <div class="card" id="card4">
+    <div class="card-hd" onclick="toggleCard(4)">
+      <span class="card-num">04</span>
+      <div><span class="card-title">예 산</span><span class="card-sub">고객 희망 예산</span></div>
+      <span class="card-toggle open" id="tog4">▼</span>
+      <div class="card-check" id="chk4">✓</div>
+    </div>
+    <div class="card-body" id="body4">
+      <div class="budget-display" id="budget-display">미정</div>
+      <div class="budget-sub">희망 예산 범위를 설정해 주세요</div>
+      <input class="budget-slider" type="range" min="0" max="18" value="0" id="budget-slider" oninput="updateBudget(this.value)">
+      <div class="budget-tags">
+        <span>미정</span><span>1,000만</span><span>3,000만</span><span>5,000만</span><span>7,000만</span><span>1억+</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ⑤ 특이사항 -->
+  <div class="card" id="card5">
+    <div class="card-hd" onclick="toggleCard(5)">
+      <span class="card-num">05</span>
+      <div><span class="card-title">특이사항 / 요청사항</span><span class="card-sub">현장 특이사항 및 고객 요청</span></div>
+      <span class="card-toggle open" id="tog5">▼</span>
+      <div class="card-check" id="chk5">✓</div>
+    </div>
+    <div class="card-body" id="body5">
+      <div class="section-label">현장 하자 여부</div>
+      <div class="check-list" style="margin-bottom:18px">
+        <div class="check-item" onclick="toggleCheck(this,'')">
+          <div class="check-box"></div>
+          <span class="check-label">곰팡이 발생</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this,'')">
+          <div class="check-box"></div>
+          <span class="check-label">누수 흔적</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this,'')">
+          <div class="check-box"></div>
+          <span class="check-label">바닥 들뜸</span>
+        </div>
+        <div class="check-item" onclick="toggleCheck(this,'')">
+          <div class="check-box"></div>
+          <span class="check-label">벽면 크랙</span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+      <div class="form-grid col1">
+        <div class="field">
+          <label>고객 특별 요청사항</label>
+          <textarea id="special-req" placeholder="고객이 특별히 요청한 사항을 입력하세요" oninput="autoCheck(5)"></textarea>
+        </div>
+        <div class="field">
+          <label>현장 메모 (내부용)</label>
+          <textarea id="internal-memo" placeholder="현장에서 확인한 특이사항, 추가 확인 필요 사항 등" oninput="autoCheck(5)"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 하단 바 -->
+<div class="bottom-bar">
+  <div class="bottom-summary">완료: <strong id="done-count">0</strong> / 5 섹션</div>
+<button class="complete-btn" onclick="showComplete()">견적서 작성으로 이동 →</button>
+</div>
+
+<!-- 완료 오버레이 -->
+<div class="overlay" id="overlay">
+  <div class="overlay-card">
+    <div class="overlay-icon">📋</div>
+    <div class="overlay-title">상담 완료</div>
+    <div class="overlay-sub" id="overlay-sub">입력된 정보를 바탕으로<br>견적서 작성 페이지로 이동합니다.</div>
+    <button class="overlay-btn" onclick="goEstimate()">견적서 작성 시작</button>
+    <button class="overlay-btn outline" onclick="closeOverlay()">계속 수정하기</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// 날짜
+var today=new Date();
+document.getElementById('tb-date').textContent=today.getFullYear()+'년 '+(today.getMonth()+1)+'월 '+today.getDate()+'일';
+document.getElementById('c-consult').value=today.toISOString().slice(0,10);
+
+var _consultId=null;
+var doneState={1:false,2:false,3:false,4:false,5:false};
+
+// 상담관리에서 넘어온 경우 고객 정보 자동 입력
+(function(){
+  var raw=localStorage.getItem('daham_prefill_consult');
+  if(!raw) return;
+  // 뒤로/저장 버튼은 확인 즉시 노출
+  document.getElementById('btn-back').style.display='';
+  document.getElementById('btn-save').style.display='';
+  try{
+    var d=JSON.parse(raw);
+    localStorage.removeItem('daham_prefill_consult');
+    if(d.id) _consultId=d.id;
+    var fill=function(id,val){var el=document.getElementById(id);if(el&&val)el.value=val;};
+    fill('c-name',d.name);
+    fill('c-tel',d.tel);
+    fill('c-addr',d.addr);
+    fill('c-date',d.moveDate);
+    fill('area-total',d.area);
+    autoCheck(1); autoCheck(2);
+    if(d.checklist) restoreChecklist(d.checklist);
+  }catch(e){}
+})();
+
+// 카드 토글
+function toggleCard(n){
+  var body=document.getElementById('body'+n);
+  var tog=document.getElementById('tog'+n);
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  tog.classList.toggle('open',!open);
+}
+
+// 스테퍼
+function step(id,d){
+  var el=document.getElementById(id);
+  var v=parseInt(el.value)||0;
+  el.value=Math.max(0,v+d);
+  autoCheck(2);
+}
+
+// 라디오
+function selRadio(groupId,el,cb){
+  document.querySelectorAll('#'+groupId+' .radio-btn').forEach(function(b){b.classList.remove('sel');});
+  el.classList.add('sel');
+  if(cb) eval(cb);
+}
+
+// 체크
+function toggleCheck(el,cb){
+  el.classList.toggle('sel');
+  var box=el.querySelector('.check-box');
+  box.textContent=el.classList.contains('sel')?'✓':'';
+  if(cb) eval(cb);
+}
+
+// 시공범위 토글
+function toggleScope(el,detailId){
+  el.classList.toggle('sel');
+  var detail=document.getElementById(detailId);
+  detail.classList.toggle('open',el.classList.contains('sel'));
+  autoCheck(3);
+}
+
+// 예산 슬라이더
+var budgetVals=['미정','~1,000만','~1,500만','~2,000만','~2,500만','~3,000만','~3,500만','~4,000만','~4,500만','~5,000만','~5,500만','~6,000만','~6,500만','~7,000만','~7,500만','~8,000만','~8,500만','~9,000만','1억 이상'];
+function updateBudget(v){
+  document.getElementById('budget-display').textContent=budgetVals[v]||'미정';
+  autoCheck(4);
+}
+
+// 자동 완료 체크
+function autoCheck(n){
+  var done=false;
+  if(n===1){
+    done=document.getElementById('c-name').value.trim()&&document.getElementById('c-tel').value.trim();
+  } else if(n===2){
+    done=document.getElementById('area-total').value>0;
+  } else if(n===3){
+    done=document.querySelectorAll('.scope-item.sel').length>0;
+  } else if(n===4){
+    done=document.getElementById('budget-slider').value>0;
+  } else if(n===5){
+    done=true;
+  }
+  doneState[n]=!!done;
+  var hd=document.getElementById('card'+n).querySelector('.card-hd');
+  var chk=document.getElementById('chk'+n);
+  hd.classList.toggle('done',!!done);
+  updateProgress();
+}
+function updateProgress(){
+  var cnt=Object.values(doneState).filter(Boolean).length;
+  document.getElementById('done-count').textContent=cnt;
+  document.getElementById('prog-label').textContent=cnt+' / 5 섹션 완료';
+  document.getElementById('prog-fill').style.width=(cnt/5*100)+'%';
+}
+
+function showComplete(){
+  var name=document.getElementById('c-name').value||'고객';
+  document.getElementById('overlay-sub').innerHTML='<strong>'+name+'</strong> 고객님 상담 내용을 바탕으로<br>견적서 작성 페이지로 이동합니다.';
+  document.getElementById('overlay').classList.add('show');
+}
+function closeOverlay(){document.getElementById('overlay').classList.remove('show');}
+function goEstimate(){
+  var scopes=[];
+  var scopeDetails={};
+  document.querySelectorAll('.scope-item.sel').forEach(function(el){
+    var m=el.getAttribute('onclick').match(/'scope-([^']+)'/);
+    if(!m) return;
+    var key=m[1];
+    scopes.push(key);
+    var det=document.getElementById('scope-'+key);
+    if(det){
+      var checked=[];
+      det.querySelectorAll('.dcheck.sel').forEach(function(d){checked.push(d.textContent.trim());});
+      if(checked.length) scopeDetails[key]=checked;
+    }
+  });
+  var envChecks=[];
+  document.querySelectorAll('#body2 .check-item.sel .check-label').forEach(function(el){envChecks.push(el.textContent.trim());});
+  var data={
+    name:document.getElementById('c-name').value.trim(),
+    tel:document.getElementById('c-tel').value.trim(),
+    addr:document.getElementById('c-addr').value.trim(),
+    movein:document.getElementById('c-date').value,
+    consultDate:document.getElementById('c-consult').value,
+    area:document.getElementById('area-total').value,
+    bath:document.getElementById('bath').value,
+    room:document.getElementById('room').value,
+    floor:document.getElementById('floor').value,
+    budget:document.getElementById('budget-slider').value>0?budgetVals[document.getElementById('budget-slider').value]:'',
+    scopes:scopes,
+    scopeDetails:scopeDetails,
+    env:envChecks,
+    specialReq:document.getElementById('special-req').value.trim(),
+    memo:document.getElementById('internal-memo').value.trim()
+  };
+  localStorage.setItem('daham_consult',JSON.stringify(data));
+  window.location.href='estimate.html';
+}
+function collectChecklistData(){
+  var scopes=[],scopeDetails={};
+  document.querySelectorAll('.scope-item.sel').forEach(function(el){
+    var m=el.getAttribute('onclick').match(/'scope-([^']+)'/);
+    if(!m) return;
+    var key=m[1];
+    scopes.push(key);
+    var det=document.getElementById('scope-'+key);
+    if(det){var ch=[];det.querySelectorAll('.dcheck.sel').forEach(function(d){ch.push(d.textContent.trim());});if(ch.length)scopeDetails[key]=ch;}
+  });
+  var env=[];
+  document.querySelectorAll('#body2 .check-item.sel .check-label').forEach(function(el){env.push(el.textContent.trim());});
+  var defects=[];
+  document.querySelectorAll('#body5 .check-list .check-item.sel .check-label').forEach(function(el){defects.push(el.textContent.trim());});
+  return{
+    scopes:scopes,scopeDetails:scopeDetails,env:env,defects:defects,
+    area:document.getElementById('area-total').value,
+    areaLiving:document.getElementById('area-living').value,
+    areaVeranda:document.getElementById('area-veranda').value,
+    room:document.getElementById('room').value,
+    bath:document.getElementById('bath').value,
+    floor:document.getElementById('floor').value,
+    budgetIdx:document.getElementById('budget-slider').value,
+    budget:document.getElementById('budget-slider').value>0?budgetVals[document.getElementById('budget-slider').value]:'',
+    moveinType:(document.querySelector('#rg-movein .radio-btn.sel')||{}).textContent||'',
+    workTime:(document.querySelector('#rg-time .radio-btn.sel')||{}).textContent||'',
+    scopeMemo:document.getElementById('scope-memo').value.trim(),
+    specialReq:document.getElementById('special-req').value.trim(),
+    memo:document.getElementById('internal-memo').value.trim()
+  };
+}
+
+function saveChecklist(){
+  var cl=collectChecklistData();
+  if(_consultId){
+    try{
+      var arr=JSON.parse(localStorage.getItem('daham_consult_v1')||'[]');
+      var idx=-1;
+      for(var i=0;i<arr.length;i++){if(arr[i].id===_consultId){idx=i;break;}}
+      if(idx>=0){
+        arr[idx].checklist=cl;
+        var n=document.getElementById('c-name').value.trim();
+        var t=document.getElementById('c-tel').value.trim();
+        var a=document.getElementById('c-addr').value.trim();
+        var md=document.getElementById('c-date').value;
+        if(n) arr[idx].name=n;
+        if(t) arr[idx].tel=t;
+        if(a) arr[idx].addr=a;
+        if(md) arr[idx].moveDate=md;
+        if(cl.area) arr[idx].area=cl.area;
+        arr[idx].updatedAt=new Date().toISOString();
+        localStorage.setItem('daham_consult_v1',JSON.stringify(arr));
+      }
+    }catch(e){}
+  }
+  showToast('저장되었습니다');
+}
+
+function goBack(){
+  if(_consultId){
+    saveChecklist();
+    setTimeout(function(){window.location.href='consult.html';},600);
+  } else {
+    window.location.href='consult.html';
+  }
+}
+
+function showToast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2000);
+}
+
+function restoreChecklist(cl){
+  if(!cl) return;
+  var fill=function(id,val){var el=document.getElementById(id);if(el&&val!=null)el.value=val;};
+  fill('area-living',cl.areaLiving);
+  fill('area-veranda',cl.areaVeranda);
+  fill('room',cl.room);
+  fill('bath',cl.bath);
+  fill('floor',cl.floor);
+  if(cl.budgetIdx>0){fill('budget-slider',cl.budgetIdx);updateBudget(cl.budgetIdx);}
+  fill('scope-memo',cl.scopeMemo);
+  fill('special-req',cl.specialReq);
+  fill('internal-memo',cl.memo);
+  // 환경 체크 복원
+  if(cl.env&&cl.env.length){
+    document.querySelectorAll('#body2 .check-item').forEach(function(item){
+      var lbl=item.querySelector('.check-label');
+      if(lbl&&cl.env.indexOf(lbl.textContent.trim())>=0){
+        item.classList.add('sel');
+        var box=item.querySelector('.check-box');
+        if(box) box.textContent='✓';
+      }
+    });
+  }
+  // 하자 체크 복원
+  if(cl.defects&&cl.defects.length){
+    document.querySelectorAll('#body5 .check-list .check-item').forEach(function(item){
+      var lbl=item.querySelector('.check-label');
+      if(lbl&&cl.defects.indexOf(lbl.textContent.trim())>=0){
+        item.classList.add('sel');
+        var box=item.querySelector('.check-box');
+        if(box) box.textContent='✓';
+      }
+    });
+  }
+  // 시공범위 복원
+  if(cl.scopes&&cl.scopes.length){
+    cl.scopes.forEach(function(key){
+      var item=document.querySelector('.scope-item[onclick*="\'scope-'+key+'\'"]');
+      if(item){
+        item.classList.add('sel');
+        var det=document.getElementById('scope-'+key);
+        if(det) det.classList.add('open');
+        // 세부 체크 복원
+        if(cl.scopeDetails&&cl.scopeDetails[key]&&det){
+          det.querySelectorAll('.dcheck').forEach(function(d){
+            if(cl.scopeDetails[key].indexOf(d.textContent.trim())>=0) d.classList.add('sel');
+          });
+        }
+      }
+    });
+  }
+  // 이사여부·공사시간 복원
+  if(cl.moveinType){
+    document.querySelectorAll('#rg-movein .radio-btn').forEach(function(b){
+      b.classList.toggle('sel',b.textContent===cl.moveinType);
+    });
+  }
+  if(cl.workTime){
+    document.querySelectorAll('#rg-time .radio-btn').forEach(function(b){
+      b.classList.toggle('sel',b.textContent===cl.workTime);
+    });
+  }
+  autoCheck(1);autoCheck(2);autoCheck(3);autoCheck(4);autoCheck(5);
+}
+
+function resetAll(){if(confirm('모든 입력 내용을 초기화하시겠습니까?'))location.reload();}
+</script>
+</body>
+</html>
