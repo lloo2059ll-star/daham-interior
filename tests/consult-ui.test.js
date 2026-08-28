@@ -15,6 +15,8 @@ test('consult workspace follows the approved master-detail layout', () => {
   assert.match(html, /상담 취소/);
   assert.match(html, /견적서 작성으로 이동/);
   for (const marker of ['consult-notification','consult-card-avatar','detail-more','scope-details-viewport']) assert.match(html,new RegExp(marker));
+  assert.match(html, /\.consult-card \.consult-delete-btn\{display:none\}/);
+  assert.match(html, /aria-label="상담 삭제"/);
 });
 
 test('consult statuses and exact work categories remain available', () => {
