@@ -468,6 +468,39 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .consult-banner-close{flex-shrink:0;background:none;border:1.5px solid #4CAF50;color:#2E7D32;font-size:11px;font-weight:700;padding:4px 12px;cursor:pointer;font-family:inherit}
 .consult-banner-close:hover{background:#4CAF50;color:#fff}
 </style>
+<style id="estimate-tablet-pc-layout">
+@media screen and (min-width: 768px) and (max-width: 1366px) {
+  #edit-view.main {
+    height: calc(100dvh - 48px);
+    overflow: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  #edit-view > .doc-hd,
+  #edit-view > .client-panel,
+  #edit-view > .summary-bar,
+  #edit-view > .grand-total-box,
+  #edit-view > #sections-container { min-width: 1080px; }
+  .toolbar { flex-wrap: nowrap; overflow-x: auto; }
+  #tb-edit-btns,
+  #tb-list-btns { flex-wrap: nowrap !important; }
+  .doc-hd-top { flex-direction: row; }
+  .doc-hd-client { grid-template-columns: 1fr 1fr 2fr 1fr; }
+  .client-bd { grid-template-columns: repeat(4, 1fr); }
+  .summary-bar { flex-wrap: nowrap; height: 58px; position: sticky; }
+  .summary-bar,
+  .sb-toggle { top: 0; }
+  .items-tbl { min-width: 720px; }
+  th.hide-sm,
+  td.hide-sm { display: table-cell !important; }
+  #tb-edit-btns .hide-sm,
+  #tb-list-btns .hide-sm { display: inline-flex !important; }
+  .sec-summary { display: flex !important; }
+  .grand-total-box { flex-direction: row !important; align-items: center !important; }
+  .gt-row { flex-wrap: nowrap; }
+  .gt-total { border-left: 2px solid var(--orange); border-top: 0; padding: 0 0 0 24px; }
+}
+</style>
 <link rel="stylesheet" href="v2-theme.css">
 </head>
 <body>
