@@ -22,12 +22,14 @@ function createHarness({ page = 'login.html', initial = {}, routes = {} } = {}) 
     get length() { return values.size; }
   };
   const location = {
+    origin: 'https://lloo2059ll-star.github.io',
     pathname: `/${page}`,
-    href: page,
+    href: `https://lloo2059ll-star.github.io/daham-interior/${page}`,
     replace(value) { redirects.push(value); this.href = value; }
   };
   const context = {
     console,
+    URL,
     URLSearchParams,
     setTimeout,
     clearTimeout,

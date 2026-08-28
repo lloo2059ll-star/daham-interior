@@ -38,6 +38,20 @@ test('signup returns approval pending and removes a session issued by autoconfir
   assert.match(result.message, /관리자 승인 대기/);
 });
 
+test('signup confirmation returns to the deployed login page', async () => {
+  const h = createHarness({ routes: {
+    '/auth/v1/signup': { data: { user: { id: 'new-user' } } }
+  }});
+
+  await h.auth.createAccount({
+    name: '신입 직원', email: 'new@example.com', password: 'password123'
+  });
+
+  const signup = h.requests.find(request => request.url.includes('/auth/v1/signup'));
+  const redirectTo = new URL(signup.url).searchParams.get('redirect_to');
+  assert.equal(redirectTo, 'https://lloo2059ll-star.github.io/daham-interior/login.html');
+});
+
 test('login rejects an inactive profile as approval pending and keeps business storage', async () => {
   const fixture = session(false);
   const h = createHarness({ initial: { daham_detail_v2: '[{"id":"site-1"}]' }, routes: {

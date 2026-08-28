@@ -121,7 +121,8 @@
       if(!email||!/^\S+@\S+\.\S+$/.test(email)) throw new Error('사용할 이메일을 정확히 입력하세요.');
       if(!password||password.length<8) throw new Error('비밀번호는 8자 이상 입력하세요.');
       if(!name) throw new Error('사용자 이름을 입력하세요.');
-      const data=await request('/auth/v1/signup',{method:'POST',body:{email,password,data:{display_name:name,username:email}}});
+      const redirectTo=new URL('login.html',location.href).href;
+      const data=await request('/auth/v1/signup?redirect_to='+encodeURIComponent(redirectTo),{method:'POST',body:{email,password,data:{display_name:name,username:email}}});
       if(data?.access_token){
         const session=saveSession(data);
         try{await loadProfile(session)}catch(e){}
