@@ -708,41 +708,103 @@ body{background:#eef1f6!important}
 </style>
 
 <style id="estimate-tablet-pc-layout">
-@media screen and (min-width: 768px) and (max-width: 1366px) {
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  #edit-view.main { width: 100%; max-width: 100%; padding: 0 12px 48px !important; overflow: visible; box-sizing: border-box; }
+  .toolbar { height: auto !important; min-height: 64px; flex-wrap: wrap !important; overflow: visible; }
+  .toolbar > div:first-child { flex: 1 1 100%; flex-wrap: wrap; }
+  #tb-edit-btns,
+  #tb-list-btns { flex-wrap: wrap !important; }
+  .v2-project-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto;
+    padding: 14px 0 48px !important;
+    overflow-x: visible !important;
+    box-sizing: border-box;
+  }
+  .v2-project-shell *,
+  .v2-workgrid > *,
+  .v2-center > * { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .v2-project-head { display: flex !important; flex-direction: row !important; flex-wrap: wrap; gap: 12px; }
+  .v2-project-title { flex: 1 1 300px; }
+  .v2-head-actions { flex: 1 1 300px; flex-wrap: wrap; justify-content: flex-end !important; margin-top: 0; }
+  .v2-project-tabs { flex-wrap: wrap; overflow: visible; }
+  .v2-workgrid {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    grid-template-areas: "summary summary" "side center";
+    grid-template-columns: 140px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+  .v2-side { grid-area: side; position: sticky !important; top: 10px !important; padding: 8px !important; }
+  .v2-center { grid-area: center; }
+  .v2-section-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    max-height: calc(100dvh - 120px) !important;
+    overflow: auto !important;
+  }
+  .v2-sec-btn { padding: 8px 7px !important; font-size: 10px !important; }
+  .v2-right {
+    grid-area: summary;
+    position: static !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px !important;
+  }
+  .v2-summary-card { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .v2-summary-kicker,
+  .v2-summary-divider,
+  .v2-margin-box { grid-column: 1 / -1; }
+  .v2-summary-divider { height: 0; margin: 0; }
+  .v2-sum-total-first,
+  .v2-sum-row { margin: 0 !important; padding: 12px !important; border: 1px solid #eceef4 !important; border-radius: 12px; }
+  .v2-sum-row { display: block; background: #fafbfc; }
+  .v2-sum-row span,
+  .v2-sum-row strong { display: block; }
+  .v2-sum-row strong { margin-top: 5px; }
+  .v2-quick-card,
+  .v2-help { margin-top: 0 !important; }
+  .v2-client-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .v2-estimate-toolbar { flex-direction: row !important; flex-wrap: wrap; align-items: center !important; }
+  .v2-estimate-toolbar .tools { width: 100%; flex-wrap: wrap; }
+  .v2-search { width: min(100%, 260px) !important; flex: 1 1 180px; }
+  .v2-sections-host { width: 100%; max-width: 100%; overflow: visible; padding: 6px !important; }
+  .items-tbl { width: 100%; min-width: 0; table-layout: fixed; font-size: 9px; }
+  .v2-sections-host .items-tbl th,
+  .v2-sections-host .items-tbl td { padding: 5px 3px !important; font-size: 9px !important; overflow-wrap: anywhere; }
+  .v2-sections-host .td-qty input { width: 100% !important; min-width: 0; padding: 5px 2px !important; font-size: 11px !important; }
+  th.hide-sm,
+  td.hide-sm { display: table-cell !important; }
+  #tb-edit-btns .hide-sm,
+  #tb-list-btns .hide-sm { display: inline-flex !important; }
+  .sec-summary { display: flex !important; }
+  .sec-hd { gap: 6px; }
+  .sec-summary { gap: 5px !important; font-size: 9px !important; }
+  body.v2-customer-view .v2-workgrid {
+    grid-template-areas: "summary" "center";
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  body.v2-customer-view .v2-center { grid-area: center; }
+  body.v2-customer-view .v2-right { grid-area: summary; }
+}
+@media screen and (min-width: 1025px) and (max-width: 1366px) {
   #edit-view.main { padding-bottom: 0 !important; overflow: hidden; }
   .toolbar { flex-wrap: nowrap !important; overflow-x: auto; }
   #tb-edit-btns,
   #tb-list-btns { flex-wrap: nowrap !important; }
-  .v2-project-shell {
-    height: calc(100dvh - 64px);
-    overflow: auto !important;
-    overscroll-behavior-inline: contain;
-    -webkit-overflow-scrolling: touch;
-  }
+  .v2-project-shell { height: calc(100dvh - 64px); overflow: auto !important; overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
   .v2-project-head,
   .v2-project-tabs,
   .v2-workgrid { min-width: 1316px; }
   .v2-project-head { display: flex !important; flex-direction: row !important; }
   .v2-head-actions { flex-wrap: nowrap; justify-content: flex-end !important; margin-top: 0; }
-  .v2-workgrid {
-    grid-template-columns: 220px minmax(720px, 1fr) 340px !important;
-    min-width: 1316px;
-  }
+  .v2-workgrid { grid-template-columns: 220px minmax(720px, 1fr) 340px !important; min-width: 1316px; }
   .v2-side { position: sticky !important; top: 16px !important; }
-  .v2-section-nav {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 3px !important;
-    max-height: calc(100dvh - 175px) !important;
-    overflow: auto !important;
-  }
-  .v2-right {
-    grid-column: auto !important;
-    position: sticky !important;
-    top: 16px !important;
-    display: flex !important;
-    flex-direction: column !important;
-  }
+  .v2-section-nav { display: flex !important; flex-direction: column !important; gap: 3px !important; max-height: calc(100dvh - 175px) !important; overflow: auto !important; }
+  .v2-right { grid-column: auto !important; position: sticky !important; top: 16px !important; display: flex !important; flex-direction: column !important; }
   .v2-client-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
   .v2-estimate-toolbar { flex-direction: row !important; align-items: center !important; }
   .v2-estimate-toolbar .tools { flex-wrap: nowrap; }
