@@ -49,6 +49,34 @@ test('existing modal and domain integration hooks remain available', () => {
   assert.match(html, /schedule-holidays\.js/);
 });
 
+test('static DOM ids are unique and every literal selector resolves', () => {
+  const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]);
+  const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
+  assert.deepEqual(duplicateIds, []);
+
+  const idSet = new Set(ids);
+  const literalRefs = [...html.matchAll(/getElementById\(["']([^"']+)["']\)/g)].map((match) => match[1]);
+  const missingIds = [...new Set(literalRefs.filter((id) => !idSet.has(id)))];
+  assert.deepEqual(missingIds, []);
+});
+
+test('schedule deletion owns a confirmation implementation before delete handlers use it', () => {
+  const definition = html.indexOf('function dahamConfirm(msg, fn)');
+  const deletion = html.indexOf('function deleteTask()');
+  assert.ok(definition > -1 && definition < deletion);
+  assert.match(html, /function dahamConfirm\(msg, fn\)\s*\{\s*if\(window\.confirm\(msg\)\) fn\(\);\s*\}/);
+});
+
+test('today navigation uses the real current month even while a site is selected', () => {
+  assert.match(html, /var calAnchorToday\s*=\s*false/);
+  assert.match(html, /function goToday\(\)\s*\{\s*calOffset=0;calAnchorToday=true;renderCalendar\(\);\s*\}/);
+  assert.match(html, /if\(calAnchorToday\)\s*\{\s*base=todayStr\(\);/);
+});
+
+test('closing the project drawer flushes pending project edits', () => {
+  assert.match(html, /function closeProjectDrawer\(\)\s*\{[^}]*autoSave\(\)/);
+});
+
 test('responsive UI provides real sizing rather than clipping page overflow', () => {
   assert.match(html, /@media[^\{]*\(min-width:\s*768px\)[\s\S]*?\(max-width:\s*1024px\)/);
   assert.match(html, /@media[^\{]*\(min-width:\s*768px\)[\s\S]*?\.schedule-workspace\s*\{[^}]*width:\s*100%[^}]*max-width:\s*100%/);
