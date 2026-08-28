@@ -14,6 +14,7 @@
 <script src="auth.js"></script>
 <script src="consult-delete.js"></script>
 <script src="consult-estimate-link.js"></script>
+<script src="consult-modal.js"></script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -148,7 +149,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 
 /* 상담/현장실측 2026 workspace */
 :root{--consult-navy:#091a43;--consult-purple:#6439df;--consult-purple-soft:#f3efff;--consult-border:#e2e6ef;--consult-muted:#70778b}
-body.operations-consult{background:#f7f8fb;color:#151a2d;overflow:hidden}
+body.operations-consult{background:#f7f8fb;color:#151a2d;overflow-y:auto}
 .consult-shell{display:grid;grid-template-columns:196px minmax(0,1fr);height:100vh;min-width:0}.consult-nav{background:linear-gradient(180deg,#0b1b46,#071536);color:#fff;padding:26px 14px 18px;display:flex;flex-direction:column;min-width:0}.consult-logo{font-size:27px;font-weight:900;letter-spacing:.09em;padding:0 13px 31px}.consult-logo small{display:block;font-size:10px;font-weight:500;letter-spacing:0;margin-top:6px;color:#aeb9d3}.consult-menu{display:grid;gap:7px}.consult-menu a{min-height:48px;border-radius:9px;padding:0 14px;color:#d4dcf1;text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:650}.consult-menu a.active{background:linear-gradient(135deg,#7450e8,#5932cb);color:#fff}.consult-user{margin-top:auto;border-top:1px solid rgba(255,255,255,.18);padding:18px 10px 0;display:flex;gap:10px;align-items:center}.consult-user-mark{width:34px;height:34px;border-radius:50%;background:#dbe2f3;color:#24345c;display:grid;place-items:center;font-weight:850}.consult-app{min-width:0;display:grid;grid-template-rows:90px minmax(0,1fr)}.consult-top{background:#fff;border-bottom:1px solid var(--consult-border);padding:18px 25px;display:flex;align-items:center;justify-content:space-between;gap:18px}.consult-top h1{font-size:25px;line-height:1.15}.consult-top p{color:var(--consult-muted);margin-top:6px}.consult-top-actions{display:flex;align-items:center;gap:9px}.consult-add{min-height:44px;border:0;border-radius:8px;background:linear-gradient(135deg,#7046e6,#5a30cf);color:#fff;padding:0 18px;font-weight:800;cursor:pointer}.consult-workspace{display:grid;grid-template-columns:390px minmax(0,1fr);gap:10px;padding:8px;min-height:0;min-width:0}.consult-list-panel,.consult-detail-panel{background:#fff;border:1px solid var(--consult-border);border-radius:10px;min-width:0;min-height:0}.consult-list-panel{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}.consult-list-head{padding:15px 16px 10px;display:flex;align-items:center;justify-content:space-between}.consult-list-head h2{font-size:15px}.consult-search{margin:0 14px 10px;min-height:40px;border:1px solid var(--consult-border);border-radius:8px;padding:0 12px;width:calc(100% - 28px);font:inherit}.consult-list-scroll{overflow-y:auto;padding:0 10px 12px}.consult-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 10px 10px}.consult-tabs .tab-btn{border:1px solid var(--consult-border);border-radius:7px;padding:8px 4px;white-space:normal}.consult-tabs .tab-btn.active{border-color:var(--consult-purple);background:var(--consult-purple-soft);color:var(--consult-purple)}.consult-card{width:100%;text-align:left;border:1px solid var(--consult-border);background:#fff;border-radius:9px;padding:15px;margin-bottom:8px;cursor:pointer;font:inherit}.consult-card:hover,.consult-card.active{border-color:var(--consult-purple);box-shadow:0 0 0 1px var(--consult-purple)}.consult-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.consult-card-name{font-size:15px;font-weight:850}.consult-card-address{font-size:12px;color:#565e72;margin-top:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.consult-card-meta{display:flex;gap:13px;color:#737b8e;font-size:11px;margin-top:10px}.consult-card-scopes{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.scope-tag{background:#f4f5f8;border:1px solid #e2e5ec;border-radius:5px;padding:3px 7px;font-size:10px}.consult-detail-panel{overflow-y:auto;padding:14px}.detail-empty{height:100%;display:grid;place-items:center;color:var(--consult-muted)}.detail-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.detail-title{display:flex;align-items:center;gap:9px}.detail-title h2{font-size:20px}.detail-actions{display:flex;gap:8px}.outline-btn{min-height:40px;border:1px solid var(--consult-border);background:#fff;border-radius:7px;padding:0 13px;font-weight:700;cursor:pointer}.detail-grid{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:9px}.info-card{border:1px solid var(--consult-border);border-radius:8px;padding:13px;min-width:0}.info-card h3,.scope-section h3,.survey-section h3{font-size:13px;margin-bottom:12px}.info-lines{display:grid;grid-template-columns:82px minmax(0,1fr);gap:9px;font-size:12px}.info-lines dt{color:#858c9e}.info-lines dd{overflow-wrap:anywhere}.scope-section{border:1px solid var(--consult-border);border-radius:8px;padding:13px;margin-top:10px}.scope-grid{display:grid;grid-template-columns:repeat(8,minmax(84px,1fr));gap:7px}.scope-chip{min-height:46px;border:1px solid var(--consult-border);border-radius:7px;background:#fff;font:inherit;font-weight:650;color:#5c6477}.scope-chip.selected{border-color:var(--consult-purple);background:var(--consult-purple-soft);color:var(--consult-purple)}.scope-details{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}.scope-detail-card{border:1px solid var(--consult-border);border-radius:7px;padding:10px;min-width:0}.scope-detail-card h4{font-size:12px;margin-bottom:8px}.survey-section{border:1px solid var(--consult-border);border-radius:8px;padding:13px;margin-top:10px}.survey-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.5fr 1.4fr;gap:8px}.survey-item{border:1px solid #edf0f5;border-radius:7px;padding:10px;min-width:0}.survey-item span{display:block;color:#868da0;font-size:10px;margin-bottom:6px}.survey-item strong,.survey-item a{font-size:12px;overflow-wrap:anywhere}.detail-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}.detail-footer .primary{background:var(--consult-purple);color:#fff;border-color:var(--consult-purple)}
 .scope-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.scope-picker label{border:1px solid var(--consult-border);border-radius:7px;padding:9px;display:flex;gap:6px;align-items:center;font-size:12px}.scope-picker label:has(input:checked){border-color:var(--consult-purple);background:var(--consult-purple-soft);color:var(--consult-purple)}.detail-options{padding:10px;background:#fafafe;border:1px solid #ece9fa;border-radius:8px;margin-top:8px}.option-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:7px}.option-row label{font-size:11px;color:#5f6678}.address-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}.address-search{border:1px solid var(--consult-purple);background:#fff;color:var(--consult-purple);border-radius:7px;padding:0 12px;font-weight:750;cursor:pointer}.photo-list{display:flex;gap:6px;flex-wrap:wrap}.photo-link{font-size:11px;color:var(--consult-purple)}
 @media(max-width:1100px){body.operations-consult{overflow:auto}.consult-shell{grid-template-columns:76px minmax(0,1fr)}.consult-logo{font-size:0;padding:0 0 24px;text-align:center}.consult-logo:before{content:'D';font-size:24px}.consult-logo small,.consult-menu span,.consult-user>div:last-child{display:none}.consult-menu a{justify-content:center;padding:0}.consult-user{justify-content:center}.consult-workspace{grid-template-columns:320px minmax(0,1fr)}.detail-grid{grid-template-columns:1fr 1fr}.detail-grid .info-card:last-child{grid-column:span 2}.scope-grid{grid-template-columns:repeat(4,1fr)}.scope-details{grid-template-columns:repeat(2,1fr)}.survey-grid{grid-template-columns:repeat(3,1fr)}}
@@ -187,6 +188,22 @@ body.operations-consult{overflow-y:auto}.consult-shell{height:auto;min-height:10
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
+<style id="consult-modal-reference">
+/* 새 상담 추가 확정 시안: 좌측 내비게이션은 유지하고 업무 영역만 대형 패널로 사용 */
+.operations-consult .modal-overlay{left:178px;top:0;right:0;bottom:0;align-items:stretch;justify-content:stretch;padding:0;background:rgba(9,26,67,.12)!important;backdrop-filter:none}
+.operations-consult .modal-box{width:100%!important;max-width:none!important;height:100dvh;max-height:none!important;margin:0!important;border:0!important;border-radius:14px 0 0 14px!important;box-shadow:-10px 0 30px rgba(18,30,58,.12)!important;min-width:0}
+.operations-consult .modal-hd{padding:21px 28px 12px;border-bottom:0!important;align-items:flex-start}.modal-heading{min-width:0}.operations-consult .modal-title{font-size:22px!important;line-height:1.25}.modal-subtitle{margin-top:5px;color:#778097;font-size:12px}.operations-consult .modal-close{width:44px;height:44px;font-size:25px;display:grid;place-items:center}
+.operations-consult .mbar{padding:6px 28px 12px;background:#fff;border-bottom:1px solid #dfe4ed;min-width:0}.operations-consult .mbar-label{display:none}.operations-consult .mbar-steps{gap:9px;overflow:visible;flex-wrap:wrap}.operations-consult .mstep{flex:0 1 105px}.operations-consult .mstep-btn,.operations-consult .mstep-contract .mstep-btn{width:100%;min-height:44px;padding:0 17px;border:1px solid #d6dce8!important;border-radius:7px!important;background:#fff;color:#445069;font-size:12px}.operations-consult .mstep-btn.active{background:linear-gradient(135deg,#7046e6,#5d32d3)!important;border-color:#6740dc!important;color:#fff!important}.operations-consult .mstep-contract{margin-left:0}
+.operations-consult .modal-body{padding:14px 18px 18px;background:#fff;overflow-y:auto;min-width:0}.consult-modal-layout,.consult-modal-main-grid,.consult-modal-left,.consult-modal-right,.consult-modal-lower-grid,.consult-form-card{min-width:0;max-width:100%}.consult-modal-layout{display:grid;gap:10px}.consult-modal-main-grid{display:grid;grid-template-columns:340px minmax(0,1fr);gap:10px}.consult-modal-left,.consult-modal-right{display:grid;align-content:start;gap:10px}.consult-modal-lower-grid{display:grid;grid-template-columns:1.06fr .94fr;gap:10px}
+.consult-form-card{border:1px solid #dfe4ed;border-radius:8px;background:#fff;padding:16px}.consult-form-card h3{display:flex;align-items:center;gap:8px;font-size:14px;color:#17213a;margin-bottom:17px}.consult-form-card h3>span{width:27px;height:27px;border-radius:8px;background:#f1ecff;color:#6840dc;display:grid;place-items:center;font-size:14px}.consult-registration-card{min-height:310px}.consult-schedule-card{min-height:216px}.consult-customer-card{min-height:310px}.consult-project-card,.consult-memo-card{min-height:216px}
+.consult-modal-layout .form-row{margin-bottom:12px;min-width:0}.consult-modal-layout .form-row:last-child{margin-bottom:0}.consult-modal-layout .form-row label{font-size:11px;color:#394156;margin-bottom:6px}.consult-modal-layout .form-row input,.consult-modal-layout .form-row textarea,.consult-modal-layout .form-row select{min-height:42px;padding:10px 11px;border:1px solid #d8deea;border-radius:6px;font-size:12px}.consult-modal-layout .form-row input:focus,.consult-modal-layout .form-row textarea:focus,.consult-modal-layout .form-row select:focus{border-color:#7046e6;box-shadow:0 0 0 2px rgba(112,70,230,.1)}.consult-content-input{min-height:132px!important}.consult-customer-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 12px}.consult-address-field{grid-column:2/-1}.consult-detail-address{grid-column:2/-1}.consult-address-line{display:grid;grid-template-columns:105px minmax(0,1fr) auto;gap:7px;min-width:0}.operations-consult .address-search{min-height:42px;padding:0 14px;white-space:nowrap}.consult-project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 10px}.consult-memo-card textarea{min-height:116px!important;resize:vertical}.consult-char-count{display:block;text-align:right;color:#8d95a6;margin-top:5px}
+.consult-history-card{padding:15px 16px}.consult-history-track{display:grid;grid-template-columns:repeat(5,minmax(120px,1fr));gap:0;align-items:center;margin:3px 0 17px}.consult-history-step{position:relative;min-height:58px;border:1px solid #dfe4ed;border-radius:7px;background:#fff;padding:10px;text-align:center;display:grid;align-content:center;gap:4px}.consult-history-step:not(:last-child):after{content:'';position:absolute;right:-18px;top:50%;width:18px;border-top:1px solid #cfd6e2}.consult-history-step:not(:last-child):before{content:'';position:absolute;right:-20px;top:calc(50% - 3px);width:7px;height:7px;border-radius:50%;background:#c5ccd8;z-index:2}.consult-history-step.current{border-color:#7146e8;background:#fbf9ff;box-shadow:0 0 0 1px rgba(113,70,232,.12)}.consult-history-step strong{font-size:11px}.consult-history-step small{font-size:9px;color:#7b8498;white-space:normal}.consult-history-log{display:grid;gap:6px;margin:7px 0}.consult-history-log-row{display:grid;grid-template-columns:100px 190px minmax(0,1fr) 32px;gap:6px;align-items:center}.consult-history-log-row input{min-height:36px}.hist-add-row{align-items:center}.hist-add-row input{min-height:42px}.hist-add-btn{min-height:42px;background:#e66a1c;padding-inline:18px}
+.consult-existing-details{padding:16px}.consult-detail-field-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.consult-existing-details .scope-picker{grid-template-columns:repeat(8,minmax(92px,1fr));margin:4px 0 10px}.consult-survey-grid{display:grid;grid-template-columns:150px 150px 1fr 1.5fr;gap:10px;align-items:start}.consult-check{min-height:42px;border:1px solid #dfe4ed;border-radius:7px;padding:0 12px;display:flex;align-items:center;gap:8px;font-size:12px}.consult-photo-urls textarea{min-height:70px!important}
+.operations-consult .modal-ft{padding:12px 28px 18px;gap:14px;background:#fff!important}.operations-consult .modal-ft .btn{min-height:46px;border-radius:6px}.operations-consult .modal-ft .btn-cancel{flex:0 1 44%;border:1px solid #d7dde7;background:#fff;color:#263047}.operations-consult .modal-ft .btn-save{background:linear-gradient(135deg,#7046e6,#5d32d3);color:#fff;flex:1}
+@media(max-width:1100px){.operations-consult .modal-overlay{left:76px}.consult-modal-main-grid{grid-template-columns:300px minmax(0,1fr)}.consult-customer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.consult-address-field,.consult-detail-address{grid-column:1/-1}.consult-project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.consult-history-track{grid-template-columns:repeat(5,minmax(100px,1fr))}.consult-existing-details .scope-picker{grid-template-columns:repeat(4,minmax(0,1fr))}.consult-survey-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){.consult-modal-main-grid{grid-template-columns:1fr}.consult-modal-left{grid-template-columns:1fr 1fr}.consult-modal-lower-grid{grid-template-columns:1fr}.consult-registration-card,.consult-schedule-card,.consult-customer-card,.consult-project-card,.consult-memo-card{min-height:0}.consult-history-track{grid-template-columns:1fr;gap:7px}.consult-history-step:not(:last-child):after,.consult-history-step:not(:last-child):before{display:none}.consult-history-log-row{grid-template-columns:90px minmax(0,1fr);padding-bottom:8px;border-bottom:1px solid #eef0f4}.consult-history-log-row .ms-memo-inp{grid-column:1/-1}.consult-detail-field-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.operations-consult .modal-overlay{left:0}.operations-consult .modal-box{border-radius:0!important}.operations-consult .modal-hd{padding:16px 16px 8px}.operations-consult .mbar{padding:5px 16px 10px}.operations-consult .modal-body{padding:10px}.consult-modal-left{grid-template-columns:1fr}.consult-customer-grid,.consult-project-grid,.consult-detail-field-grid,.consult-survey-grid{grid-template-columns:1fr}.consult-address-field,.consult-detail-address{grid-column:auto}.consult-address-line{grid-template-columns:90px minmax(0,1fr)}.consult-address-line .address-search{grid-column:1/-1}.consult-existing-details .scope-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.operations-consult .modal-ft{padding:10px}.hist-add-row{align-items:stretch;flex-direction:column}.hist-add-btn{width:100%}}
+</style>
 </head>
 <body class="operations-ui operations-admin operations-consult">
 <div class="consult-shell">
@@ -201,7 +218,7 @@ body.operations-consult{overflow-y:auto}.consult-shell{height:auto;min-height:10
 <div class="modal-overlay" id="modal" style="display:none" onclick="onOverlayClick(event)">
   <div class="modal-box">
     <div class="modal-hd">
-      <div class="modal-title" id="modal-title">새 상담</div>
+      <div class="modal-heading"><div class="modal-title" id="modal-title">새 상담</div><p class="modal-subtitle">상담 정보를 입력하고 저장하세요.</p></div>
       <button class="modal-close" onclick="closeModal()">×</button>
     </div>
     <div class="mbar" id="mbar"></div>
@@ -408,7 +425,7 @@ function openAddModal(){
   document.getElementById('modal-title').textContent='새 상담 추가';
   renderMbar();
   renderModalBody(null);
-  document.getElementById('modal-ft').innerHTML='<button class="btn btn-save" onclick="saveModal()">저장</button>';
+  document.getElementById('modal-ft').innerHTML='<button class="btn btn-cancel" onclick="closeModal()">취소</button><button class="btn btn-save" onclick="saveModal()">저장</button>';
   document.getElementById('modal').style.display='flex';
 }
 function openEditModal(id){
@@ -469,11 +486,9 @@ function renderMbar(){
   var steps=MS_ACTIVE.map(function(s,i){
     var sc=MS_CONFIG[s];
     var active=s===_curStatus;
-    var style=active?'style="--sc:'+sc.color+';--sb:'+sc.bg+'"':'';
     /* 마지막 버튼은 오른쪽 둥근 모서리 */
-    var rStyle=i===MS_ACTIVE.length-1?'border-radius:0 8px 8px 0':'';
-    return '<div class="mstep"><button class="mstep-btn'+(active?' active':'')+'" '+style
-      +' style="'+rStyle+'" onclick="clickMilestone(\''+s+'\')" title="클릭 시 날짜/시간 기록">'+sc.label+'</button></div>';
+    var style='--sc:'+sc.color+';--sb:'+sc.bg+';'+(i===MS_ACTIVE.length-1?'border-radius:0 8px 8px 0;':'');
+    return '<div class="mstep"><button class="mstep-btn'+(active?' active':'')+'" style="'+style+'" onclick="clickMilestone(\''+s+'\')" title="클릭 시 날짜/시간 기록">'+sc.label+'</button></div>';
   }).join('');
 
   /* 계약 버튼 (우측 분리) */
@@ -483,7 +498,7 @@ function renderMbar(){
     +' onclick="clickContract()" title="계약 완료 — 프로젝트 자동 생성">✓ 계약</button></div>';
 
   document.getElementById('mbar').innerHTML=
-    '<div class="mbar-label">진행 단계 — 버튼을 클릭하면 날짜·시간이 이력에 기록됩니다</div>'
+    '<div class="mbar-label">상담 단계</div>'
     +'<div class="mbar-steps">'+steps+contract+'</div>';
 }
 
@@ -516,24 +531,29 @@ function renderHistSection(){
     else notes.push({h:h,i:i});
   });
 
+  var record=_editId?_records.find(function(x){return x.id===_editId;}):null;
+  var managerEl=document.getElementById('f-manager');
+  var manager=(managerEl&&managerEl.value)||(record&&record.manager)||(_currentUser&&(_currentUser.full_name||_currentUser.name||_currentUser.email))||'담당자';
+  var stages=MS_ACTIVE.concat(['contracted']);
+  var track='<div class="consult-history-track">'+stages.map(function(status){
+    var latest=null;
+    milestones.forEach(function(obj){if(obj.h.status===status)latest=obj.h;});
+    var sc=getStatusCfg(status);
+    var active=status===_curStatus;
+    var detail=latest?fmtDateTime(latest.at)+' · '+manager:(active?'현재 단계':'—');
+    return '<div class="consult-history-step'+(active?' current':'')+'"><strong>'+sc.label+'</strong><small>'+escHtml(detail)+'</small></div>';
+  }).join('')+'</div>';
+
   var msHtml='';
   if(milestones.length){
-    msHtml='<table class="ms-table"><thead><tr>'
-      +'<th>항목</th><th>날짜 / 시간</th><th>메모</th><th></th>'
-      +'</tr></thead><tbody>';
-    milestones.slice().reverse().forEach(function(obj){
-      var h=obj.h, idx=obj.i;
-      var sc=getStatusCfg(h.status);
-      msHtml+='<tr>'
-        +'<td><span class="ms-stage-pill" style="background:'+sc.color+';color:#fff">'+sc.label+'</span></td>'
-        +'<td><input class="ms-dt-inp" type="datetime-local" value="'+escAttr(h.at||'')+'" oninput="updateMs('+idx+',\'at\',this.value)"></td>'
-        +'<td><input class="ms-memo-inp" type="text" placeholder="메모" value="'+escAttr(h.memo||'')+'" oninput="updateMs('+idx+',\'memo\',this.value)"></td>'
-        +'<td><button class="ms-del-btn" onclick="deleteMilestone('+idx+')" title="삭제">×</button></td>'
-        +'</tr>';
-    });
-    msHtml+='</tbody></table>';
-  } else {
-    msHtml='<div style="color:var(--dim);font-size:12px;padding:6px 0">위 단계 버튼을 클릭하면 이력이 기록됩니다</div>';
+    msHtml='<div class="consult-history-log">'+milestones.slice().reverse().map(function(obj){
+      var h=obj.h,idx=obj.i,sc=getStatusCfg(h.status);
+      return '<div class="consult-history-log-row">'
+        +'<span class="ms-stage-pill" style="background:'+sc.bg+';color:'+sc.color+'">'+sc.label+'</span>'
+        +'<input class="ms-dt-inp" type="datetime-local" value="'+escAttr(h.at||'')+'" oninput="updateMs('+idx+',\'at\',this.value)">'
+        +'<input class="ms-memo-inp" type="text" placeholder="진행 메모" value="'+escAttr(h.memo||'')+'" oninput="updateMs('+idx+',\'memo\',this.value)">'
+        +'<button class="ms-del-btn" onclick="deleteMilestone('+idx+')" title="이력 삭제">×</button></div>';
+    }).join('')+'</div>';
   }
 
   var notesHtml='';
@@ -547,10 +567,10 @@ function renderHistSection(){
       }).join('')+'</div>';
   }
 
-  el.innerHTML=msHtml+notesHtml
+  el.innerHTML=track+msHtml+notesHtml
     +'<div class="hist-add-row">'
-    +'<input id="f-hist-note" placeholder="텍스트 메모 추가...">'
-    +'<button class="hist-add-btn" onclick="addHistNote()">추가</button>'
+    +'<input id="f-hist-note" placeholder="상담 진행 중 메모를 입력하세요">'
+    +'<button class="hist-add-btn" onclick="addHistNote()">메모 추가</button>'
     +'</div>';
 }
 
@@ -564,44 +584,18 @@ function updateMs(idx,field,val){
 
 /* 모달 바디 */
 function renderModalBody(r){
-  var v=function(f){ return r?escAttr(r[f]||''):''; };
-  document.getElementById('modal-body').innerHTML=
-    '<div class="sec-title">상담 이력</div>'
-    +'<div id="hist-section"></div>'
-    +'<div class="sec-title">고객 정보</div>'
-    +'<div class="form-grid">'
-    +'<div class="form-row"><label>고객명</label><input id="f-name" placeholder="홍길동" value="'+v('name')+'"></div>'
-    +'<div class="form-row"><label>연락처</label><input id="f-tel" type="tel" placeholder="010-0000-0000" value="'+v('tel')+'"></div>'
-    +'</div>'
-    +'<div class="form-grid"><div class="form-row"><label>이메일</label><input id="f-email" type="email" value="'+v('email')+'"></div><div class="form-row"><label>예비 연락처</label><input id="f-alt-tel" type="tel" value="'+escAttr((r&&(r.altTel||r.phone2))||'')+'"></div></div>'
-    +'<div class="form-row"><label>우편번호</label><input id="f-postcode" inputmode="numeric" value="'+escAttr((r&&(r.postcode||r.zip))||'')+'"></div>'
-    +'<div class="form-row"><label>주소</label><div class="address-row"><input id="f-addr" placeholder="주소 검색 또는 직접 입력" value="'+v('addr')+'"><button type="button" class="address-search" onclick="openAddressSearch()">주소 검색</button></div></div>'
-    +'<div class="form-row"><label>상세주소</label><input id="f-addr-detail" placeholder="동/호수, 상세주소" value="'+v('addrDetail')+'"></div>'
-    +'<div class="form-grid">'
-    +'<div class="form-row"><label>현장명</label><input id="f-site-name" placeholder="건물명 또는 현장명" value="'+v('siteName')+'"></div>'
-    +'<div class="form-row"><label>평수</label><input id="f-area" placeholder="32" value="'+v('area')+'"></div>'
-    +'</div><div class="form-grid"><div class="form-row"><label>준공연도</label><input id="f-build-year" inputmode="numeric" placeholder="2015" value="'+v('buildYear')+'"></div><div class="form-row"><label>주거 형태</label><select id="f-housing-type">'+['','아파트','주상복합','빌라/연립','단독주택','오피스텔','기타'].map(function(x){return '<option value="'+x+'" '+((r&&r.housingType===x)?'selected':'')+'>'+(x||'-- 선택 --')+'</option>';}).join('')+'</select></div></div><div class="form-grid">'
-    +'<div class="form-row"><label>담당자</label><input id="f-manager" placeholder="최일성" value="'+v('manager')+'"></div>'
-    +'</div>'
-    +'<div class="sec-title">상담 일정</div>'
-    +'<div class="form-grid">'
-    +'<div class="form-row"><label>상담 날짜</label><input id="f-sdate" type="date" value="'+v('schedDate')+'"></div>'
-    +'<div class="form-row"><label>상담 시간</label><input id="f-stime" type="time" value="'+v('schedTime')+'"></div>'
-    +'</div>'
-    +'<div class="form-row"><label>장소</label><select id="f-splace">'
-    +['','현장 방문','사무실 방문','전화 상담','화상 상담','기타'].map(function(p){
-      return '<option value="'+p+'"'+((r&&r.schedPlace===p)?' selected':'')+'>'+(p||'-- 선택 --')+'</option>';
-    }).join('')+'</select></div>'
-    +'<div class="sec-title">공사 범위</div>'
-    +'<input id="f-works" type="hidden" value="'+v('works')+'"><div class="scope-picker">'+renderScopePicker(r)+'</div><div id="scope-option-area">'+renderScopeOptions(r)+'</div>'
-    +'<div class="form-grid">'
-    +'<div class="form-row"><label>예산</label><input id="f-budget" placeholder="1,500만원 예상" value="'+v('budget')+'"></div>'
-    +'<div class="form-row"><label>이사 예정일</label><input id="f-movedate" type="date" value="'+v('moveDate')+'"></div>'
-    +'</div>'
-    +'<div class="form-row"><label>요청사항 / 메모</label><textarea id="f-memo">'+v('memo')+'</textarea></div>';
-  document.getElementById('modal-body').innerHTML += '<div class="sec-title">상담 경로 · 현장 실측 / Polycam</div><div class="form-grid"><div class="form-row"><label>유입경로</label><select id="f-source">'+['','소개','온라인 검색','블로그/SNS','기존 고객','기타'].map(function(x){return '<option'+((r&&r.source===x)?' selected':'')+'>'+ (x||'-- 선택 --')+'</option>';}).join('')+'</select></div><div class="form-row"><label>현장 방문일</label><input id="f-visit-date" type="datetime-local" value="'+escAttr((r&&r.survey&&r.survey.visitDate)||'')+'"></div></div><div class="form-grid"><div class="form-row"><label><input id="f-measured" type="checkbox" '+(r&&r.survey&&r.survey.measured?'checked':'')+'> 실측 완료</label></div><div class="form-row"><label><input id="f-polycam-done" type="checkbox" '+(r&&r.survey&&r.survey.polycamDone?'checked':'')+'> Polycam 완료</label></div></div><div class="form-row"><label>Polycam 링크</label><input id="f-polycam-url" type="url" placeholder="https://poly.cam/..." value="'+escAttr((r&&r.survey&&r.survey.polycamUrl)||'')+'"></div><div class="form-row"><label>현장 사진 링크</label><textarea id="f-photo-urls" placeholder="사진 URL을 줄바꿈으로 입력">'+escHtml(((r&&r.survey&&r.survey.photoUrls)||[]).join('\n'))+'</textarea></div><div class="form-row"><label>현장 특이사항</label><textarea id="f-survey-note" placeholder="실측 및 현장 특이사항">'+escHtml((r&&r.survey&&r.survey.note)||'')+'</textarea></div>';
+  document.getElementById('modal-body').innerHTML=DAHAM_CONSULT_MODAL.buildBody(r||{}, {
+    scopePicker:renderScopePicker(r),
+    scopeOptions:renderScopeOptions(r)
+  });
   refreshScopeOptions();
   renderHistSection();
+}
+
+function syncConsultArea(value,sourceId){
+  var targetId=sourceId==='f-area'?'f-project-area':'f-area';
+  var target=document.getElementById(targetId);
+  if(target&&target.value!==value) target.value=value;
 }
 
 function renderScopePicker(r){var selected=getRecordScopes(r||{});return CONSULT_SCOPES.map(function(s){return '<label><input type="checkbox" class="scope-check" value="'+s+'" '+(selected.indexOf(s)>=0?'checked':'')+' onchange="refreshScopeOptions()"> '+s+'</label>';}).join('');}
@@ -634,6 +628,8 @@ function readScopeDetails(){var out={};function radio(n){var x=document.querySel
 
 /* 저장 */
 function saveModal(){
+  var consultTitle=(document.getElementById('f-consult-title').value||'').trim();
+  var consultContent=(document.getElementById('f-consult-content').value||'').trim();
   var name    =(document.getElementById('f-name').value||'').trim();
   var tel     =(document.getElementById('f-tel').value||'').trim();
   var email   =(document.getElementById('f-email').value||'').trim();
@@ -642,6 +638,7 @@ function saveModal(){
   var addr    =(document.getElementById('f-addr').value||'').trim();
   var addrDetail=(document.getElementById('f-addr-detail').value||'').trim();
   var siteName=(document.getElementById('f-site-name').value||'').trim();
+  var unit    =(document.getElementById('f-unit').value||'').trim();
   var area    =(document.getElementById('f-area').value||'').trim();
   var buildYear=(document.getElementById('f-build-year').value||'').trim();
   var housingType=document.getElementById('f-housing-type').value||'';
@@ -684,7 +681,7 @@ function saveModal(){
     var idx=db.findIndex(function(r){return r.id===_editId;});
     if(idx<0){closeModal();return;}
     db[idx]=Object.assign({},db[idx],{
-      name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
+      consultTitle:consultTitle,consultContent:consultContent,name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,unit:unit,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
       works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
       history:_modalHist.slice(),updatedAt:nowISO()
@@ -693,7 +690,7 @@ function saveModal(){
   } else {
     db.push({
       id:newId,createdAt:nowISO(),updatedAt:nowISO(),
-      name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
+      consultTitle:consultTitle,consultContent:consultContent,name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,unit:unit,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
       works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
       projId:newProjId||null,history:_modalHist.slice()
