@@ -13,6 +13,22 @@ function tabletOverride(file) {
   return block[1];
 }
 
+test('touch-capable iPads opt into tablet layout through 1366px', () => {
+  for (const file of ['estimate.html', 'estimate-commercial.html']) {
+    const html = read(file);
+    const css = tabletOverride(file);
+    assert.match(html, /navigator\.maxTouchPoints\s*>\s*0/);
+    assert.match(html, /matchMedia\(["']\(hover:\s*none\)\s+and\s+\(pointer:\s*coarse\)["']\)/);
+    assert.match(html, /documentElement\.classList\.add\(["']daham-touch-tablet["']\)/);
+    assert.match(css, /@media\s+screen\s+and\s*\(min-width:\s*1025px\)\s+and\s*\(max-width:\s*1366px\)[\s\S]*?html\.daham-touch-tablet/);
+  }
+
+  const css = tabletOverride('estimate.html');
+  assert.match(css, /html\.daham-touch-tablet\s+\.v2-workgrid\s*\{[^}]*grid-template-areas\s*:\s*["']summary summary["']\s*["']side center["'][^}]*grid-template-columns\s*:\s*140px\s+minmax\(0,\s*1fr\)\s*!important/s);
+  assert.match(css, /html\.daham-touch-tablet\s+\.v2-right\s*\{[^}]*grid-area\s*:\s*summary[^}]*position\s*:\s*static\s*!important/s);
+  assert.match(css, /html\.daham-touch-tablet\s+\.items-tbl\s*\{[^}]*width\s*:\s*100%[^}]*min-width\s*:\s*0\s*!important[^}]*table-layout\s*:\s*fixed/s);
+});
+
 test('estimate editor reflows inside tablet width without horizontal scrolling', () => {
   const css = tabletOverride('estimate.html');
   assert.match(css, /@media\s+screen\s+and\s*\(min-width:\s*768px\)\s+and\s*\(max-width:\s*1024px\)/);
