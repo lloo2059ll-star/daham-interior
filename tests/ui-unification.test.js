@@ -148,3 +148,43 @@ test('price editor title row and action toolbar use a dedicated adapter', () => 
   assert.match(css, /\.operations-ui\.operations-price-editor\s+\.top\s*\{/);
   assert.match(css, /\.operations-ui\.operations-price-editor\s+\.top\s+\.toolbar\s*\{/);
 });
+
+test('mobile and tablet breakpoint layers stay screen-only', () => {
+  const css = read('operations-ui.css');
+  for (const width of [1024, 767, 430]) {
+    assert.match(
+      css,
+      new RegExp(`@media\\s+screen\\s+and\\s*\\(max-width:\\s*${width}px\\)`),
+      `missing ${width}px screen breakpoint`
+    );
+  }
+  assert.doesNotMatch(css, /@media\s+screen\s+and\s*\(min-width:\s*1025px\)/);
+});
+
+test('responsive layer provides touch, overflow, modal, and long-text safety', () => {
+  const css = read('operations-ui.css');
+  assert.match(css, /--ops-touch-size\s*:\s*44px/);
+  assert.match(css, /overflow-x\s*:\s*auto/);
+  assert.match(css, /max-height\s*:\s*calc\(100dvh\s*-\s*16px\)/);
+  assert.match(css, /overflow-wrap\s*:\s*anywhere/);
+  assert.match(css, /overscroll-behavior-inline\s*:\s*contain/);
+  assert.match(css, /@media\s+screen\s+and\s*\(hover:\s*none\)\s*,\s*screen\s+and\s*\(pointer:\s*coarse\)/);
+  assert.match(css, /\.album-del-btn[\s\S]*?\.photo-del-btn[\s\S]*?min-width\s*:\s*44px/);
+  assert.match(css, /\.modal-ft[\s\S]*?\.modal-foot[\s\S]*?flex-wrap\s*:\s*wrap/);
+  assert.match(css, /\.operations-ui\.operations-worklog \.proj-cards/);
+  assert.match(css, /\.operations-ui:not\(\.operations-document\) button/);
+});
+
+test('layout-specific production pages expose presentation adapters', () => {
+  const adapters = {
+    'employees.html': 'operations-employees',
+    'schedule.html': 'operations-schedule',
+    'photos.html': 'operations-photos',
+    'worklog.html': 'operations-worklog'
+  };
+  for (const [file, adapter] of Object.entries(adapters)) {
+    const body = read(file).match(/<body\b([^>]*)>/i);
+    assert.ok(body, `${file} must contain body`);
+    assert.match(body[1], new RegExp(`\\b${adapter}\\b`), `${file} must use ${adapter}`);
+  }
+});
