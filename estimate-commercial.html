@@ -469,13 +469,45 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .consult-banner-close:hover{background:#4CAF50;color:#fff}
 </style>
 <style id="estimate-tablet-pc-layout">
-@media screen and (min-width: 768px) and (max-width: 1366px) {
+@media screen and (min-width: 768px) and (max-width: 1024px) {
   #edit-view.main {
-    height: calc(100dvh - 48px);
-    overflow: auto;
-    overscroll-behavior-inline: contain;
-    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: visible;
+    padding: 16px 12px 60px;
+    box-sizing: border-box;
   }
+  #edit-view > .doc-hd,
+  #edit-view > .client-panel,
+  #edit-view > .summary-bar,
+  #edit-view > .grand-total-box,
+  #edit-view > #sections-container { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
+  #edit-view *,
+  .toolbar * { min-width: 0; max-width: 100%; box-sizing: border-box; }
+  .toolbar { flex-wrap: wrap; overflow: visible; }
+  #tb-edit-btns,
+  #tb-list-btns { flex-wrap: wrap !important; }
+  .doc-hd-client,
+  .client-bd { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .summary-bar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; position: static; }
+  .sb-item,
+  .sb-margin { width: 100%; min-width: 0; padding: 10px 12px; border-bottom: 1px solid var(--line-lt); }
+  .items-tbl { width: 100%; min-width: 0; table-layout: fixed; font-size: 9px; }
+  .items-tbl th,
+  .items-tbl td { padding: 4px 3px; font-size: 9px; overflow-wrap: anywhere; }
+  .td-qty input { width: 100%; min-width: 0; padding: 4px 2px; font-size: 11px; }
+  th.hide-sm,
+  td.hide-sm { display: table-cell !important; }
+  #tb-edit-btns .hide-sm,
+  #tb-list-btns .hide-sm { display: inline-flex !important; }
+  .sec-summary { display: flex !important; }
+  .sec-summary { gap: 5px; font-size: 9px; }
+  .grand-total-box { max-width: 100%; box-sizing: border-box; }
+  .donut-wrap { transform: scale(.9); transform-origin: center; }
+}
+@media screen and (min-width: 1025px) and (max-width: 1366px) {
+  #edit-view.main { height: calc(100dvh - 48px); overflow: auto; overscroll-behavior-inline: contain; -webkit-overflow-scrolling: touch; }
   #edit-view > .doc-hd,
   #edit-view > .client-panel,
   #edit-view > .summary-bar,

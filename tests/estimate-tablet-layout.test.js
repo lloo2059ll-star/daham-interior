@@ -13,18 +13,20 @@ function tabletOverride(file) {
   return block[1];
 }
 
-test('estimate editor keeps the desktop three-column workspace on tablets', () => {
+test('estimate editor reflows inside tablet width without horizontal scrolling', () => {
   const css = tabletOverride('estimate.html');
-  assert.match(css, /@media\s+screen\s+and\s*\(min-width:\s*768px\)\s+and\s*\(max-width:\s*1366px\)/);
-  assert.match(css, /#edit-view\.main\s*\{[^}]*padding-bottom\s*:\s*0\s*!important[^}]*overflow\s*:\s*hidden/s);
-  assert.match(css, /\.toolbar\s*\{[^}]*flex-wrap\s*:\s*nowrap\s*!important[^}]*overflow-x\s*:\s*auto/s);
-  assert.match(css, /\.v2-project-shell\s*\{[^}]*height\s*:\s*calc\(100dvh\s*-\s*64px\)[^}]*overflow\s*:\s*auto/s);
-  assert.match(css, /\.v2-workgrid\s*\{[^}]*grid-template-columns\s*:\s*220px\s+minmax\(720px,\s*1fr\)\s+340px\s*!important/s);
-  assert.match(css, /\.v2-workgrid\s*\{[^}]*min-width\s*:\s*1316px/s);
-  assert.match(css, /\.v2-right\s*\{[^}]*display\s*:\s*flex\s*!important/s);
-  assert.match(css, /\.v2-side\s*\{[^}]*position\s*:\s*sticky\s*!important/s);
-  assert.match(css, /\.v2-head-actions\s*\{[^}]*flex-wrap\s*:\s*nowrap/s);
-  assert.match(css, /\.v2-section-nav\s*\{[^}]*flex-direction\s*:\s*column\s*!important[^}]*max-height\s*:\s*calc\(100dvh\s*-\s*175px\)/s);
+  assert.match(css, /@media\s+screen\s+and\s*\(min-width:\s*768px\)\s+and\s*\(max-width:\s*1024px\)/);
+  assert.match(css, /\.v2-project-shell\s*\{[^}]*max-width\s*:\s*100%[^}]*overflow-x\s*:\s*visible/s);
+  assert.match(css, /\.v2-workgrid\s*\{[^}]*grid-template-areas\s*:\s*["']summary summary["']\s*["']side center["']/s);
+  assert.match(css, /\.v2-workgrid\s*\{[^}]*grid-template-columns\s*:\s*140px\s+minmax\(0,\s*1fr\)/s);
+  assert.match(css, /\.v2-right\s*\{[^}]*grid-area\s*:\s*summary[^}]*grid-template-columns\s*:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(css, /\.v2-summary-card\s*\{[^}]*grid-template-columns\s*:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  assert.match(css, /\.v2-head-actions\s*\{[^}]*flex-wrap\s*:\s*wrap/s);
+  assert.match(css, /\.v2-project-head\s*\{[^}]*flex-direction\s*:\s*row\s*!important/s);
+  assert.match(css, /\.toolbar\s*>\s*div:first-child\s*\{[^}]*flex\s*:\s*1\s+1\s+100%[^}]*flex-wrap\s*:\s*wrap/s);
+  assert.match(css, /\.v2-project-tabs\s*\{[^}]*flex-wrap\s*:\s*wrap[^}]*overflow\s*:\s*visible/s);
+  assert.match(css, /body\.v2-customer-view\s+\.v2-workgrid\s*\{[^}]*grid-template-areas\s*:\s*["']summary["']\s*["']center["'][^}]*grid-template-columns\s*:\s*minmax\(0,\s*1fr\)/s);
+  assert.match(css, /#tb-edit-btns\s+\.hide-sm,[^}]*#tb-list-btns\s+\.hide-sm\s*\{[^}]*display\s*:\s*inline-flex\s*!important/s);
 });
 
 test('tablet overrides keep estimate information visible and leave phone and print rules alone', () => {
@@ -33,10 +35,10 @@ test('tablet overrides keep estimate information visible and leave phone and pri
     assert.doesNotMatch(css, /display\s*:\s*none/i);
     assert.doesNotMatch(css, /@media\s+print/i);
     assert.doesNotMatch(css, /max-width\s*:\s*(?:520|767)px/i);
-    assert.match(css, /\.items-tbl\s*\{[^}]*min-width\s*:\s*720px/s);
+    assert.match(css, /\.items-tbl\s*\{[^}]*width\s*:\s*100%[^}]*min-width\s*:\s*0[^}]*table-layout\s*:\s*fixed/s);
     assert.match(css, /\.sec-summary\s*\{[^}]*display\s*:\s*flex\s*!important/s);
-    assert.match(css, /\.grand-total-box\s*\{[^}]*flex-direction\s*:\s*row\s*!important/s);
-    assert.match(css, /#tb-edit-btns \.hide-sm[\s\S]*?#tb-list-btns \.hide-sm\s*\{[^}]*display\s*:\s*inline-flex\s*!important/s);
+    assert.match(css, /box-sizing\s*:\s*border-box/);
+    assert.match(css, /@media\s+screen\s+and\s*\(min-width:\s*1025px\)\s+and\s*\(max-width:\s*1366px\)/);
   }
-  assert.match(tabletOverride('estimate-commercial.html'), /\.summary-bar\s*,\s*\.sb-toggle\s*\{[^}]*top\s*:\s*0/s);
+  assert.match(tabletOverride('estimate-commercial.html'), /\.summary-bar\s*\{[^}]*display\s*:\s*grid[^}]*grid-template-columns\s*:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
 });
