@@ -25,8 +25,9 @@ test('desktop consultation geometry matches the final 1440 reference', () => {
   assert.match(html, /\.consult-workspace\{grid-template-columns:390px minmax\(0,1fr\)/);
   assert.match(html, /\.scope-grid\{[^}]*grid-template-columns:repeat\(8,minmax\(0,1fr\)\)/);
   assert.match(html, /\.scope-details\{[^}]*grid-template-columns:1fr 1\.35fr 1\.35fr 1fr 2fr/);
-  assert.match(html, /\.scope-detail-card\{height:144px/);
-  assert.match(html, /\.survey-item\{min-height:52px/);
+  assert.match(html, /\.scope-detail-card\{min-height:214px/);
+  assert.match(html, /\.survey-item\{min-height:70px/);
+  assert.match(html, /body\.operations-consult\{[^}]*overflow-y:auto/);
 });
 
 test('final customer, project, and five trade details are rendered', () => {
@@ -81,6 +82,6 @@ test('tablet workspace reflows without hiding the detail editor', () => {
   assert.match(html, /\.consult-workspace\{grid-template-columns:320px minmax\(0,1fr\)\}/);
   assert.doesNotMatch(html, /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/i);
   assert.match(html, /@media\(max-width:1100px\)\{\.consult-shell\{grid-template-columns:76px minmax\(0,1fr\)\}/);
-  assert.match(html, /@media\(max-width:1100px\)\{\.scope-details\{[^}]*grid-template-columns:repeat\(2,minmax\(145px,1fr\)\)[^}]*overflow-x:auto/);
+  assert.match(html, /\.scope-details\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 
