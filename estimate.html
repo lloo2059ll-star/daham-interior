@@ -468,6 +468,17 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .consult-scope-tag{background:#4CAF50;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px;letter-spacing:.04em}
 .consult-banner-close{flex-shrink:0;background:none;border:1.5px solid #4CAF50;color:#2E7D32;font-size:11px;font-weight:700;padding:4px 12px;cursor:pointer;font-family:inherit}
 .consult-banner-close:hover{background:#4CAF50;color:#fff}
+.consult-reference-backdrop{position:fixed;inset:0;background:rgba(8,18,43,.35);z-index:790;opacity:0;pointer-events:none;transition:opacity .2s}
+.consult-reference-backdrop.open{opacity:1;pointer-events:auto}
+.consult-reference-drawer{position:fixed;z-index:800;top:0;right:0;width:min(430px,100vw);height:100dvh;background:#fff;border-left:1px solid #dfe3eb;box-shadow:-14px 0 40px rgba(16,27,59,.16);transform:translateX(102%);transition:transform .22s ease;display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0}
+.consult-reference-drawer.open{transform:translateX(0)}
+.consult-reference-head{padding:18px 20px;border-bottom:1px solid #e5e8ef;display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fbfbfe}
+.consult-reference-head h2{font-size:17px}.consult-reference-readonly{font-size:10px;font-weight:800;color:#6540d5;background:#efeaff;border-radius:99px;padding:4px 8px;margin-left:7px}
+.consult-reference-close{width:40px;height:40px;border:1px solid #dfe3eb;background:#fff;border-radius:8px;font-size:22px;cursor:pointer}
+.consult-reference-body{padding:16px 20px 28px;overflow-y:auto;min-width:0}
+.consult-reference-card{border:1px solid #e1e5ed;border-radius:9px;padding:13px;margin-bottom:10px;min-width:0}
+.consult-reference-card h3{font-size:13px;margin-bottom:9px;color:#19233f}.consult-reference-list{display:grid;grid-template-columns:86px minmax(0,1fr);gap:7px;font-size:12px}.consult-reference-list dt{color:#858c9d}.consult-reference-list dd{overflow-wrap:anywhere}
+.consult-reference-tags{display:flex;gap:6px;flex-wrap:wrap}.consult-reference-tag{border:1px solid #d9cef9;background:#f6f2ff;color:#623bd2;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:700}.consult-reference-photo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.consult-reference-photo img{width:100%;aspect-ratio:1.25;object-fit:cover;border-radius:6px;border:1px solid #e2e5ec}
 </style>
 <style>
 
@@ -870,7 +881,7 @@ body{background:#eef1f6!important}
   html.daham-touch-tablet body.v2-customer-view .v2-workgrid { grid-template-areas: "summary" "center"; grid-template-columns: minmax(0, 1fr) !important; }
 }
 </style>
-<script src="auth.js"></script></head>
+<script src="auth.js"></script><script src="consult-estimate-link.js"></script></head>
 <body>
 
 <!-- 만료 견적 정리 모달 -->
@@ -908,6 +919,7 @@ body{background:#eef1f6!important}
     <button class="btn save" onclick="newProject()">+ 새 프로젝트</button>
   </div>
   <div id="tb-edit-btns" style="display:none;gap:6px" class="tb-right">
+    <button class="btn" id="consult-reference-btn" style="display:none;border-color:#6d45dc;color:#5f35d1" onclick="openConsultReference()">상담 내용 참조</button>
     <button class="btn hide-sm" onclick="clearAll()">초기화</button>
     <button class="btn hide-sm" onclick="expandAll()">전체 펼치기</button>
     <button class="btn hide-sm" onclick="collapseAll()">전체 접기</button>
@@ -919,6 +931,12 @@ body{background:#eef1f6!important}
     <button class="btn primary" onclick="window.print()">인쇄 / PDF</button>
   </div>
 </div>
+
+<div id="consult-reference-backdrop" class="consult-reference-backdrop" onclick="closeConsultReference()"></div>
+<aside id="consult-reference-drawer" class="consult-reference-drawer" aria-hidden="true" aria-label="상담 내용 참조">
+  <div class="consult-reference-head"><div><h2>상담 내용 참조 <span class="consult-reference-readonly">READ ONLY</span></h2><div style="font-size:11px;color:#7c8496;margin-top:4px">원본 상담은 이 화면에서 수정되지 않습니다.</div></div><button class="consult-reference-close" onclick="closeConsultReference()" aria-label="닫기">×</button></div>
+  <div id="consult-reference-body" class="consult-reference-body"></div>
+</aside>
 
 <!-- 상담 데이터 배너 -->
 <div id="consult-banner" style="display:none">
@@ -2260,6 +2278,7 @@ function openProject(id){
       document.getElementById('tb-edit-btns').style.display = 'flex';
       var pn = document.getElementById('tb-proj-name');
       if(pn) pn.textContent = (allProjects[i].client||{})['cl-name'] || '새 프로젝트';
+      setConsultReference(allProjects[i].consultRef||null);
       updateToolbarStatus();
       return;
     }
@@ -3086,6 +3105,69 @@ initCloud();
 loadDB();
 
 var _pendingConsult = null;
+var _activeConsultRef = null;
+function setConsultReference(data){
+  _activeConsultRef=data||null;
+  var btn=document.getElementById('consult-reference-btn');
+  if(btn) btn.style.display=_activeConsultRef?'inline-flex':'none';
+  if(!_activeConsultRef) closeConsultReference();
+}
+function consultDetailText(details){
+  var labels={grade:'벽지 등급',wood:'마루 규격',vinyl:'장판 두께',place:'욕실 위치',mode:'공사 방식',tile:'타일 규격',brand:'브랜드',range:'교체 범위',note:'메모',items:'선택 항목',closetRooms:'붙박이장 위치',count:'수량',places:'위치',itemLabel:'중문 옵션'};
+  var rows=[];
+  Object.keys(details||{}).forEach(function(key){
+    var value=details[key];
+    if(key==='itemRef'||value==null||value==='') return;
+    if(Array.isArray(value)) value=value.join(', ');
+    rows.push('<dt>'+escHtml(labels[key]||key)+'</dt><dd>'+escHtml(value||'—')+'</dd>');
+  });
+  return rows.length?'<dl class="consult-reference-list">'+rows.join('')+'</dl>':'<div style="font-size:12px;color:#858c9d">상세 선택 없음</div>';
+}
+function renderConsultReference(){
+  var d=_activeConsultRef||{},survey=d.survey||{},details=d.scopeDetails||{},scopes=d.scopes||[];
+  var applied=window.DAHAM_CONSULT_ESTIMATE?DAHAM_CONSULT_ESTIMATE.autoItems(d):[];
+  var appliedText=applied.length?applied.map(function(x){var p=x.ref.split('_'),item=SECTIONS[Number(p[0])].items[Number(p[1])];return x.scope+' · '+escHtml(item.sub+(item.det?' '+item.det:''))+' · 수량 '+x.qty;}).join('<br>'):'자동 반영 항목 없음';
+  var photos=(d.photoUrls||survey.photoUrls||[]).map(function(url){var safe=safeConsultUrl(url);return safe?'<a href="'+safe+'" target="_blank" rel="noopener"><img src="'+safe+'" alt="현장 사진"></a>':'';}).join('');
+  var scopeCards=scopes.map(function(scope){return '<div class="consult-reference-card"><h3>'+escHtml(scope)+'</h3>'+consultDetailText(details[scope]||{})+'</div>';}).join('');
+  var body=document.getElementById('consult-reference-body');
+  if(!body)return;
+  body.innerHTML='<div class="consult-reference-card"><h3>고객·현장 정보</h3><dl class="consult-reference-list"><dt>고객</dt><dd>'+escHtml(d.name||'—')+'</dd><dt>연락처</dt><dd>'+escHtml(d.tel||'—')+'</dd><dt>주소</dt><dd>'+escHtml([d.addr,d.addrDetail].filter(Boolean).join(' ')||'—')+'</dd><dt>평형</dt><dd>'+escHtml(d.area?d.area+'평':'—')+'</dd><dt>희망일정</dt><dd>'+escHtml(d.movein||'—')+'</dd><dt>예산</dt><dd>'+escHtml(d.budget||'—')+'</dd><dt>메모</dt><dd>'+escHtml(d.specialReq||d.memo||'—')+'</dd></dl></div>'
+    +'<div class="consult-reference-card"><h3>선택 공종</h3><div class="consult-reference-tags">'+scopes.map(function(s){return '<span class="consult-reference-tag">'+escHtml(s)+'</span>';}).join('')+'</div></div>'
+    +scopeCards
+    +'<div class="consult-reference-card"><h3>자동 반영 요약</h3><div style="font-size:12px;line-height:1.7">'+appliedText+'</div></div>'
+    +'<div class="consult-reference-card"><h3>현장 실측 / Polycam</h3><dl class="consult-reference-list"><dt>방문일</dt><dd>'+escHtml(survey.visitDate||'—')+'</dd><dt>실측</dt><dd>'+(survey.measured?'완료':'미완료')+'</dd><dt>Polycam</dt><dd>'+(safeConsultUrl(d.polycamUrl||survey.polycamUrl)?'<a href="'+safeConsultUrl(d.polycamUrl||survey.polycamUrl)+'" target="_blank" rel="noopener">링크 열기</a>':'—')+'</dd><dt>특이사항</dt><dd>'+escHtml(survey.note||'—')+'</dd></dl>'+(photos?'<div class="consult-reference-photo" style="margin-top:10px">'+photos+'</div>':'')+'</div>'
+    +'<button class="btn" style="width:100%;min-height:42px" onclick="openConsultOrigin()">상담 원본 보기</button>';
+}
+function safeConsultUrl(value){var s=String(value||'').trim();if(!/^https?:\/\//i.test(s))return '';return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function openConsultReference(){
+  if(!_activeConsultRef)return;
+  renderConsultReference();
+  document.getElementById('consult-reference-drawer').classList.add('open');
+  document.getElementById('consult-reference-drawer').setAttribute('aria-hidden','false');
+  document.getElementById('consult-reference-backdrop').classList.add('open');
+}
+function closeConsultReference(){
+  var drawer=document.getElementById('consult-reference-drawer'),backdrop=document.getElementById('consult-reference-backdrop');
+  if(drawer){drawer.classList.remove('open');drawer.setAttribute('aria-hidden','true');}
+  if(backdrop)backdrop.classList.remove('open');
+}
+function openConsultOrigin(){
+  if(_activeConsultRef&&_activeConsultRef.consultId) localStorage.setItem('daham_open_consult',_activeConsultRef.consultId);
+  location.href='consult.html';
+}
+function applyConsultAutoItems(data){
+  if(!window.DAHAM_CONSULT_ESTIMATE)return [];
+  var items=DAHAM_CONSULT_ESTIMATE.autoItems(data);
+  items.forEach(function(entry){
+    var parts=entry.ref.split('_'),si=Number(parts[0]),ii=Number(parts[1]);
+    var input=document.getElementById(`q_${si}_${ii}`),row=document.getElementById('tr_'+si+'_'+ii),chip=document.getElementById('chip_'+si+'_'+ii);
+    if(!input||!SECTIONS[si]||!SECTIONS[si].items[ii])return;
+    input.value=entry.qty;if(row)row.style.display='table-row';if(chip)chip.classList.add('selected');
+    var body=document.getElementById('body_'+si);if(body)body.classList.remove('closed');
+    onQtyChange(si,ii,input);
+  });
+  return items;
+}
 function startFromConsult(){
   if(!_pendingConsult) return;
   var d=_pendingConsult;
@@ -3100,11 +3182,13 @@ function startFromConsult(){
       'cl-movein':d.movein||'','cl-addr':d.addr||'',
       'cl-area':d.area?d.area+'평':'','cl-start':'','cl-end':''
     },
-    margins:{profit:'15'},qtys:{}
+    margins:{profit:'15'},qtys:{},consultId:d.consultId||null,consultRef:d
   };
   allProjects.unshift(p);
   saveDB(p.id);
   openProject(p.id);
+  applyConsultAutoItems(d);
+  autoSave();
 }
 
 /* 상담관리 불러오기 팝업 */
@@ -3148,6 +3232,9 @@ function pickConsult(id){
   fill('cl-addr',r.addr);
   fill('cl-movein',r.moveDate);
   if(r.area) fill('cl-area',r.area+'평');
+  var payload={consultId:r.id,name:r.name||'',tel:r.tel||'',email:r.email||'',backupTel:r.altTel||r.phone2||'',addr:r.addr||'',addrDetail:r.addrDetail||'',postcode:r.postcode||r.zip||'',siteName:r.siteName||'',buildYear:r.buildYear||'',housingType:r.housingType||'',movein:r.moveDate||'',area:r.area||'',budget:r.budget||'',scopes:Array.isArray(r.scopes)?r.scopes:String(r.works||'').split(/[,/]/).map(function(x){return x.trim();}).filter(Boolean),scopeDetails:r.scopeDetails||{},specialReq:r.memo||'',memo:r.memo||'',survey:r.survey||{},photoUrls:(r.survey&&r.survey.photoUrls)||[],polycamUrl:(r.survey&&r.survey.polycamUrl)||''};
+  if(currentProjId){var project=allProjects.find(function(x){return x.id===currentProjId;});if(project){project.consultId=r.id;project.consultRef=payload;project.updatedAt=nowISO();saveDB(currentProjId);}}
+  setConsultReference(payload);
   var ov=document.getElementById('consult-picker-overlay');
   if(ov) ov.remove();
   if(typeof syncDocHeader==='function') syncDocHeader();
@@ -3163,6 +3250,7 @@ function pickConsult(id){
     var d=JSON.parse(raw);
     localStorage.removeItem('daham_consult');
     _pendingConsult=d;
+    setConsultReference(d);
     // 배너 표시
     var scopeLabels={'도배':'도배','바닥':'바닥','욕실':'욕실','주방':'주방','전기':'전기/조명','철거':'철거','목작업':'목작업','기타':'기타','필름':'필름','설비':'설비'};
     var infoArr=[];
@@ -3343,3 +3431,4 @@ body.v2-customer-view .v2-summary-card{border-color:#e3e6ed!important}
 
 </body>
 </html>
+
