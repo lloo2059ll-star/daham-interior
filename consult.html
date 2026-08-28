@@ -429,6 +429,8 @@ function openAddModal(){
   document.getElementById('modal-ft').innerHTML='<button class="btn btn-cancel" onclick="closeModal()">취소</button><button class="btn btn-save" onclick="saveModal()">저장</button>';
   document.getElementById('modal').style.display='flex';
   document.body.classList.add('modal-open');
+  var modalBody=document.getElementById('modal-body');
+  if(modalBody) modalBody.scrollTop=0;
 }
 function openEditModal(id){
   _editId=id;
@@ -449,6 +451,8 @@ function openEditModal(id){
   document.getElementById('modal-ft').innerHTML=ft;
   document.getElementById('modal').style.display='flex';
   document.body.classList.add('modal-open');
+  var modalBody=document.getElementById('modal-body');
+  if(modalBody) modalBody.scrollTop=0;
 }
 function openProject(pid){ sessionStorage.setItem('daham_open_proj',pid); location.href='estimate.html'; }
 function goChecklist(id){
