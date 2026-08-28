@@ -62,5 +62,8 @@ test('consult page wires the wide modal to existing save and address flows', () 
   assert.match(page, /consultContent:consultContent/);
   assert.match(page, /unit:unit/);
   assert.match(page, /f-addr-detail'\)\.focus/);
+  assert.match(page, /body\.modal-open\{overflow-y:hidden\}/);
+  assert.match(page, /document\.body\.classList\.add\('modal-open'\)/);
+  assert.match(page, /document\.body\.classList\.remove\('modal-open'\)/);
 });
 
