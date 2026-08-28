@@ -706,6 +706,56 @@ body{background:#eef1f6!important}
 .v2-sum-total-first{background:#7563ea!important}.v2-sum-total-first strong{font-size:30px!important}
 @media(max-width:900px){.v2-workgrid{grid-template-columns:1fr!important}.v2-side,.v2-right{position:static!important}}
 </style>
+
+<style id="estimate-tablet-pc-layout">
+@media screen and (min-width: 768px) and (max-width: 1366px) {
+  #edit-view.main { padding-bottom: 0 !important; overflow: hidden; }
+  .toolbar { flex-wrap: nowrap !important; overflow-x: auto; }
+  #tb-edit-btns,
+  #tb-list-btns { flex-wrap: nowrap !important; }
+  .v2-project-shell {
+    height: calc(100dvh - 64px);
+    overflow: auto !important;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .v2-project-head,
+  .v2-project-tabs,
+  .v2-workgrid { min-width: 1316px; }
+  .v2-project-head { display: flex !important; flex-direction: row !important; }
+  .v2-head-actions { flex-wrap: nowrap; justify-content: flex-end !important; margin-top: 0; }
+  .v2-workgrid {
+    grid-template-columns: 220px minmax(720px, 1fr) 340px !important;
+    min-width: 1316px;
+  }
+  .v2-side { position: sticky !important; top: 16px !important; }
+  .v2-section-nav {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 3px !important;
+    max-height: calc(100dvh - 175px) !important;
+    overflow: auto !important;
+  }
+  .v2-right {
+    grid-column: auto !important;
+    position: sticky !important;
+    top: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .v2-client-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .v2-estimate-toolbar { flex-direction: row !important; align-items: center !important; }
+  .v2-estimate-toolbar .tools { flex-wrap: nowrap; }
+  .v2-search { width: auto !important; }
+  .items-tbl { min-width: 720px; }
+  th.hide-sm,
+  td.hide-sm { display: table-cell !important; }
+  #tb-edit-btns .hide-sm,
+  #tb-list-btns .hide-sm { display: inline-flex !important; }
+  .sec-summary { display: flex !important; }
+  .grand-total-box { flex-direction: row !important; align-items: center !important; }
+}
+</style>
 <script src="auth.js"></script></head>
 <body>
 
