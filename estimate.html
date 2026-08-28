@@ -1238,11 +1238,11 @@ function buildSections(){
 
       if(hasDet){
         /* sub-group header row */
-        rows+=`<tr class="sub-hd-row" id="shdr_${gid}" onclick="toggleSubGroup('${gid}')"><td colspan="10"><div class="sub-hd-inner"><span class="sub-tog-icon" id="stog_${gid}">▶</span><span class="sub-name">${sub}</span><span class="sub-cnt">${entries.length}</span></div></td></tr>`;
+        rows+=`<tr class="sub-hd-row" id="shdr_${gid}" onclick="toggleSubGroup('${gid}')"><td colspan="9"><div class="sub-hd-inner"><span class="sub-tog-icon" id="stog_${gid}">▶</span><span class="sub-name">${sub}</span><span class="sub-cnt">${entries.length}</span></div></td></tr>`;
 
         /* chips selector row (hidden initially) */
         const chips=entries.map(({item,ii})=>`<span class="det-chip" id="chip_${si}_${ii}" onclick="toggleChip(${si},${ii},event)">${item.det}</span>`).join('');
-        rows+=`<tr class="chips-row" id="crow_${gid}" style="display:none"><td colspan="10"><div class="det-chips">${chips}</div></td></tr>`;
+        rows+=`<tr class="chips-row" id="crow_${gid}" style="display:none"><td colspan="9"><div class="det-chips">${chips}</div></td></tr>`;
 
         /* item detail rows (hidden initially) */
         entries.forEach(({item,ii})=>{
