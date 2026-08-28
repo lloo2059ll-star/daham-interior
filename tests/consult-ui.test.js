@@ -25,6 +25,7 @@ test('desktop consultation geometry matches the final 1440 reference', () => {
   assert.match(html, /\.consult-workspace\{grid-template-columns:390px minmax\(0,1fr\)/);
   assert.match(html, /\.scope-grid\{[^}]*grid-template-columns:repeat\(8,minmax\(0,1fr\)\)/);
   assert.match(html, /\.scope-details\{[^}]*grid-template-columns:1fr 1\.35fr 1\.35fr 1fr 2fr/);
+  assert.match(html, /\.scope-detail-card\{height:144px/);
 });
 
 test('final customer, project, and five trade details are rendered', () => {
