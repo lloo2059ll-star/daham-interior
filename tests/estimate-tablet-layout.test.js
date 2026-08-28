@@ -29,6 +29,20 @@ test('touch-capable iPads opt into tablet layout through 1366px', () => {
   assert.match(css, /html\.daham-touch-tablet\s+\.items-tbl\s*\{[^}]*width\s*:\s*100%[^}]*min-width\s*:\s*0\s*!important[^}]*table-layout\s*:\s*fixed/s);
 });
 
+test('estimate item and group rows share the same table column count', () => {
+  const html = read('estimate.html');
+  const header = html.match(/<table class="items-tbl">[\s\S]*?<thead><tr>([\s\S]*?)<\/tr><\/thead>/);
+  assert.ok(header, 'estimate table header must exist');
+
+  const columnCount = (header[1].match(/<th\b/g) || []).length;
+  const groupColspans = [...html.matchAll(/<(?:tr class="(?:sub-hd-row|chips-row)"[\s\S]*?)?<td colspan="(\d+)"/g)]
+    .map((match) => Number(match[1]));
+
+  assert.equal(columnCount, 9);
+  assert.ok(groupColspans.length >= 2, 'group rows must declare their shared span');
+  assert.deepEqual([...new Set(groupColspans)], [columnCount]);
+});
+
 test('estimate editor reflows inside tablet width without horizontal scrolling', () => {
   const css = tabletOverride('estimate.html');
   assert.match(css, /@media\s+screen\s+and\s*\(min-width:\s*768px\)\s+and\s*\(max-width:\s*1024px\)/);
