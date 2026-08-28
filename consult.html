@@ -191,6 +191,7 @@ body.operations-consult{overflow-y:auto}.consult-shell{height:auto;min-height:10
 <style id="consult-modal-reference">
 /* 새 상담 추가 확정 시안: 좌측 내비게이션은 유지하고 업무 영역만 대형 패널로 사용 */
 .operations-consult .modal-overlay{left:178px;top:0;right:0;bottom:0;align-items:stretch;justify-content:stretch;padding:0;background:rgba(9,26,67,.12)!important;backdrop-filter:none}
+body.modal-open{overflow-y:hidden}
 .operations-consult .modal-box{width:100%!important;max-width:none!important;height:100dvh;max-height:none!important;margin:0!important;border:0!important;border-radius:14px 0 0 14px!important;box-shadow:-10px 0 30px rgba(18,30,58,.12)!important;min-width:0}
 .operations-consult .modal-hd{padding:21px 28px 12px;border-bottom:0!important;align-items:flex-start}.modal-heading{min-width:0}.operations-consult .modal-title{font-size:22px!important;line-height:1.25}.modal-subtitle{margin-top:5px;color:#778097;font-size:12px}.operations-consult .modal-close{width:44px;height:44px;font-size:25px;display:grid;place-items:center}
 .operations-consult .mbar{padding:6px 28px 12px;background:#fff;border-bottom:1px solid #dfe4ed;min-width:0}.operations-consult .mbar-label{display:none}.operations-consult .mbar-steps{gap:9px;overflow:visible;flex-wrap:wrap}.operations-consult .mstep{flex:0 1 105px}.operations-consult .mstep-btn,.operations-consult .mstep-contract .mstep-btn{width:100%;min-height:44px;padding:0 17px;border:1px solid #d6dce8!important;border-radius:7px!important;background:#fff;color:#445069;font-size:12px}.operations-consult .mstep-btn.active{background:linear-gradient(135deg,#7046e6,#5d32d3)!important;border-color:#6740dc!important;color:#fff!important}.operations-consult .mstep-contract{margin-left:0}
@@ -427,6 +428,7 @@ function openAddModal(){
   renderModalBody(null);
   document.getElementById('modal-ft').innerHTML='<button class="btn btn-cancel" onclick="closeModal()">취소</button><button class="btn btn-save" onclick="saveModal()">저장</button>';
   document.getElementById('modal').style.display='flex';
+  document.body.classList.add('modal-open');
 }
 function openEditModal(id){
   _editId=id;
@@ -446,6 +448,7 @@ function openEditModal(id){
   ft+='<button class="btn btn-save" onclick="saveModal()">저장</button>';
   document.getElementById('modal-ft').innerHTML=ft;
   document.getElementById('modal').style.display='flex';
+  document.body.classList.add('modal-open');
 }
 function openProject(pid){ sessionStorage.setItem('daham_open_proj',pid); location.href='estimate.html'; }
 function goChecklist(id){
@@ -477,7 +480,7 @@ function goEstimateFrom(id){
   localStorage.setItem('daham_consult',JSON.stringify(payload));
   location.href='estimate.html';
 }
-function closeModal(){ document.getElementById('modal').style.display='none'; _editId=null; }
+function closeModal(){ document.getElementById('modal').style.display='none'; document.body.classList.remove('modal-open'); _editId=null; }
 function onOverlayClick(e){ if(e.target.id==='modal') closeModal(); }
 
 /* 마일스톤 바 렌더 */
