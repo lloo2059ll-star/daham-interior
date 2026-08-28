@@ -61,5 +61,6 @@ test('tablet workspace reflows without hiding the detail editor', () => {
   assert.match(html, /@media\(max-width:1100px\)/);
   assert.match(html, /\.consult-workspace\{grid-template-columns:320px minmax\(0,1fr\)\}/);
   assert.doesNotMatch(html, /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/i);
+  assert.match(html, /@media\(max-width:1100px\)\{\.consult-shell\{grid-template-columns:76px minmax\(0,1fr\)\}/);
 });
 
