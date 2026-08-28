@@ -11,6 +11,9 @@ test('consult workspace follows the approved master-detail layout', () => {
   }
   assert.match(html, /상담 \/ 현장실측/);
   assert.match(html, /새 상담 등록/);
+  for (const marker of ['detail-row-primary','detail-row-secondary','schedule-card','budget-card','memo-card','detail-bottom-actions']) assert.match(html, new RegExp(marker));
+  assert.match(html, /상담 취소/);
+  assert.match(html, /견적서 작성으로 이동/);
 });
 
 test('consult statuses and exact work categories remain available', () => {
@@ -22,6 +25,20 @@ test('consult statuses and exact work categories remain available', () => {
 
 test('consult options match the compact estimating vocabulary', () => {
   for (const option of ['베스트','디아망','597×597','165×1200','325×805','98×805','650×650','2.2T','3.2T','5.0T','거실욕실','안방욕실','둘 다','전체 리모델링','300×600','600×600','싱크','붙박이장','신발장','화장대','작은방1','작은방2','+방추가']) assert.match(html, new RegExp(option.replace(/[+]/g, '\\+')));
+});
+
+test('detail values use Korean labels instead of storage keys', () => {
+  assert.match(html, /function scopeDetailRows/);
+  for (const label of ['벽지 등급','마루 규격','장판 두께','욕실 위치','공사 방식','타일 규격','교체 범위','붙박이장 위치']) assert.match(html,new RegExp(label));
+  assert.doesNotMatch(html, /return Object\.keys\(value\).*k\+['"]:/);
+});
+
+test('survey summary renders photos and estimate handoff keeps consultation context', () => {
+  assert.match(html, /survey-photo-list/);
+  assert.match(html, /survey-photo-thumb/);
+  assert.match(html, /daham_prefill_consult/);
+  assert.match(html, /scopes:scopes/);
+  assert.match(html, /scopeDetails:r\.scopeDetails/);
 });
 
 test('address lookup keeps direct input fallback and survey excludes manual dimensions', () => {
