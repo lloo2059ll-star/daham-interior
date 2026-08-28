@@ -3,7 +3,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'consult.html'), 'utf8');
+const html = [
+  'consult.html',
+  'consult-modal.js'
+].map(file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8')).join('\n');
 
 test('consult workspace follows the approved master-detail layout', () => {
   for (const marker of ['consult-nav', 'consult-list-panel', 'consult-detail-panel', 'consult-card', 'detail-grid', 'scope-section', 'survey-section']) {
