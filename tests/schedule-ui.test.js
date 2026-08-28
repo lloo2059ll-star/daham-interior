@@ -51,6 +51,7 @@ test('existing modal and domain integration hooks remain available', () => {
 
 test('responsive UI provides real sizing rather than clipping page overflow', () => {
   assert.match(html, /@media[^\{]*\(min-width:\s*768px\)[\s\S]*?\(max-width:\s*1024px\)/);
+  assert.match(html, /@media[^\{]*\(min-width:\s*768px\)[\s\S]*?\.schedule-workspace\s*\{[^}]*width:\s*100%[^}]*max-width:\s*100%/);
   assert.match(html, /min-height:\s*44px/);
   assert.match(html, /\.schedule-workspace[\s\S]*?min-width:\s*0/);
   assert.match(html, /@media[^\{]*\(max-width:\s*600px\)[\s\S]*?\.cal-months\s*\{\s*display:\s*none/);
