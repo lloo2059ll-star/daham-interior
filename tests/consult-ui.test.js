@@ -36,6 +36,13 @@ test('final customer, project, and five trade details are rendered', () => {
   for (const trade of ['도배','바닥','욕실','샷시','가구']) assert.match(html,new RegExp("'"+trade+"'"));
 });
 
+test('consultation handoff keeps full reference data and exact auto mapping hook',()=>{
+  assert.match(html,/consult-estimate-link\.js/);
+  assert.match(html,/estimateConsultPayload/);
+  for(const key of ['photoUrls','polycamUrl','scopeDetails','scopes']) assert.match(html,new RegExp(key));
+  for(const scope of ['필름','설비','시스템에어컨','탄성코트','문·문틀','중문']) assert.match(html,new RegExp(scope));
+});
+
 test('consult statuses and exact work categories remain available', () => {
   for (const status of ['진행상담', '현장실측', '견적미팅', '견적완료', '계약']) assert.match(html, new RegExp(status));
   const scopes = ['도배','바닥','욕실','전기·조명','샷시','가구','목작업','문·문틀','설비','타일','필름','탄성코트','시스템에어컨','중문','철거','기타'];
