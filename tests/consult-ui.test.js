@@ -14,6 +14,7 @@ test('consult workspace follows the approved master-detail layout', () => {
   for (const marker of ['detail-row-primary','detail-row-secondary','schedule-card','budget-card','memo-card','detail-bottom-actions']) assert.match(html, new RegExp(marker));
   assert.match(html, /상담 취소/);
   assert.match(html, /견적서 작성으로 이동/);
+  for (const marker of ['consult-notification','consult-card-avatar','detail-more','scope-details-viewport']) assert.match(html,new RegExp(marker));
 });
 
 test('consult statuses and exact work categories remain available', () => {
@@ -62,5 +63,6 @@ test('tablet workspace reflows without hiding the detail editor', () => {
   assert.match(html, /\.consult-workspace\{grid-template-columns:320px minmax\(0,1fr\)\}/);
   assert.doesNotMatch(html, /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/i);
   assert.match(html, /@media\(max-width:1100px\)\{\.consult-shell\{grid-template-columns:76px minmax\(0,1fr\)\}/);
+  assert.match(html, /\.scope-details\{[^}]*grid-auto-flow:column[^}]*overflow-x:auto/);
 });
 
