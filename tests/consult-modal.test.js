@@ -65,5 +65,6 @@ test('consult page wires the wide modal to existing save and address flows', () 
   assert.match(page, /body\.modal-open\{overflow-y:hidden\}/);
   assert.match(page, /document\.body\.classList\.add\('modal-open'\)/);
   assert.match(page, /document\.body\.classList\.remove\('modal-open'\)/);
+  assert.match(page, /modalBody\.scrollTop\s*=\s*0/);
 });
 
