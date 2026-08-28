@@ -13,6 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="auth.js"></script>
 <script src="consult-delete.js"></script>
+<script src="consult-estimate-link.js"></script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -375,11 +376,14 @@ function selectRecord(id){_selectedId=id;renderList();}
 function referenceOptions(values,selected){var chosen=Array.isArray(selected)?selected:[selected];return '<div class="scope-option-line">'+values.map(function(v){return '<span class="scope-option'+(chosen.indexOf(v)>=0?' on':'')+'">'+escHtml(v)+'</span>';}).join('')+'</div>';}
 function renderReferenceScopeDetails(details){
   var wall=details['도배']||{},floor=details['바닥']||{},bath=details['욕실']||{},windowInfo=details['샷시']||{},furniture=details['가구']||{};
-  return '<article class="scope-detail-card"><h4>도배</h4><div class="scope-detail-rows"><div class="scope-detail-row"><b>브랜드</b>'+referenceOptions(['베스트','디아망'],wall.grade)+'</div><div class="scope-detail-row"><b>기타</b><div class="scope-faux-input">메모를 입력하세요</div></div></div></article>'
+  var base='<article class="scope-detail-card"><h4>도배</h4><div class="scope-detail-rows"><div class="scope-detail-row"><b>브랜드</b>'+referenceOptions(['베스트','디아망'],wall.grade)+'</div><div class="scope-detail-row"><b>기타</b><div class="scope-faux-input">메모를 입력하세요</div></div></div></article>'
     +'<article class="scope-detail-card"><h4>바닥</h4><div class="scope-detail-rows"><div class="scope-detail-row"><b>구분</b>'+referenceOptions(['마루','장판'],floor.type||floor.kind)+'</div><div class="scope-detail-row"><b>사이즈</b>'+referenceOptions(['597×597','165×1200','325×805','98×805','650×650','기타'],floor.wood)+'</div><div class="scope-detail-row"><b>메모</b><div class="scope-faux-input">메모 입력</div></div></div></article>'
     +'<article class="scope-detail-card"><h4>욕실</h4><div class="scope-detail-rows"><div class="scope-detail-row"><b>욕실 선택</b>'+referenceOptions(['거실욕실','안방욕실','둘 다'],bath.place)+'</div><div class="scope-detail-row"><b>시공 범위</b>'+referenceOptions(['전체 리모델링','기타'],bath.mode)+'</div><div class="scope-detail-row"><b>타일 사이즈</b>'+referenceOptions(['600×600','300×600','300×300','기타'],bath.tile)+'</div><div class="scope-detail-row"><b>메모</b><div class="scope-faux-input">메모 입력</div></div></div></article>'
     +'<article class="scope-detail-card"><h4>샷시</h4><div class="scope-detail-rows"><div class="scope-detail-row"><b>브랜드</b><div class="scope-faux-input">'+escHtml(windowInfo.brand||'브랜드 선택')+'</div></div><div class="scope-detail-row"><b>교체 범위</b>'+referenceOptions(['전체교체','부분교체'],windowInfo.range)+'</div><div class="scope-detail-row"><b>메모</b><div class="scope-faux-input">'+escHtml(windowInfo.note||'메모 입력')+'</div></div></div></article>'
     +'<article class="scope-detail-card"><h4>가구</h4><div class="scope-detail-rows"><div class="scope-detail-row"><b>항목 선택</b>'+referenceOptions(['싱크','붙박이장','신발장','화장대'],furniture.items)+'</div><div class="scope-detail-row"><b>붙박이장 방 선택</b>'+referenceOptions(['안방','작은방1','작은방2'],furniture.closetRooms)+'</div><div class="scope-detail-row">'+referenceOptions(['＋ 방 추가'],[])+'</div><div class="scope-detail-row"><b>메모</b><div class="scope-faux-input">'+escHtml(furniture.note||'메모 입력')+'</div></div></div></article>';
+  var fixed={'도배':1,'바닥':1,'욕실':1,'샷시':1,'가구':1};
+  var extra=Object.keys(details||{}).filter(function(name){return !fixed[name];}).map(function(name){return '<article class="scope-detail-card"><h4>'+escHtml(name)+'</h4><div class="scope-detail-rows">'+scopeDetailRows(name,details[name])+'</div></article>';}).join('');
+  return base+extra;
 }
 function renderSelectedDetail(){
   var host=document.getElementById('consult-detail');if(!host)return;var r=_records.find(function(x){return x.id===_selectedId;});if(!r){host.innerHTML='<div class="detail-empty">왼쪽에서 상담을 선택하세요.</div>';return;}
@@ -393,7 +397,7 @@ function renderSelectedDetail(){
   +'<section class="survey-section"><h3>현장 실측 / Polycam 정보</h3><div class="survey-grid"><div class="survey-item"><span>방문일</span><strong>'+escHtml(survey.visitDate||'미정')+'</strong></div><div class="survey-item"><span>실측 완료</span><strong>'+(survey.measured?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 완료</span><strong>'+(survey.polycamDone?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 링크</span>'+(survey.polycamUrl?'<a href="'+escAttr(survey.polycamUrl)+'" target="_blank">링크 열기</a>':'<strong>—</strong>')+'</div><div class="survey-item"><span>현장사진</span>'+renderSurveyPhotos(survey.photoUrls||[])+'</div><div class="survey-item"><span>특이사항</span><strong>'+escHtml(survey.note||'—')+'</strong></div></div></section>'
   +'<div class="detail-bottom-actions"><button class="outline-btn" onclick="cancelConsult(\''+r.id+'\')">상담 취소</button><button class="outline-btn estimate-go" onclick="'+(r.projId?'openProject(\''+r.projId+'\')':'goEstimateFrom(\''+r.id+'\')')+'">견적서 작성으로 이동 →</button></div>';
 }
-function scopeDetailRows(name,value){if(!value)return '<div class="scope-detail-row">세부 선택 없음</div>';if(typeof value==='string')return '<div class="scope-detail-row">'+escHtml(value)+'</div>';var labels={grade:'벽지 등급',wood:'마루 규격',vinyl:'장판 두께',place:'욕실 위치',mode:'공사 방식',tile:'타일 규격',brand:'브랜드',range:'교체 범위',note:'메모',items:'가구 품목',closetRooms:'붙박이장 위치'};return Object.keys(value).filter(function(k){return value[k]&&(!Array.isArray(value[k])||value[k].length);}).map(function(k){var v=Array.isArray(value[k])?value[k].join(', '):value[k];return '<div class="scope-detail-row"><b>'+escHtml(labels[k]||'선택 내용')+'</b>'+escHtml(v)+'</div>';}).join('')||'<div class="scope-detail-row">세부 선택 없음</div>';}
+function scopeDetailRows(name,value){if(!value)return '<div class="scope-detail-row">세부 선택 없음</div>';if(typeof value==='string')return '<div class="scope-detail-row">'+escHtml(value)+'</div>';var labels={grade:'벽지 등급',wood:'마루 규격',vinyl:'장판 두께',place:'욕실 위치',mode:'공사 방식',tile:'타일 규격',brand:'브랜드',range:'교체 범위',note:'메모',items:'선택 항목',closetRooms:'붙박이장 위치',count:'수량',places:'위치',itemLabel:'중문 옵션'};return Object.keys(value).filter(function(k){return k!=='itemRef'&&value[k]&&(!Array.isArray(value[k])||value[k].length);}).map(function(k){var v=Array.isArray(value[k])?value[k].join(', '):value[k];return '<div class="scope-detail-row"><b>'+escHtml(labels[k]||'선택 내용')+'</b>'+escHtml(v)+'</div>';}).join('')||'<div class="scope-detail-row">세부 선택 없음</div>';}
 function renderSurveyPhotos(urls){if(!urls.length)return '<strong>—</strong>';return '<div class="survey-photo-list">'+urls.slice(0,3).map(function(url){return '<a href="'+escAttr(url)+'" target="_blank"><img class="survey-photo-thumb" src="'+escAttr(url)+'" alt="현장사진"></a>';}).join('')+(urls.length>3?'<span class="survey-photo-more">+'+(urls.length-3)+'</span>':'')+'</div>';}
 function cancelConsult(id){var r=_records.find(function(x){return x.id===id;});if(!r||!window.confirm('상담을 취소 상태로 변경할까요?'))return;var db=loadDB(),idx=db.findIndex(function(x){return x.id===id;});if(idx<0)return;db[idx]=Object.assign({},db[idx],{status:'cancelled',updatedAt:nowISO()});saveDB(db);_records=db;renderTabs();renderList();showToast('상담이 취소 상태로 변경됐습니다');}
 
@@ -438,18 +442,22 @@ function goChecklist(id){
   }));
   location.href='consult-demo.html';
 }
+function estimateConsultPayload(r){
+  var scopes=getRecordScopes(r),survey=r.survey||{};
+  return {
+    consultId:r.id,name:r.name||'',tel:r.tel||'',email:r.email||'',backupTel:r.altTel||r.phone2||'',
+    addr:r.addr||'',addrDetail:r.addrDetail||'',postcode:r.postcode||r.zip||'',siteName:r.siteName||'',buildYear:r.buildYear||'',housingType:r.housingType||'',movein:r.moveDate||'',
+    consultDate:new Date().toISOString().slice(0,10),area:r.area||'',budget:r.budget||'',
+    scopes:scopes,scopeDetails:r.scopeDetails||{},specialReq:r.memo||'',memo:r.memo||'',
+    survey:survey,photoUrls:survey.photoUrls||[],polycamUrl:survey.polycamUrl||''
+  };
+}
 function goEstimateFrom(id){
   var r=_records.find(function(x){return x.id===id;});
   if(!r) return;
-  var scopes=getRecordScopes(r);
-  localStorage.setItem('daham_prefill_consult',JSON.stringify({id:r.id,name:r.name||'',tel:r.tel||'',addr:r.addr||'',addrDetail:r.addrDetail||'',moveDate:r.moveDate||'',area:r.area||'',budget:r.budget||'',memo:r.memo||'',scopes:scopes,scopeDetails:r.scopeDetails||{},survey:r.survey||null}));
-  localStorage.setItem('daham_consult',JSON.stringify({
-    name:r.name||'',tel:r.tel||'',addr:r.addr||'',
-    movein:r.moveDate||'',consultDate:new Date().toISOString().slice(0,10),
-    area:r.area||'',bath:'',room:'',budget:r.budget||'',
-    scopes:scopes,scopeDetails:r.scopeDetails||{},env:[],
-    specialReq:r.memo||'',memo:''
-  }));
+  var payload=estimateConsultPayload(r);
+  localStorage.setItem('daham_prefill_consult',JSON.stringify(payload));
+  localStorage.setItem('daham_consult',JSON.stringify(payload));
   location.href='estimate.html';
 }
 function closeModal(){ document.getElementById('modal').style.display='none'; _editId=null; }
@@ -565,10 +573,14 @@ function renderModalBody(r){
     +'<div class="form-row"><label>고객명</label><input id="f-name" placeholder="홍길동" value="'+v('name')+'"></div>'
     +'<div class="form-row"><label>연락처</label><input id="f-tel" type="tel" placeholder="010-0000-0000" value="'+v('tel')+'"></div>'
     +'</div>'
+    +'<div class="form-grid"><div class="form-row"><label>이메일</label><input id="f-email" type="email" value="'+v('email')+'"></div><div class="form-row"><label>예비 연락처</label><input id="f-alt-tel" type="tel" value="'+escAttr((r&&(r.altTel||r.phone2))||'')+'"></div></div>'
+    +'<div class="form-row"><label>우편번호</label><input id="f-postcode" inputmode="numeric" value="'+escAttr((r&&(r.postcode||r.zip))||'')+'"></div>'
     +'<div class="form-row"><label>주소</label><div class="address-row"><input id="f-addr" placeholder="주소 검색 또는 직접 입력" value="'+v('addr')+'"><button type="button" class="address-search" onclick="openAddressSearch()">주소 검색</button></div></div>'
     +'<div class="form-row"><label>상세주소</label><input id="f-addr-detail" placeholder="동/호수, 상세주소" value="'+v('addrDetail')+'"></div>'
     +'<div class="form-grid">'
+    +'<div class="form-row"><label>현장명</label><input id="f-site-name" placeholder="건물명 또는 현장명" value="'+v('siteName')+'"></div>'
     +'<div class="form-row"><label>평수</label><input id="f-area" placeholder="32" value="'+v('area')+'"></div>'
+    +'</div><div class="form-grid"><div class="form-row"><label>준공연도</label><input id="f-build-year" inputmode="numeric" placeholder="2015" value="'+v('buildYear')+'"></div><div class="form-row"><label>주거 형태</label><select id="f-housing-type">'+['','아파트','주상복합','빌라/연립','단독주택','오피스텔','기타'].map(function(x){return '<option value="'+x+'" '+((r&&r.housingType===x)?'selected':'')+'>'+(x||'-- 선택 --')+'</option>';}).join('')+'</select></div></div><div class="form-grid">'
     +'<div class="form-row"><label>담당자</label><input id="f-manager" placeholder="최일성" value="'+v('manager')+'"></div>'
     +'</div>'
     +'<div class="sec-title">상담 일정</div>'
@@ -595,24 +607,44 @@ function renderModalBody(r){
 function renderScopePicker(r){var selected=getRecordScopes(r||{});return CONSULT_SCOPES.map(function(s){return '<label><input type="checkbox" class="scope-check" value="'+s+'" '+(selected.indexOf(s)>=0?'checked':'')+' onchange="refreshScopeOptions()"> '+s+'</label>';}).join('');}
 function scopeValue(r,key,field){var d=r&&r.scopeDetails&&r.scopeDetails[key];return escAttr((d&&d[field])||'');}
 function checkedScope(r,key,field,val){var d=r&&r.scopeDetails&&r.scopeDetails[key];return d&&d[field]===val?'checked':'';}
+function checkedScopeList(r,key,field,val){var d=r&&r.scopeDetails&&r.scopeDetails[key],a=d&&d[field];return Array.isArray(a)&&a.indexOf(val)>=0?'checked':'';}
 function renderScopeOptions(r){
   return '<div class="detail-options" data-scope="도배"><strong>도배</strong><div class="option-row">'+['베스트','디아망','기타'].map(function(v){return '<label><input type="radio" name="wallpaper" value="'+v+'" '+checkedScope(r,'도배','grade',v)+'> '+v+'</label>';}).join('')+'</div></div>'
   +'<div class="detail-options" data-scope="바닥"><strong>바닥</strong><div class="option-row"><label>마루</label><select id="scope-floor-wood"><option></option>'+['597×597','165×1200','325×805','98×805','650×650','기타'].map(function(v){return '<option '+(scopeValue(r,'바닥','wood')===v?'selected':'')+'>'+v+'</option>';}).join('')+'</select><label>장판</label><select id="scope-floor-vinyl"><option></option>'+['2.2T','3.2T','5.0T','기타'].map(function(v){return '<option '+(scopeValue(r,'바닥','vinyl')===v?'selected':'')+'>'+v+'</option>';}).join('')+'</select></div></div>'
   +'<div class="detail-options" data-scope="욕실"><strong>욕실</strong><div class="option-row">'+['거실욕실','안방욕실','둘 다'].map(function(v){return '<label><input type="radio" name="bathroom" value="'+v+'" '+checkedScope(r,'욕실','place',v)+'> '+v+'</label>';}).join('')+'<label><input type="radio" name="bathMode" value="전체 리모델링" '+(!r||!r.scopeDetails||!r.scopeDetails['욕실']||checkedScope(r,'욕실','mode','전체 리모델링')?'checked':'')+'> 전체 리모델링</label><label><input type="radio" name="bathMode" value="기타" '+checkedScope(r,'욕실','mode','기타')+'> 기타</label><select id="scope-bath-tile"><option>300×600</option><option>600×600</option><option>기타</option></select></div></div>'
   +'<div class="detail-options" data-scope="샷시"><strong>샷시</strong><div class="option-row"><label>브랜드</label><input id="scope-window-brand" value="'+scopeValue(r,'샷시','brand')+'"><label>범위</label><select id="scope-window-range"><option>전체교체</option><option>부분교체</option></select><input id="scope-window-note" placeholder="메모" value="'+scopeValue(r,'샷시','note')+'"></div></div>'
-  +'<div class="detail-options" data-scope="가구"><strong>가구</strong><div class="option-row">'+['싱크','붙박이장','신발장','화장대'].map(function(v){return '<label><input type="checkbox" name="furniture" value="'+v+'"> '+v+'</label>';}).join('')+'</div><div class="option-row"><span>붙박이장:</span>'+['안방','작은방1','작은방2','+방추가'].map(function(v){return '<label><input type="checkbox" name="closetRoom" value="'+v+'"> '+v+'</label>';}).join('')+'</div></div>';
+  +'<div class="detail-options" data-scope="가구"><strong>가구</strong><div class="option-row">'+['싱크','붙박이장','신발장','화장대'].map(function(v){return '<label><input type="checkbox" name="furniture" value="'+v+'" '+checkedScopeList(r,'가구','items',v)+'> '+v+'</label>';}).join('')+'</div><div class="option-row"><span>붙박이장:</span>'+['안방','작은방1','작은방2','+방추가'].map(function(v){return '<label><input type="checkbox" name="closetRoom" value="'+v+'" '+checkedScopeList(r,'가구','closetRooms',v)+'> '+v+'</label>';}).join('')+'</div></div>'
+  +'<div class="detail-options" data-scope="필름"><strong>필름</strong><div class="option-row">'+['거실샤시','방/발코니샤시','방문/문틀','천장몰딩','걸레받이','중문','현관문','싱크대 문짝','붙박이장 문짝','신발장 문짝','화장대'].map(function(v){return '<label><input type="checkbox" name="filmItem" value="'+v+'" '+checkedScopeList(r,'필름','items',v)+'> '+v+'</label>';}).join('')+'</div></div>'
+  +'<div class="detail-options" data-scope="설비"><strong>설비</strong><div class="option-row">'+['거실확장 설비','주방확장 설비','방확장','보일러 바닥 시공','급수 배관 교체','욕실 배관 작업','싱크대 수전내림','수전 이동','라디에이터 철거','분배기 교체'].map(function(v){return '<label><input type="checkbox" name="utilityItem" value="'+v+'" '+checkedScopeList(r,'설비','items',v)+'> '+v+'</label>';}).join('')+'</div></div>'
+  +'<div class="detail-options" data-scope="시스템에어컨"><strong>시스템에어컨</strong><div class="option-row"><label>설치 대수</label><select id="scope-aircon-count"><option></option>'+['2대','3대','4대','5대','6대'].map(function(v){return '<option '+(scopeValue(r,'시스템에어컨','count')===v?'selected':'')+'>'+v+'</option>';}).join('')+'</select></div></div>'
+  +'<div class="detail-options" data-scope="탄성코트"><strong>탄성코트</strong><div class="option-row">'+['앞베란다','뒤베란다','세탁실','대피실'].map(function(v){return '<label><input type="checkbox" name="coatPlace" value="'+v+'" '+checkedScopeList(r,'탄성코트','places',v)+'> '+v+'</label>';}).join('')+'<label>개소수 <input id="scope-coat-count" type="number" min="1" value="'+scopeValue(r,'탄성코트','count')+'"></label></div></div>'
+  +'<div class="detail-options" data-scope="문·문틀"><strong>문·문틀</strong><div class="option-row">'+['문만','문틀만','문+문틀'].map(function(v){return '<label><input type="radio" name="doorMode" value="'+v+'" '+checkedScope(r,'문·문틀','mode',v)+'> '+v+'</label>';}).join('')+'<label>개수 <input id="scope-door-count" type="number" min="1" value="'+scopeValue(r,'문·문틀','count')+'"></label></div></div>'
+  +'<div class="detail-options" data-scope="중문"><strong>중문</strong><div class="option-row"><label>종류·마감</label><select id="scope-entrance-item"><option value="">-- 선택 --</option>'+entranceDoorOptions(r)+'</select></div></div>';
+}
+function entranceDoorOptions(r){
+  var types=['초슬림3연동','슬라이딩도어','싱글도어','양개도어(비대칭)','양개도어(정대칭)'];
+  var finishes=['도장 화이트','현대S240 라이트그레이','현대S159 다크그레이','도장 블랙','현대SPW13 오크','현대SPW19 다크오크'];
+  var selected=scopeValue(r,'중문','itemRef'),out=[];
+  types.forEach(function(type,ti){finishes.forEach(function(finish,fi){var ref='11_'+(ti*6+fi);out.push('<option value="'+ref+'" '+(selected===ref?'selected':'')+'>'+type+' · '+finish+'</option>');});});
+  return out.join('');
 }
 function refreshScopeOptions(){var selected=[].slice.call(document.querySelectorAll('.scope-check:checked')).map(function(x){return x.value;});var w=document.getElementById('f-works');if(w)w.value=selected.join(', ');document.querySelectorAll('[data-scope]').forEach(function(el){el.style.display=selected.indexOf(el.dataset.scope)>=0?'block':'none';});}
-function openAddressSearch(){if(window.daum&&daum.Postcode){new daum.Postcode({oncomplete:function(data){document.getElementById('f-addr').value=data.roadAddress||data.jibunAddress;document.getElementById('f-addr-detail').focus();}}).open();}else{showToast('주소 검색을 불러오지 못했습니다. 직접 입력해 주세요.');document.getElementById('f-addr').focus();}}
-function readScopeDetails(){var out={};function radio(n){var x=document.querySelector('input[name="'+n+'"]:checked');return x?x.value:'';}var selected=[].slice.call(document.querySelectorAll('.scope-check:checked')).map(function(x){return x.value;});if(selected.indexOf('도배')>=0)out['도배']={grade:radio('wallpaper')};if(selected.indexOf('바닥')>=0)out['바닥']={wood:(document.getElementById('scope-floor-wood')||{}).value||'',vinyl:(document.getElementById('scope-floor-vinyl')||{}).value||''};if(selected.indexOf('욕실')>=0)out['욕실']={place:radio('bathroom'),mode:radio('bathMode'),tile:(document.getElementById('scope-bath-tile')||{}).value||''};if(selected.indexOf('샷시')>=0)out['샷시']={brand:(document.getElementById('scope-window-brand')||{}).value||'',range:(document.getElementById('scope-window-range')||{}).value||'',note:(document.getElementById('scope-window-note')||{}).value||''};if(selected.indexOf('가구')>=0)out['가구']={items:[].slice.call(document.querySelectorAll('input[name="furniture"]:checked')).map(function(x){return x.value;}),closetRooms:[].slice.call(document.querySelectorAll('input[name="closetRoom"]:checked')).map(function(x){return x.value;})};return out;}
+function openAddressSearch(){if(window.daum&&daum.Postcode){new daum.Postcode({oncomplete:function(data){document.getElementById('f-addr').value=data.roadAddress||data.jibunAddress;var post=document.getElementById('f-postcode');if(post)post.value=data.zonecode||'';var site=document.getElementById('f-site-name');if(site&&!site.value&&data.buildingName)site.value=data.buildingName;if(data.apartment==='Y'){var housing=document.getElementById('f-housing-type');if(housing&&!housing.value)housing.value='아파트';}document.getElementById('f-addr-detail').focus();}}).open();}else{showToast('주소 검색을 불러오지 못했습니다. 직접 입력해 주세요.');document.getElementById('f-addr').focus();}}
+function readScopeDetails(){var out={};function radio(n){var x=document.querySelector('input[name="'+n+'"]:checked');return x?x.value:'';}function vals(n){return [].slice.call(document.querySelectorAll('input[name="'+n+'"]:checked')).map(function(x){return x.value;});}function value(id){return (document.getElementById(id)||{}).value||'';}var selected=[].slice.call(document.querySelectorAll('.scope-check:checked')).map(function(x){return x.value;});if(selected.indexOf('도배')>=0)out['도배']={grade:radio('wallpaper')};if(selected.indexOf('바닥')>=0)out['바닥']={wood:value('scope-floor-wood'),vinyl:value('scope-floor-vinyl')};if(selected.indexOf('욕실')>=0)out['욕실']={place:radio('bathroom'),mode:radio('bathMode'),tile:value('scope-bath-tile')};if(selected.indexOf('샷시')>=0)out['샷시']={brand:value('scope-window-brand'),range:value('scope-window-range'),note:value('scope-window-note')};if(selected.indexOf('가구')>=0)out['가구']={items:vals('furniture'),closetRooms:vals('closetRoom')};if(selected.indexOf('필름')>=0)out['필름']={items:vals('filmItem')};if(selected.indexOf('설비')>=0)out['설비']={items:vals('utilityItem')};if(selected.indexOf('시스템에어컨')>=0)out['시스템에어컨']={count:value('scope-aircon-count')};if(selected.indexOf('탄성코트')>=0)out['탄성코트']={places:vals('coatPlace'),count:value('scope-coat-count')};if(selected.indexOf('문·문틀')>=0)out['문·문틀']={mode:radio('doorMode'),count:value('scope-door-count')};if(selected.indexOf('중문')>=0){var sel=document.getElementById('scope-entrance-item');out['중문']={itemRef:value('scope-entrance-item'),itemLabel:sel&&sel.selectedIndex>=0?sel.options[sel.selectedIndex].text:''};}return out;}
 
 /* 저장 */
 function saveModal(){
   var name    =(document.getElementById('f-name').value||'').trim();
   var tel     =(document.getElementById('f-tel').value||'').trim();
+  var email   =(document.getElementById('f-email').value||'').trim();
+  var altTel  =(document.getElementById('f-alt-tel').value||'').trim();
+  var postcode=(document.getElementById('f-postcode').value||'').trim();
   var addr    =(document.getElementById('f-addr').value||'').trim();
   var addrDetail=(document.getElementById('f-addr-detail').value||'').trim();
+  var siteName=(document.getElementById('f-site-name').value||'').trim();
   var area    =(document.getElementById('f-area').value||'').trim();
+  var buildYear=(document.getElementById('f-build-year').value||'').trim();
+  var housingType=document.getElementById('f-housing-type').value||'';
   var sdate   =document.getElementById('f-sdate').value||'';
   var stime   =document.getElementById('f-stime').value||'';
   var splace  =document.getElementById('f-splace').value||'';
@@ -652,7 +684,7 @@ function saveModal(){
     var idx=db.findIndex(function(r){return r.id===_editId;});
     if(idx<0){closeModal();return;}
     db[idx]=Object.assign({},db[idx],{
-      name:name,tel:tel,addr:addr,addrDetail:addrDetail,area:area,manager:manager,
+      name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
       works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
       history:_modalHist.slice(),updatedAt:nowISO()
@@ -661,7 +693,7 @@ function saveModal(){
   } else {
     db.push({
       id:newId,createdAt:nowISO(),updatedAt:nowISO(),
-      name:name,tel:tel,addr:addr,addrDetail:addrDetail,area:area,manager:manager,
+      name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
       works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
       projId:newProjId||null,history:_modalHist.slice()
@@ -743,6 +775,8 @@ DAHAM_AUTH.ready.then(function(ready){
   _currentUser=DAHAM_AUTH.currentUser();
   _canDeleteConsult=DAHAM_CONSULT_DELETE.canDeleteConsult(_currentUser);
   initCloud();
+  var requested=localStorage.getItem('daham_open_consult');
+  if(requested){_selectedId=requested;localStorage.removeItem('daham_open_consult');}
   renderTabs();
   renderList();
   cloudPull();
