@@ -19,6 +19,20 @@ test('consult workspace follows the approved master-detail layout', () => {
   assert.match(html, /aria-label="상담 삭제"/);
 });
 
+test('desktop consultation geometry matches the final 1440 reference', () => {
+  assert.match(html, /\.consult-shell\{grid-template-columns:178px minmax\(0,1fr\)/);
+  assert.match(html, /\.consult-app\{[^}]*grid-template-rows:80px minmax\(0,1fr\)/);
+  assert.match(html, /\.consult-workspace\{grid-template-columns:390px minmax\(0,1fr\)/);
+  assert.match(html, /\.scope-grid\{[^}]*grid-template-columns:repeat\(8,minmax\(0,1fr\)\)/);
+  assert.match(html, /\.scope-details\{[^}]*grid-template-columns:1fr 1\.35fr 1\.35fr 1fr 2fr/);
+});
+
+test('final customer, project, and five trade details are rendered', () => {
+  for (const label of ['이메일','예비연락처','우편번호','준공연도','주거 형태']) assert.match(html,new RegExp(label));
+  assert.match(html, /renderReferenceScopeDetails/);
+  for (const trade of ['도배','바닥','욕실','샷시','가구']) assert.match(html,new RegExp("'"+trade+"'"));
+});
+
 test('consult statuses and exact work categories remain available', () => {
   for (const status of ['진행상담', '현장실측', '견적미팅', '견적완료', '계약']) assert.match(html, new RegExp(status));
   const scopes = ['도배','바닥','욕실','전기·조명','샷시','가구','목작업','문·문틀','설비','타일','필름','탄성코트','시스템에어컨','중문','철거','기타'];
@@ -65,6 +79,6 @@ test('tablet workspace reflows without hiding the detail editor', () => {
   assert.match(html, /\.consult-workspace\{grid-template-columns:320px minmax\(0,1fr\)\}/);
   assert.doesNotMatch(html, /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/i);
   assert.match(html, /@media\(max-width:1100px\)\{\.consult-shell\{grid-template-columns:76px minmax\(0,1fr\)\}/);
-  assert.match(html, /\.scope-details\{[^}]*grid-auto-flow:column[^}]*overflow-x:auto/);
+  assert.match(html, /@media\(max-width:1100px\)\{\.scope-details\{[^}]*grid-template-columns:repeat\(2,minmax\(145px,1fr\)\)[^}]*overflow-x:auto/);
 });
 
