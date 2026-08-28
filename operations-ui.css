@@ -389,6 +389,200 @@
 }
 }
 
+@media screen and (max-width: 1024px) {
+  .operations-ui {
+    --ops-touch-size: 44px;
+    overflow-x: hidden;
+  }
+
+  .operations-ui .main,
+  .operations-ui main,
+  .operations-ui .wrap,
+  .operations-ui .container,
+  .operations-ui .page-wrap,
+  .operations-ui .content {
+    width: min(calc(100vw - 32px), 1180px);
+    min-width: 0;
+  }
+
+  .operations-ui .toolbar,
+  .operations-ui .top,
+  .operations-ui .app-header,
+  .operations-ui .head,
+  .operations-ui .page-title,
+  .operations-ui .section-head,
+  .operations-ui .actions,
+  .operations-ui .filters,
+  .operations-ui .controls {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+
+  .operations-ui:not(.operations-document) button,
+  .operations-ui:not(.operations-document) .btn,
+  .operations-ui:not(.operations-document) input:not([type="checkbox"]):not([type="radio"]),
+  .operations-ui:not(.operations-document) select,
+  .operations-ui:not(.operations-document) textarea {
+    min-height: var(--ops-touch-size);
+  }
+
+  .operations-ui .tbl-wrap,
+  .operations-ui .table,
+  .operations-ui .table-wrap,
+  .operations-ui .calendar-wrap,
+  .operations-ui .tabs,
+  .operations-ui .tab-row,
+  .operations-ui.operations-price-editor .table-wrap,
+  .operations-ui.operations-document .editor-wrap,
+  .operations-ui.operations-document .preview-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .operations-ui .tabs,
+  .operations-ui .tab-row {
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  .operations-ui.operations-document { overflow-x: auto; }
+
+  .operations-ui .modal,
+  .operations-ui .modal-box,
+  .operations-ui .dialog,
+  .operations-ui [role="dialog"] {
+    width: min(calc(100vw - 16px), 720px);
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .operations-ui .modal-body,
+  .operations-ui .dialog-body,
+  .operations-ui [role="dialog"] .body {
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .operations-ui td,
+  .operations-ui th,
+  .operations-ui .email,
+  .operations-ui .address,
+  .operations-ui .description,
+  .operations-ui .memo {
+    overflow-wrap: anywhere;
+  }
+
+  .operations-ui .badge,
+  .operations-ui .status,
+  .operations-ui .row-actions,
+  .operations-ui .action-group {
+    flex-wrap: wrap;
+  }
+
+  .operations-ui.operations-schedule .toolbar,
+  .operations-ui.operations-schedule .controls,
+  .operations-ui.operations-schedule .filter-row { gap: 8px; }
+
+  .operations-ui.operations-photos .photo-grid,
+  .operations-ui.operations-photos .grid { columns: 2; }
+}
+
+@media screen and (max-width: 767px) {
+  .operations-ui .main,
+  .operations-ui main,
+  .operations-ui .wrap,
+  .operations-ui .container,
+  .operations-ui .page-wrap,
+  .operations-ui .content { width: min(calc(100vw - 24px), 1180px); }
+
+  .operations-ui .page-title,
+  .operations-ui .head,
+  .operations-ui .section-head { align-items: stretch; flex-direction: column; }
+
+  .operations-ui .filters,
+  .operations-ui .filter-row,
+  .operations-ui .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .operations-ui .modal-footer,
+  .operations-ui .dialog-footer,
+  .operations-ui .modal-ft,
+  .operations-ui .modal-foot { flex-wrap: wrap; }
+
+  .operations-ui.operations-price-editor .stats,
+  .operations-ui.operations-price-editor .toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .operations-ui.operations-photos .photo-grid,
+  .operations-ui.operations-photos .grid,
+  .operations-ui.operations-worklog .grid,
+  .operations-ui.operations-worklog .proj-cards { columns: 1; grid-template-columns: minmax(0, 1fr); }
+}
+
+@media screen and (max-width: 430px) {
+  .operations-ui .toolbar,
+  .operations-ui .top,
+  .operations-ui .app-header { padding-inline: 10px !important; }
+
+  .operations-ui .main,
+  .operations-ui main,
+  .operations-ui .wrap,
+  .operations-ui .container,
+  .operations-ui .page-wrap,
+  .operations-ui .content { width: min(calc(100vw - 20px), 1180px); }
+
+  .operations-ui .filters,
+  .operations-ui .filter-row,
+  .operations-ui .controls,
+  .operations-ui .actions,
+  .operations-ui .action-group { grid-template-columns: minmax(0, 1fr); width: 100%; }
+
+  .operations-ui .actions > *,
+  .operations-ui .action-group > * { width: 100%; }
+
+  .operations-ui .table,
+  .operations-ui .table-wrap,
+  .operations-ui .tbl-wrap { border-radius: 12px; }
+
+  .operations-ui .modal,
+  .operations-ui .modal-box,
+  .operations-ui .dialog,
+  .operations-ui [role="dialog"] {
+    width: calc(100vw - 8px);
+    max-width: calc(100vw - 8px);
+    margin: 4px;
+  }
+
+  .operations-ui .modal-body,
+  .operations-ui .dialog-body { padding: 16px; }
+
+  .operations-ui.operations-price-editor .stats { grid-template-columns: minmax(0, 1fr); }
+
+  .operations-ui.operations-document .editor-wrap,
+  .operations-ui.operations-document .preview-wrap { width: 100%; max-width: 100vw; }
+
+  .operations-ui.operations-auth .login-shell,
+  .operations-ui.operations-auth .wrap { width: calc(100% - 24px) !important; }
+
+  .operations-ui.operations-auth .help,
+  .operations-ui.operations-auth .links { flex-wrap: wrap; }
+}
+
+@media screen and (hover: none), screen and (pointer: coarse) {
+  .operations-ui .photo-actions,
+  .operations-ui .row-actions,
+  .operations-ui .album-del-btn,
+  .operations-ui .photo-del-btn,
+  .operations-ui [class*="hover-actions"],
+  .operations-ui [class*="overlay-actions"] { opacity: 1; visibility: visible; pointer-events: auto; }
+
+  .operations-ui .album-del-btn,
+  .operations-ui .photo-del-btn { display: inline-grid; place-items: center; min-width: 44px; min-height: 44px; }
+
+  .operations-ui button:active,
+  .operations-ui .btn:active { transform: scale(.98); }
+}
+
 @media print {
   /* Intentionally neutral: each document keeps its existing print rules. */
 }
