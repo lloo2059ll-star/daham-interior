@@ -13,6 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="auth.js"></script>
 <script src="consult-delete.js"></script>
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -143,28 +144,29 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#333;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;pointer-events:none;z-index:999;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* 상담/현장실측 2026 workspace */
+:root{--consult-navy:#091a43;--consult-purple:#6439df;--consult-purple-soft:#f3efff;--consult-border:#e2e6ef;--consult-muted:#70778b}
+body.operations-consult{background:#f7f8fb;color:#151a2d;overflow:hidden}
+.consult-shell{display:grid;grid-template-columns:196px minmax(0,1fr);height:100vh;min-width:0}.consult-nav{background:linear-gradient(180deg,#0b1b46,#071536);color:#fff;padding:26px 14px 18px;display:flex;flex-direction:column;min-width:0}.consult-logo{font-size:27px;font-weight:900;letter-spacing:.09em;padding:0 13px 31px}.consult-logo small{display:block;font-size:10px;font-weight:500;letter-spacing:0;margin-top:6px;color:#aeb9d3}.consult-menu{display:grid;gap:7px}.consult-menu a{min-height:48px;border-radius:9px;padding:0 14px;color:#d4dcf1;text-decoration:none;display:flex;align-items:center;gap:11px;font-weight:650}.consult-menu a.active{background:linear-gradient(135deg,#7450e8,#5932cb);color:#fff}.consult-user{margin-top:auto;border-top:1px solid rgba(255,255,255,.18);padding:18px 10px 0;display:flex;gap:10px;align-items:center}.consult-user-mark{width:34px;height:34px;border-radius:50%;background:#dbe2f3;color:#24345c;display:grid;place-items:center;font-weight:850}.consult-app{min-width:0;display:grid;grid-template-rows:90px minmax(0,1fr)}.consult-top{background:#fff;border-bottom:1px solid var(--consult-border);padding:18px 25px;display:flex;align-items:center;justify-content:space-between;gap:18px}.consult-top h1{font-size:25px;line-height:1.15}.consult-top p{color:var(--consult-muted);margin-top:6px}.consult-top-actions{display:flex;align-items:center;gap:9px}.consult-add{min-height:44px;border:0;border-radius:8px;background:linear-gradient(135deg,#7046e6,#5a30cf);color:#fff;padding:0 18px;font-weight:800;cursor:pointer}.consult-workspace{display:grid;grid-template-columns:390px minmax(0,1fr);gap:10px;padding:8px;min-height:0;min-width:0}.consult-list-panel,.consult-detail-panel{background:#fff;border:1px solid var(--consult-border);border-radius:10px;min-width:0;min-height:0}.consult-list-panel{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto}.consult-list-head{padding:15px 16px 10px;display:flex;align-items:center;justify-content:space-between}.consult-list-head h2{font-size:15px}.consult-search{margin:0 14px 10px;min-height:40px;border:1px solid var(--consult-border);border-radius:8px;padding:0 12px;width:calc(100% - 28px);font:inherit}.consult-list-scroll{overflow-y:auto;padding:0 10px 12px}.consult-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 10px 10px}.consult-tabs .tab-btn{border:1px solid var(--consult-border);border-radius:7px;padding:8px 4px;white-space:normal}.consult-tabs .tab-btn.active{border-color:var(--consult-purple);background:var(--consult-purple-soft);color:var(--consult-purple)}.consult-card{width:100%;text-align:left;border:1px solid var(--consult-border);background:#fff;border-radius:9px;padding:15px;margin-bottom:8px;cursor:pointer;font:inherit}.consult-card:hover,.consult-card.active{border-color:var(--consult-purple);box-shadow:0 0 0 1px var(--consult-purple)}.consult-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.consult-card-name{font-size:15px;font-weight:850}.consult-card-address{font-size:12px;color:#565e72;margin-top:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.consult-card-meta{display:flex;gap:13px;color:#737b8e;font-size:11px;margin-top:10px}.consult-card-scopes{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.scope-tag{background:#f4f5f8;border:1px solid #e2e5ec;border-radius:5px;padding:3px 7px;font-size:10px}.consult-detail-panel{overflow-y:auto;padding:14px}.detail-empty{height:100%;display:grid;place-items:center;color:var(--consult-muted)}.detail-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.detail-title{display:flex;align-items:center;gap:9px}.detail-title h2{font-size:20px}.detail-actions{display:flex;gap:8px}.outline-btn{min-height:40px;border:1px solid var(--consult-border);background:#fff;border-radius:7px;padding:0 13px;font-weight:700;cursor:pointer}.detail-grid{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:9px}.info-card{border:1px solid var(--consult-border);border-radius:8px;padding:13px;min-width:0}.info-card h3,.scope-section h3,.survey-section h3{font-size:13px;margin-bottom:12px}.info-lines{display:grid;grid-template-columns:82px minmax(0,1fr);gap:9px;font-size:12px}.info-lines dt{color:#858c9e}.info-lines dd{overflow-wrap:anywhere}.scope-section{border:1px solid var(--consult-border);border-radius:8px;padding:13px;margin-top:10px}.scope-grid{display:grid;grid-template-columns:repeat(8,minmax(84px,1fr));gap:7px}.scope-chip{min-height:46px;border:1px solid var(--consult-border);border-radius:7px;background:#fff;font:inherit;font-weight:650;color:#5c6477}.scope-chip.selected{border-color:var(--consult-purple);background:var(--consult-purple-soft);color:var(--consult-purple)}.scope-details{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}.scope-detail-card{border:1px solid var(--consult-border);border-radius:7px;padding:10px;min-width:0}.scope-detail-card h4{font-size:12px;margin-bottom:8px}.survey-section{border:1px solid var(--consult-border);border-radius:8px;padding:13px;margin-top:10px}.survey-grid{display:grid;grid-template-columns:1fr 1fr 1.2fr 1.5fr 1.4fr;gap:8px}.survey-item{border:1px solid #edf0f5;border-radius:7px;padding:10px;min-width:0}.survey-item span{display:block;color:#868da0;font-size:10px;margin-bottom:6px}.survey-item strong,.survey-item a{font-size:12px;overflow-wrap:anywhere}.detail-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}.detail-footer .primary{background:var(--consult-purple);color:#fff;border-color:var(--consult-purple)}
+.scope-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.scope-picker label{border:1px solid var(--consult-border);border-radius:7px;padding:9px;display:flex;gap:6px;align-items:center;font-size:12px}.scope-picker label:has(input:checked){border-color:var(--consult-purple);background:var(--consult-purple-soft);color:var(--consult-purple)}.detail-options{padding:10px;background:#fafafe;border:1px solid #ece9fa;border-radius:8px;margin-top:8px}.option-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:7px}.option-row label{font-size:11px;color:#5f6678}.address-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}.address-search{border:1px solid var(--consult-purple);background:#fff;color:var(--consult-purple);border-radius:7px;padding:0 12px;font-weight:750;cursor:pointer}.photo-list{display:flex;gap:6px;flex-wrap:wrap}.photo-link{font-size:11px;color:var(--consult-purple)}
+@media(max-width:1100px){body.operations-consult{overflow:auto}.consult-shell{grid-template-columns:76px minmax(0,1fr)}.consult-logo{font-size:0;padding:0 0 24px;text-align:center}.consult-logo:before{content:'D';font-size:24px}.consult-logo small,.consult-menu span,.consult-user>div:last-child{display:none}.consult-menu a{justify-content:center;padding:0}.consult-user{justify-content:center}.consult-workspace{grid-template-columns:320px minmax(0,1fr)}.detail-grid{grid-template-columns:1fr 1fr}.detail-grid .info-card:last-child{grid-column:span 2}.scope-grid{grid-template-columns:repeat(4,1fr)}.scope-details{grid-template-columns:repeat(2,1fr)}.survey-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.consult-shell{display:block}.consult-nav{display:none}.consult-app{grid-template-rows:auto auto}.consult-top{padding:15px;align-items:flex-start}.consult-top h1{font-size:21px}.consult-top p{font-size:11px}.consult-workspace{display:block;padding:8px}.consult-list-panel{max-height:46vh;margin-bottom:8px}.consult-detail-panel{min-height:50vh}.detail-grid{grid-template-columns:1fr}.detail-grid .info-card:last-child{grid-column:auto}.scope-grid{grid-template-columns:repeat(2,1fr)}.scope-details,.survey-grid{grid-template-columns:1fr}.modal-box{max-width:calc(100vw - 16px)}.scope-picker{grid-template-columns:repeat(2,1fr)}}
 </style>
 <link rel="stylesheet" href="v2-theme.css">
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
 </head>
-<body class="operations-ui operations-admin">
-
-<div class="toolbar">
-  <div style="display:flex;align-items:center;gap:12px">
-    <a class="tb-home" href="index.html">← 홈</a>
-    <span class="brand">DAHAM</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <span style="font-size:13px;font-weight:700;color:var(--mid)">상담 관리</span>
-    <span id="sync-dot" title="클라우드 동기화" style="font-size:13px;opacity:.35;transition:all .3s">☁</span>
-    <button class="tb-add-btn" onclick="openAddModal()">+ 상담 추가</button>
-  </div>
+<body class="operations-ui operations-admin operations-consult">
+<div class="consult-shell">
+  <aside class="consult-nav" aria-label="주요 메뉴"><div class="consult-logo">DAHAM<small>인테리어의 기준, 다함</small></div><nav class="consult-menu">
+    <a href="index.html">⌂ <span>대시보드</span></a><a class="active" href="consult.html">▣ <span>상담 / 현장실측</span></a><a href="estimate.html">▤ <span>견적 관리</span></a><a href="contract.html">▧ <span>계약 관리</span></a><a href="schedule.html">◇ <span>현장 관리</span></a><a href="order.html">▦ <span>자재 관리</span></a><a href="employees.html">⚙ <span>설정</span></a>
+  </nav><div class="consult-user"><div class="consult-user-mark">D</div><div><strong id="consult-user-name">다함</strong><small style="display:block;color:#aeb9d3">대표</small></div></div></aside>
+  <main class="consult-app"><header class="consult-top"><div><h1>상담 / 현장실측</h1><p>상담 현황을 관리하고, 현장 실측 및 Polycam 정보를 등록하세요.</p></div><div class="consult-top-actions"><span id="sync-dot" title="클라우드 동기화">☁</span><button class="consult-add" onclick="openAddModal()">＋ 새 상담 등록</button></div></header>
+    <div class="consult-workspace"><section class="consult-list-panel"><div class="consult-list-head"><h2>상담 목록</h2><button class="outline-btn" onclick="setFilter('active')">전체 필터</button></div><input id="consult-search" class="consult-search" placeholder="고객명, 연락처, 주소 검색" oninput="renderList()"><div id="tab-wrap" class="consult-tabs"></div><div id="list-area" class="consult-list-scroll"></div><div id="consult-total" style="padding:12px 16px;border-top:1px solid var(--consult-border);color:#7b8293"></div></section><section id="consult-detail" class="consult-detail-panel"><div class="detail-empty">왼쪽에서 상담을 선택하세요.</div></section></div>
+  </main>
 </div>
-
-<div class="tab-wrap" id="tab-wrap"></div>
-<div class="main"><div id="list-area"></div></div>
 
 <div class="modal-overlay" id="modal" style="display:none" onclick="onOverlayClick(event)">
   <div class="modal-box">
@@ -218,6 +220,8 @@ var _modalHist   = []; /* 모달 세션용 이력 작업본 */
 var _curStatus   = 'inquiry'; /* 모달 현재 선택 단계 */
 var _currentUser = null;
 var _canDeleteConsult = false;
+var _selectedId = null;
+var CONSULT_SCOPES=['도배','바닥','욕실','전기·조명','샷시','가구','목작업','문·문틀','설비','타일','필름','탄성코트','시스템에어컨','중문','철거','기타'];
 
 /* ════ CLOUD SYNC ════ */
 function initCloud(){
@@ -287,12 +291,12 @@ function renderTabs(){
   var ac=all.filter(function(r){ return isActive(r.status); }).length;
   var cc=all.filter(function(r){ return r.status==='contracted'; }).length;
   var tabs=[
-    {key:'active',      label:'진행 상담', cnt:ac},
-    {key:'contracted',  label:'계약 완료', cnt:cc},
-    {key:'inquiry',     label:'상담문의',  cnt:all.filter(function(r){return r.status==='inquiry';}).length},
+    {key:'active',      label:'전체', cnt:ac},
+    {key:'inquiry',     label:'진행상담',  cnt:all.filter(function(r){return r.status==='inquiry';}).length},
     {key:'site_check',  label:'현장실측',  cnt:all.filter(function(r){return r.status==='site_check';}).length},
     {key:'est_meeting', label:'견적미팅',  cnt:all.filter(function(r){return r.status==='est_meeting';}).length},
     {key:'est_done',    label:'견적완료',  cnt:all.filter(function(r){return r.status==='est_done';}).length},
+    {key:'contracted',  label:'계약', cnt:cc},
   ];
   document.getElementById('tab-wrap').innerHTML=tabs.map(function(t){
     var a=_filter===t.key?' active':'';
@@ -307,6 +311,8 @@ function renderList(){
   var list=_filter==='active'
     ? _records.filter(function(r){ return isActive(r.status); })
     : _records.filter(function(r){ return r.status===_filter; });
+  var query=((document.getElementById('consult-search')||{}).value||'').trim().toLowerCase();
+  if(query) list=list.filter(function(r){return [r.name,r.tel,r.addr,r.manager].join(' ').toLowerCase().indexOf(query)>=0;});
 
   list.sort(function(a,b){
     var da=a.schedDate||'',db=b.schedDate||'';
@@ -316,6 +322,7 @@ function renderList(){
   });
 
   var el=document.getElementById('list-area');
+  var total=document.getElementById('consult-total');if(total)total.textContent='전체 '+list.length+'건';
   if(!list.length){
     var lbl=_filter==='active'?'진행 중인 상담':_filter==='contracted'?'계약된 상담':(getStatusCfg(_filter).label||_filter)+' 상담';
     el.innerHTML='<div class="empty-state"><div class="empty-icon">💬</div>'
@@ -323,29 +330,31 @@ function renderList(){
       +'<div style="font-size:12px">+ 상담 추가 버튼을 눌러 시작하세요</div></div>';
     return;
   }
+  if(!_selectedId||!_records.some(function(r){return r.id===_selectedId;}))_selectedId=list[0].id;
   var rows=list.map(function(r,i){
     var sc=getStatusCfg(r.status);
     var sched=r.schedDate?r.schedDate+(r.schedTime?' '+r.schedTime:''):'—';
-    var proj=r.projId
-      ?'<a class="ct-proj" href="estimate.html" onclick="event.stopPropagation();sessionStorage.setItem(\'daham_open_proj\',\''+r.projId+'\')">📋 프로젝트</a>':'';
-    var deleteCell=_canDeleteConsult
-      ?'<td class="consult-delete-cell"><button class="consult-delete-btn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')">삭제</button></td>':'';
-    return '<tr onclick="openEditModal(\''+r.id+'\')">'
-      +'<td class="ct-num col-hide-mobile">'+(i+1)+'</td>'
-      +'<td><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></td>'
-      +'<td><div class="ct-name">'+escHtml(r.name||'—')+proj+'</div>'+(r.tel?'<div class="ct-sub">'+escHtml(r.tel)+'</div>':'')+'</td>'
-      +'<td><div class="ct-sub">'+escHtml(r.addr||'—')+(r.area?' · '+escHtml(r.area)+'평':'')+'</div>'+(r.works?'<div class="ct-sub">'+escHtml(r.works.slice(0,20))+'</div>':'')+'</td>'
-      +'<td class="ct-date">'+sched+'</td>'
-      +'<td class="ct-date col-hide-mobile">'+(r.moveDate?'🏠 '+r.moveDate:'—')+'</td>'
-      +'<td class="ct-date col-hide-mobile">'+fmtDate(r.createdAt)+'</td>'
-      +deleteCell
-      +'</tr>';
+    var scopes=getRecordScopes(r);
+    return '<article role="button" tabindex="0" class="consult-card'+(_selectedId===r.id?' active':'')+'" onclick="selectRecord(\''+r.id+'\')"><div class="consult-card-head"><span class="consult-card-name">'+escHtml(r.name||'고객명 미입력')+' <small>고객님</small></span><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></div><div class="consult-card-address">'+escHtml(r.addr||'주소 미입력')+(r.area?' · '+escHtml(r.area)+'평':'')+'</div><div class="consult-card-meta"><span>▣ '+escHtml(sched)+'</span><span>♙ '+escHtml(r.manager||'담당자 미정')+'</span></div><div class="consult-card-scopes">'+scopes.slice(0,5).map(function(s){return '<span class="scope-tag">'+escHtml(s)+'</span>';}).join('')+(scopes.length>5?'<span class="scope-tag">+'+(scopes.length-5)+'</span>':'')+(_canDeleteConsult?'<button class="consult-delete-btn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')">삭제</button>':'')+'</div></article>';
   }).join('');
-  el.innerHTML='<div class="tbl-wrap"><table class="consult-table">'
-    +'<thead><tr><th class="col-hide-mobile">No.</th><th>단계</th><th>고객명</th><th>주소 · 공종</th><th>상담일</th><th class="col-hide-mobile">이사예정일</th><th class="col-hide-mobile">접수일</th>'+(_canDeleteConsult?'<th class="consult-delete-cell">삭제</th>':'')+'</tr></thead>'
-    +'<tbody>'+rows+'</tbody></table></div>';
+  el.innerHTML=rows;
+  renderSelectedDetail();
 }
 function setFilter(k){ _filter=k; renderTabs(); renderList(); }
+function getRecordScopes(r){if(Array.isArray(r.scopes))return r.scopes.slice();return String(r.works||'').split(/[,/]/).map(function(x){return x.trim();}).filter(Boolean);}
+function selectRecord(id){_selectedId=id;renderList();}
+function renderSelectedDetail(){
+  var host=document.getElementById('consult-detail');if(!host)return;var r=_records.find(function(x){return x.id===_selectedId;});if(!r){host.innerHTML='<div class="detail-empty">왼쪽에서 상담을 선택하세요.</div>';return;}
+  var sc=getStatusCfg(r.status),scopes=getRecordScopes(r),d=r.scopeDetails||{},survey=r.survey||{};
+  host.innerHTML='<div class="detail-head"><div class="detail-title"><h2>'+escHtml(r.name||'고객명 미입력')+' <small>고객님</small></h2><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></div><div class="detail-actions"><button class="outline-btn" onclick="openEditModal(\''+r.id+'\')">✎ 상담 정보 수정</button></div></div>'
+  +'<div class="detail-grid"><article class="info-card"><h3>고객 정보</h3><dl class="info-lines"><dt>이름</dt><dd>'+escHtml(r.name||'—')+'</dd><dt>연락처</dt><dd>'+escHtml(r.tel||'—')+'</dd><dt>상담일</dt><dd>'+escHtml((r.schedDate||'—')+' '+(r.schedTime||''))+'</dd><dt>담당자</dt><dd>'+escHtml(r.manager||'—')+'</dd></dl></article>'
+  +'<article class="info-card"><h3>주소</h3><dl class="info-lines"><dt>주소</dt><dd>'+escHtml(r.addr||'—')+'</dd><dt>상세주소</dt><dd>'+escHtml(r.addrDetail||'—')+'</dd><dt>평형</dt><dd>'+escHtml(r.area||'—')+(r.area?'평':'')+'</dd></dl></article>'
+  +'<article class="info-card"><h3>프로젝트 정보</h3><dl class="info-lines"><dt>공사시기</dt><dd>'+escHtml(r.moveDate||'—')+'</dd><dt>예산</dt><dd>'+escHtml(r.budget||'—')+'</dd><dt>유입경로</dt><dd>'+escHtml(r.source||'—')+'</dd><dt>메모</dt><dd>'+escHtml(r.memo||'—')+'</dd></dl></article></div>'
+  +'<section class="scope-section"><h3>공종 선택</h3><div class="scope-grid">'+CONSULT_SCOPES.map(function(s){return '<button class="scope-chip'+(scopes.indexOf(s)>=0?' selected':'')+'" onclick="openEditModal(\''+r.id+'\')">'+s+'</button>';}).join('')+'</div><div class="scope-details">'+scopes.slice(0,5).map(function(s){return '<div class="scope-detail-card"><h4>'+escHtml(s)+'</h4><div style="font-size:11px;color:#687085;line-height:1.6">'+escHtml(formatScopeDetail(s,d[s]))+'</div></div>';}).join('')+'</div></section>'
+  +'<section class="survey-section"><h3>현장 실측 / Polycam 정보</h3><div class="survey-grid"><div class="survey-item"><span>방문일</span><strong>'+escHtml(survey.visitDate||'미정')+'</strong></div><div class="survey-item"><span>실측 완료</span><strong>'+(survey.measured?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 완료</span><strong>'+(survey.polycamDone?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 링크</span>'+(survey.polycamUrl?'<a href="'+escAttr(survey.polycamUrl)+'" target="_blank">링크 열기</a>':'<strong>—</strong>')+'</div><div class="survey-item"><span>특이사항</span><strong>'+escHtml(survey.note||'—')+'</strong></div></div></section>'
+  +'<div class="detail-footer"><button class="outline-btn" onclick="openEditModal(\''+r.id+'\')">정보 수정</button>'+(r.projId?'<button class="outline-btn primary" onclick="openProject(\''+r.projId+'\')">견적서 열기 →</button>':'')+'</div>';
+}
+function formatScopeDetail(name,value){if(!value)return '세부 선택 없음';if(typeof value==='string')return value;return Object.keys(value).map(function(k){return k+': '+value[k];}).join(' · ');}
 
 /* 모달 열기 */
 function openAddModal(){
@@ -513,7 +522,8 @@ function renderModalBody(r){
     +'<div class="form-row"><label>고객명</label><input id="f-name" placeholder="홍길동" value="'+v('name')+'"></div>'
     +'<div class="form-row"><label>연락처</label><input id="f-tel" type="tel" placeholder="010-0000-0000" value="'+v('tel')+'"></div>'
     +'</div>'
-    +'<div class="form-row"><label>주소</label><input id="f-addr" placeholder="서울시 강남구 ..." value="'+v('addr')+'"></div>'
+    +'<div class="form-row"><label>주소</label><div class="address-row"><input id="f-addr" placeholder="주소 검색 또는 직접 입력" value="'+v('addr')+'"><button type="button" class="address-search" onclick="openAddressSearch()">주소 검색</button></div></div>'
+    +'<div class="form-row"><label>상세주소</label><input id="f-addr-detail" placeholder="동/호수, 상세주소" value="'+v('addrDetail')+'"></div>'
     +'<div class="form-grid">'
     +'<div class="form-row"><label>평수</label><input id="f-area" placeholder="32" value="'+v('area')+'"></div>'
     +'<div class="form-row"><label>담당자</label><input id="f-manager" placeholder="최일성" value="'+v('manager')+'"></div>'
@@ -527,21 +537,38 @@ function renderModalBody(r){
     +['','현장 방문','사무실 방문','전화 상담','화상 상담','기타'].map(function(p){
       return '<option value="'+p+'"'+((r&&r.schedPlace===p)?' selected':'')+'>'+(p||'-- 선택 --')+'</option>';
     }).join('')+'</select></div>'
-    +'<div class="sec-title">공사 내용</div>'
-    +'<div class="form-row"><label>희망 공종</label><input id="f-works" placeholder="도배, 바닥, 욕실 등" value="'+v('works')+'"></div>'
+    +'<div class="sec-title">공사 범위</div>'
+    +'<input id="f-works" type="hidden" value="'+v('works')+'"><div class="scope-picker">'+renderScopePicker(r)+'</div><div id="scope-option-area">'+renderScopeOptions(r)+'</div>'
     +'<div class="form-grid">'
     +'<div class="form-row"><label>예산</label><input id="f-budget" placeholder="1,500만원 예상" value="'+v('budget')+'"></div>'
     +'<div class="form-row"><label>이사 예정일</label><input id="f-movedate" type="date" value="'+v('moveDate')+'"></div>'
     +'</div>'
     +'<div class="form-row"><label>요청사항 / 메모</label><textarea id="f-memo">'+v('memo')+'</textarea></div>';
+  document.getElementById('modal-body').innerHTML += '<div class="sec-title">상담 경로 · 현장 실측 / Polycam</div><div class="form-grid"><div class="form-row"><label>유입경로</label><select id="f-source">'+['','소개','온라인 검색','블로그/SNS','기존 고객','기타'].map(function(x){return '<option'+((r&&r.source===x)?' selected':'')+'>'+ (x||'-- 선택 --')+'</option>';}).join('')+'</select></div><div class="form-row"><label>현장 방문일</label><input id="f-visit-date" type="datetime-local" value="'+escAttr((r&&r.survey&&r.survey.visitDate)||'')+'"></div></div><div class="form-grid"><div class="form-row"><label><input id="f-measured" type="checkbox" '+(r&&r.survey&&r.survey.measured?'checked':'')+'> 실측 완료</label></div><div class="form-row"><label><input id="f-polycam-done" type="checkbox" '+(r&&r.survey&&r.survey.polycamDone?'checked':'')+'> Polycam 완료</label></div></div><div class="form-row"><label>Polycam 링크</label><input id="f-polycam-url" type="url" placeholder="https://poly.cam/..." value="'+escAttr((r&&r.survey&&r.survey.polycamUrl)||'')+'"></div><div class="form-row"><label>현장 사진 링크</label><textarea id="f-photo-urls" placeholder="사진 URL을 줄바꿈으로 입력">'+escHtml(((r&&r.survey&&r.survey.photoUrls)||[]).join('\n'))+'</textarea></div><div class="form-row"><label>현장 특이사항</label><textarea id="f-survey-note" placeholder="실측 및 현장 특이사항">'+escHtml((r&&r.survey&&r.survey.note)||'')+'</textarea></div>';
+  refreshScopeOptions();
   renderHistSection();
 }
+
+function renderScopePicker(r){var selected=getRecordScopes(r||{});return CONSULT_SCOPES.map(function(s){return '<label><input type="checkbox" class="scope-check" value="'+s+'" '+(selected.indexOf(s)>=0?'checked':'')+' onchange="refreshScopeOptions()"> '+s+'</label>';}).join('');}
+function scopeValue(r,key,field){var d=r&&r.scopeDetails&&r.scopeDetails[key];return escAttr((d&&d[field])||'');}
+function checkedScope(r,key,field,val){var d=r&&r.scopeDetails&&r.scopeDetails[key];return d&&d[field]===val?'checked':'';}
+function renderScopeOptions(r){
+  return '<div class="detail-options" data-scope="도배"><strong>도배</strong><div class="option-row">'+['베스트','디아망','기타'].map(function(v){return '<label><input type="radio" name="wallpaper" value="'+v+'" '+checkedScope(r,'도배','grade',v)+'> '+v+'</label>';}).join('')+'</div></div>'
+  +'<div class="detail-options" data-scope="바닥"><strong>바닥</strong><div class="option-row"><label>마루</label><select id="scope-floor-wood"><option></option>'+['597×597','165×1200','325×805','98×805','650×650','기타'].map(function(v){return '<option '+(scopeValue(r,'바닥','wood')===v?'selected':'')+'>'+v+'</option>';}).join('')+'</select><label>장판</label><select id="scope-floor-vinyl"><option></option>'+['2.2T','3.2T','5.0T','기타'].map(function(v){return '<option '+(scopeValue(r,'바닥','vinyl')===v?'selected':'')+'>'+v+'</option>';}).join('')+'</select></div></div>'
+  +'<div class="detail-options" data-scope="욕실"><strong>욕실</strong><div class="option-row">'+['거실욕실','안방욕실','둘 다'].map(function(v){return '<label><input type="radio" name="bathroom" value="'+v+'" '+checkedScope(r,'욕실','place',v)+'> '+v+'</label>';}).join('')+'<label><input type="radio" name="bathMode" value="전체 리모델링" '+(!r||!r.scopeDetails||!r.scopeDetails['욕실']||checkedScope(r,'욕실','mode','전체 리모델링')?'checked':'')+'> 전체 리모델링</label><label><input type="radio" name="bathMode" value="기타" '+checkedScope(r,'욕실','mode','기타')+'> 기타</label><select id="scope-bath-tile"><option>300×600</option><option>600×600</option><option>기타</option></select></div></div>'
+  +'<div class="detail-options" data-scope="샷시"><strong>샷시</strong><div class="option-row"><label>브랜드</label><input id="scope-window-brand" value="'+scopeValue(r,'샷시','brand')+'"><label>범위</label><select id="scope-window-range"><option>전체교체</option><option>부분교체</option></select><input id="scope-window-note" placeholder="메모" value="'+scopeValue(r,'샷시','note')+'"></div></div>'
+  +'<div class="detail-options" data-scope="가구"><strong>가구</strong><div class="option-row">'+['싱크','붙박이장','신발장','화장대'].map(function(v){return '<label><input type="checkbox" name="furniture" value="'+v+'"> '+v+'</label>';}).join('')+'</div><div class="option-row"><span>붙박이장:</span>'+['안방','작은방1','작은방2','+방추가'].map(function(v){return '<label><input type="checkbox" name="closetRoom" value="'+v+'"> '+v+'</label>';}).join('')+'</div></div>';
+}
+function refreshScopeOptions(){var selected=[].slice.call(document.querySelectorAll('.scope-check:checked')).map(function(x){return x.value;});var w=document.getElementById('f-works');if(w)w.value=selected.join(', ');document.querySelectorAll('[data-scope]').forEach(function(el){el.style.display=selected.indexOf(el.dataset.scope)>=0?'block':'none';});}
+function openAddressSearch(){if(window.daum&&daum.Postcode){new daum.Postcode({oncomplete:function(data){document.getElementById('f-addr').value=data.roadAddress||data.jibunAddress;document.getElementById('f-addr-detail').focus();}}).open();}else{showToast('주소 검색을 불러오지 못했습니다. 직접 입력해 주세요.');document.getElementById('f-addr').focus();}}
+function readScopeDetails(){var out={};function radio(n){var x=document.querySelector('input[name="'+n+'"]:checked');return x?x.value:'';}var selected=[].slice.call(document.querySelectorAll('.scope-check:checked')).map(function(x){return x.value;});if(selected.indexOf('도배')>=0)out['도배']={grade:radio('wallpaper')};if(selected.indexOf('바닥')>=0)out['바닥']={wood:(document.getElementById('scope-floor-wood')||{}).value||'',vinyl:(document.getElementById('scope-floor-vinyl')||{}).value||''};if(selected.indexOf('욕실')>=0)out['욕실']={place:radio('bathroom'),mode:radio('bathMode'),tile:(document.getElementById('scope-bath-tile')||{}).value||''};if(selected.indexOf('샷시')>=0)out['샷시']={brand:(document.getElementById('scope-window-brand')||{}).value||'',range:(document.getElementById('scope-window-range')||{}).value||'',note:(document.getElementById('scope-window-note')||{}).value||''};if(selected.indexOf('가구')>=0)out['가구']={items:[].slice.call(document.querySelectorAll('input[name="furniture"]:checked')).map(function(x){return x.value;}),closetRooms:[].slice.call(document.querySelectorAll('input[name="closetRoom"]:checked')).map(function(x){return x.value;})};return out;}
 
 /* 저장 */
 function saveModal(){
   var name    =(document.getElementById('f-name').value||'').trim();
   var tel     =(document.getElementById('f-tel').value||'').trim();
   var addr    =(document.getElementById('f-addr').value||'').trim();
+  var addrDetail=(document.getElementById('f-addr-detail').value||'').trim();
   var area    =(document.getElementById('f-area').value||'').trim();
   var sdate   =document.getElementById('f-sdate').value||'';
   var stime   =document.getElementById('f-stime').value||'';
@@ -551,6 +578,10 @@ function saveModal(){
   var budget  =(document.getElementById('f-budget').value||'').trim();
   var moveDate=document.getElementById('f-movedate').value||'';
   var memo    =(document.getElementById('f-memo').value||'').trim();
+  var scopes=[].slice.call(document.querySelectorAll('.scope-check:checked')).map(function(x){return x.value;});
+  var scopeDetails=readScopeDetails();
+  var source=(document.getElementById('f-source').value||'').trim();
+  var survey={visitDate:document.getElementById('f-visit-date').value||'',measured:document.getElementById('f-measured').checked,polycamDone:document.getElementById('f-polycam-done').checked,polycamUrl:(document.getElementById('f-polycam-url').value||'').trim(),photoUrls:(document.getElementById('f-photo-urls').value||'').split(/\r?\n/).map(function(x){return x.trim();}).filter(Boolean),note:(document.getElementById('f-survey-note').value||'').trim()};
   var status  =_curStatus;
 
   if(!name&&!tel){ showToast('고객명 또는 연락처를 입력하세요'); return; }
@@ -578,23 +609,24 @@ function saveModal(){
     var idx=db.findIndex(function(r){return r.id===_editId;});
     if(idx<0){closeModal();return;}
     db[idx]=Object.assign({},db[idx],{
-      name:name,tel:tel,addr:addr,area:area,manager:manager,
+      name:name,tel:tel,addr:addr,addrDetail:addrDetail,area:area,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
-      works:works,budget:budget,moveDate:moveDate,memo:memo,status:status,
+      works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
       history:_modalHist.slice(),updatedAt:nowISO()
     });
     if(newProjId) db[idx].projId=newProjId;
   } else {
     db.push({
       id:newId,createdAt:nowISO(),updatedAt:nowISO(),
-      name:name,tel:tel,addr:addr,area:area,manager:manager,
+      name:name,tel:tel,addr:addr,addrDetail:addrDetail,area:area,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
-      works:works,budget:budget,moveDate:moveDate,memo:memo,status:status,
+      works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
       projId:newProjId||null,history:_modalHist.slice()
     });
   }
 
   saveDB(db);
+  _selectedId=_editId||newId;
   closeModal();
   renderTabs();
   renderList();
@@ -673,33 +705,6 @@ DAHAM_AUTH.ready.then(function(ready){
   cloudPull();
 });
 </script>
-<script src="auth.js"></script>
-
-<script>
-(function(){
- const KEY='daham_consult_handoff_v1';
- window.DAHAM_CONSULT_HANDOFF={
-   save(data){localStorage.setItem(KEY,JSON.stringify({savedAt:new Date().toISOString(),data:data||{}}))},
-   load(){try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){return null}},
-   clear(){localStorage.removeItem(KEY)}
- };
- document.addEventListener('DOMContentLoaded',()=>{
-   if(location.pathname.endsWith('consult.html')){
-     const b=document.createElement('button'); b.textContent='현재 상담·실측을 견적으로 넘기기';
-     b.style.cssText='position:fixed;right:22px;bottom:126px;z-index:9998;padding:11px 14px;border:0;border-radius:10px;background:#14936f;color:#fff;font-weight:800;cursor:pointer';
-     b.onclick=()=>{const d={}; document.querySelectorAll('input,select,textarea').forEach((el,i)=>{const k=el.name||el.id||('field_'+i); if(el.type==='checkbox'||el.type==='radio'){if(el.checked)d[k]=el.value||true}else if(el.value)d[k]=el.value}); DAHAM_CONSULT_HANDOFF.save(d); location.href='estimate.html';};
-     (document.querySelector('main')||document.body).appendChild(b);
-   }
-   if(location.pathname.endsWith('estimate.html')){
-     const h=DAHAM_CONSULT_HANDOFF.load(); if(h?.data){
-       const box=document.createElement('div'); box.style.cssText='margin:12px 0;padding:12px 14px;border:1px solid #d7d2ff;background:#faf9ff;border-radius:12px;font-size:12px';
-       box.innerHTML='<b>상담·실측 연결됨</b> · '+Object.keys(h.data).length+'개 입력값을 견적 참고정보로 불러왔습니다. 기존 견적값은 자동 덮어쓰기하지 않습니다.';
-       (document.querySelector('main')||document.body).prepend(box);
-     }
-   }
- });
-})();
-</script>
-
 </body>
 </html>
+
