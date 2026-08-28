@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="auth.js"></script>
+<script src="consult-delete.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -53,6 +54,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .ct-sub{font-size:11px;color:var(--mid);margin-top:2px}
 .ct-proj{font-size:10px;font-weight:700;color:var(--orange);background:var(--orange-lt);padding:2px 7px;border-radius:4px;text-decoration:none;margin-left:6px;vertical-align:middle}
 .ct-date{font-size:12px;color:var(--mid);white-space:nowrap}
+.consult-delete-cell{width:1%;text-align:right;white-space:nowrap}
+.consult-delete-btn{font-family:var(--sans);font-size:11px;font-weight:700;color:#C62828;background:#fff;border:1px solid #FFCDD2;border-radius:7px;padding:6px 9px;cursor:pointer}
+.consult-delete-btn:hover{background:#FFEBEE;border-color:#EF9A9A}
 .empty-state{text-align:center;padding:60px 20px;color:var(--dim)}
 .empty-icon{font-size:40px;margin-bottom:12px}
 
@@ -211,6 +215,8 @@ var _editId      = null;
 var _records     = [];
 var _modalHist   = []; /* 모달 세션용 이력 작업본 */
 var _curStatus   = 'inquiry'; /* 모달 현재 선택 단계 */
+var _currentUser = null;
+var _canDeleteConsult = false;
 
 /* ════ CLOUD SYNC ════ */
 function initCloud(){
@@ -321,6 +327,8 @@ function renderList(){
     var sched=r.schedDate?r.schedDate+(r.schedTime?' '+r.schedTime:''):'—';
     var proj=r.projId
       ?'<a class="ct-proj" href="estimate.html" onclick="event.stopPropagation();sessionStorage.setItem(\'daham_open_proj\',\''+r.projId+'\')">📋 프로젝트</a>':'';
+    var deleteCell=_canDeleteConsult
+      ?'<td class="consult-delete-cell"><button class="consult-delete-btn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')">삭제</button></td>':'';
     return '<tr onclick="openEditModal(\''+r.id+'\')">'
       +'<td class="ct-num col-hide-mobile">'+(i+1)+'</td>'
       +'<td><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></td>'
@@ -329,10 +337,11 @@ function renderList(){
       +'<td class="ct-date">'+sched+'</td>'
       +'<td class="ct-date col-hide-mobile">'+(r.moveDate?'🏠 '+r.moveDate:'—')+'</td>'
       +'<td class="ct-date col-hide-mobile">'+fmtDate(r.createdAt)+'</td>'
+      +deleteCell
       +'</tr>';
   }).join('');
   el.innerHTML='<div class="tbl-wrap"><table class="consult-table">'
-    +'<thead><tr><th class="col-hide-mobile">No.</th><th>단계</th><th>고객명</th><th>주소 · 공종</th><th>상담일</th><th class="col-hide-mobile">이사예정일</th><th class="col-hide-mobile">접수일</th></tr></thead>'
+    +'<thead><tr><th class="col-hide-mobile">No.</th><th>단계</th><th>고객명</th><th>주소 · 공종</th><th>상담일</th><th class="col-hide-mobile">이사예정일</th><th class="col-hide-mobile">접수일</th>'+(_canDeleteConsult?'<th class="consult-delete-cell">삭제</th>':'')+'</tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div>';
 }
 function setFilter(k){ _filter=k; renderTabs(); renderList(); }
@@ -356,7 +365,7 @@ function openEditModal(id){
   document.getElementById('modal-title').textContent=r.name||'상담 상세';
   renderMbar();
   renderModalBody(r);
-  var ft='<button class="btn btn-del" onclick="deleteRecord(\''+id+'\')">삭제</button>';
+  var ft=_canDeleteConsult?'<button class="btn btn-del" onclick="deleteRecord(\''+id+'\')">삭제</button>':'';
   ft+='<button class="btn" style="background:#E1F5FE;color:#0277BD;border:1.5px solid #90CAF9;flex:0 0 auto" onclick="goChecklist(\''+id+'\')">📋 현장 체크</button>';
   if(['est_meeting','est_done','contracted'].indexOf(r.status)>=0||r.projId){
     if(r.projId) ft+='<button class="btn btn-proj" onclick="openProject(\''+r.projId+'\')">📋 프로젝트</button>';
@@ -627,11 +636,20 @@ function addHistNote(){
 
 /* 삭제 */
 function deleteRecord(id){
-  dahamConfirm('이 상담 기록을 삭제할까요?\n이 작업은 되돌릴 수 없습니다.', function(){
-    var db=loadDB().filter(function(r){return r.id!==id;});
-    saveDB(db);closeModal();renderTabs();renderList();
-    showToast('✓ 삭제됐습니다');
-  });
+  if(!_canDeleteConsult){ showToast('대표 또는 관리자만 삭제할 수 있습니다.'); return; }
+  if(!_sb){ showToast('DB 연결 후 다시 시도해 주세요.'); return; }
+  DAHAM_CONSULT_DELETE.removeConsult({
+    id:id,
+    user:_currentUser,
+    confirmDelete:function(message){return window.confirm('정말 삭제하시겠습니까?');},
+    rpc:function(id){return _sb.rpc('delete_consult_record',{p_record_id:id});},
+    loadLocal:loadDB,
+    saveLocal:function(db){localStorage.setItem(DB_KEY,JSON.stringify(db));_records=db;},
+    setTimestamp:function(ts){localStorage.setItem(DB_KEY+'_ts',ts);}
+  }).then(function(result){
+    if(!result.deleted) return;
+    closeModal();renderTabs();renderList();showToast('✓ 삭제됐습니다');
+  }).catch(function(error){showToast('삭제하지 못했습니다: '+error.message);});
 }
 
 function escHtml(s){ var d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML; }
@@ -644,10 +662,15 @@ function showToast(msg){
   _toastTimer=setTimeout(function(){t.classList.remove('show');},2800);
 }
 
-initCloud();
-renderTabs();
-renderList();
-cloudPull();
+DAHAM_AUTH.ready.then(function(ready){
+  if(!ready) return;
+  _currentUser=DAHAM_AUTH.currentUser();
+  _canDeleteConsult=DAHAM_CONSULT_DELETE.canDeleteConsult(_currentUser);
+  initCloud();
+  renderTabs();
+  renderList();
+  cloudPull();
+});
 </script>
 <script src="auth.js"></script>
 
@@ -679,3 +702,4 @@ cloudPull();
 
 </body>
 </html>
+
