@@ -633,6 +633,7 @@ var allGeneralEvents = [];
 var holidayMap = DAHAM_SCHEDULE_HOLIDAYS.fallback();
 var currentId   = null;  // null = all-projects view
 var calOffset   = 0;
+var calAnchorToday = false;
 var saveTimer   = null;
 var editTaskId  = null;
 var pendingDate = null;
@@ -715,6 +716,7 @@ function cloudPull(onDone){
 function migrate(){
   allProjects=DAHAM_SCHEDULE_DOMAIN.normalizeSites(allProjects,COLORS);
 }
+function dahamConfirm(msg, fn){ if(window.confirm(msg)) fn(); }
 
 function loadDB(){
   try{ allProjects=JSON.parse(localStorage.getItem(DB_KEY)||'[]'); }catch(e){ allProjects=[]; }
@@ -851,7 +853,7 @@ function getProj(){
 /* ════ VIEW SWITCHING ════ */
 function showAllCalendar(){
   autoSave();
-  currentId=null; calOffset=0;
+  currentId=null; calOffset=0; calAnchorToday=false;
   closeProjectDrawer();
   document.getElementById('tb-add-btn').style.display='none';
   document.getElementById('tb-phase-btn').style.display='inline-flex';
@@ -864,7 +866,7 @@ function openProject(id){
   autoSave();
   for(var i=0;i<allProjects.length;i++){
     if(allProjects[i].id===id){
-      currentId=id; calOffset=0;
+      currentId=id; calOffset=0; calAnchorToday=false;
       applyInfo(allProjects[i].info);
       renderProjColorPicker(allProjects[i].color||COLORS[0]);
       document.getElementById('tb-add-btn').style.display='inline-flex';
@@ -948,7 +950,16 @@ function openProjectDrawer(id){
   applyInfo(p.info||{});renderProjColorPicker(p.color||COLORS[0]);
   var drawer=document.getElementById('project-drawer');drawer.classList.add('open');drawer.setAttribute('aria-hidden','false');
 }
-function closeProjectDrawer(){var drawer=document.getElementById('project-drawer');if(!drawer)return;drawer.classList.remove('open');drawer.setAttribute('aria-hidden','true');}
+function closeProjectDrawer(){
+  var drawer=document.getElementById('project-drawer');
+  if(!drawer)return;
+  if(drawer.classList.contains('open')){
+    clearTimeout(saveTimer);
+    autoSave();
+  }
+  drawer.classList.remove('open');
+  drawer.setAttribute('aria-hidden','true');
+}
 function renderAgenda(){
   var host=document.getElementById('agenda-area');if(!host)return;
   var base=getBaseMonth(), events=[];
@@ -1028,12 +1039,14 @@ function setProjectColor(c){
 
 /* ════ CALENDAR ════ */
 function shiftCal(n){ calOffset+=n; renderCalendar(); }
-function goToday(){calOffset=0;renderCalendar();}
+function goToday(){calOffset=0;calAnchorToday=true;renderCalendar();}
 function onCalendarSiteFilter(value){if(value)openProject(value);else showAllCalendar();}
 
 function getBaseMonth(){
   var base;
-  if(currentId){
+  if(calAnchorToday){
+    base=todayStr();
+  } else if(currentId){
     var p=getProj();
     base=(p&&p.info&&p.info.start)?p.info.start:todayStr();
   } else {
