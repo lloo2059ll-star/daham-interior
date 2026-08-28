@@ -154,6 +154,25 @@ body.operations-consult{background:#f7f8fb;color:#151a2d;overflow:hidden}
 @media(max-width:760px){.consult-shell{display:block}.consult-nav{display:none}.consult-app{grid-template-rows:auto auto}.consult-top{padding:15px;align-items:flex-start}.consult-top h1{font-size:21px}.consult-top p{font-size:11px}.consult-workspace{display:block;padding:8px}.consult-list-panel{max-height:46vh;margin-bottom:8px}.consult-detail-panel{min-height:50vh}.detail-grid{grid-template-columns:1fr}.detail-grid .info-card:last-child{grid-column:auto}.scope-grid{grid-template-columns:repeat(2,1fr)}.scope-details,.survey-grid{grid-template-columns:1fr}.modal-box{max-width:calc(100vw - 16px)}.scope-picker{grid-template-columns:repeat(2,1fr)}}
 .consult-list-panel{grid-template-rows:auto auto auto minmax(0,1fr) auto}
 .operations-ui.operations-consult main.consult-app{width:auto;max-width:none;margin:0;padding:0}
+/* final consultation reference layout */
+.consult-shell{grid-template-columns:196px minmax(0,1fr)}
+.consult-app{grid-template-rows:90px minmax(0,1fr)}
+.consult-workspace{grid-template-columns:400px minmax(0,1fr);gap:10px;padding:0 8px 8px}
+.consult-list-panel,.consult-detail-panel{border-radius:8px}
+.consult-list-head{height:58px;padding:14px 16px}.consult-search{height:38px;margin-bottom:9px}
+.consult-tabs{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:0 10px 12px}
+.consult-tabs .tab-btn{min-width:0;padding:8px 2px;font-size:10px;line-height:1.25}.consult-tabs .tab-count{display:block;margin:4px auto 0;width:max-content}
+.consult-card{padding:17px 16px;min-height:152px;margin-bottom:9px}.consult-card.active{border-width:1.5px;box-shadow:0 0 0 1px rgba(100,57,223,.15)}
+.consult-detail-panel{padding:14px 12px 10px}.detail-head{height:42px;margin-bottom:8px}.detail-title h2{font-size:20px}
+.detail-row-primary,.detail-row-secondary{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:9px;margin-bottom:9px}
+.detail-row-secondary{grid-template-columns:1.15fr .85fr 1.2fr}.info-card{min-height:154px;padding:14px}.detail-row-secondary .info-card{min-height:112px}
+.info-lines{grid-template-columns:80px minmax(0,1fr);gap:10px;font-size:12px}.memo-copy{font-size:12px;line-height:1.65;white-space:pre-wrap;color:#444b5d}
+.scope-section{margin-top:0;padding:13px}.scope-grid{grid-template-columns:repeat(8,minmax(82px,1fr));gap:7px}.scope-chip{position:relative;min-height:48px}.scope-chip.selected:after{content:'✓';position:absolute;right:5px;top:4px;width:15px;height:15px;border-radius:50%;background:var(--consult-purple);color:#fff;font-size:10px;display:grid;place-items:center}
+.scope-details{grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}.scope-detail-card{min-height:118px;padding:10px;background:#fff}.scope-detail-rows{display:grid;gap:6px}.scope-detail-row{font-size:10px;color:#687085;line-height:1.4}.scope-detail-row b{display:block;color:#303749;font-size:10px;margin-bottom:2px}
+.survey-section{padding:12px;margin-top:9px}.survey-grid{grid-template-columns:.9fr .8fr .9fr 1.45fr 1.55fr 1.25fr}.survey-item{min-height:70px;padding:9px}.survey-photo-list{display:flex;gap:4px;min-height:42px;align-items:center}.survey-photo-thumb{width:42px;height:42px;object-fit:cover;border-radius:5px;border:1px solid #dfe3eb}.survey-photo-more{font-size:10px;color:#6c7487}
+.detail-bottom-actions{display:flex;justify-content:flex-end;gap:12px;padding-top:10px}.detail-bottom-actions .outline-btn{min-width:126px}.detail-bottom-actions .estimate-go{min-width:235px;background:linear-gradient(135deg,#7046e6,#5a30cf);color:#fff;border-color:#633bdb}
+@media(max-width:1100px){.consult-workspace{grid-template-columns:300px minmax(0,1fr)}.consult-tabs{grid-template-columns:repeat(3,1fr)}.detail-row-primary,.detail-row-secondary{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-row-primary .info-card:last-child,.detail-row-secondary .info-card:last-child{grid-column:1/-1}.scope-grid{grid-template-columns:repeat(4,1fr)}.survey-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.detail-row-primary,.detail-row-secondary{grid-template-columns:1fr}.detail-row-primary .info-card:last-child,.detail-row-secondary .info-card:last-child{grid-column:auto}.detail-bottom-actions{position:sticky;bottom:0;background:#fff;padding:10px 0}.detail-bottom-actions .outline-btn{min-width:0;flex:1}.detail-bottom-actions .estimate-go{min-width:0;flex:1.5}}
 </style>
 <link rel="stylesheet" href="v2-theme.css">
 <link rel="stylesheet" href="v2-suite.css">
@@ -349,14 +368,17 @@ function renderSelectedDetail(){
   var host=document.getElementById('consult-detail');if(!host)return;var r=_records.find(function(x){return x.id===_selectedId;});if(!r){host.innerHTML='<div class="detail-empty">왼쪽에서 상담을 선택하세요.</div>';return;}
   var sc=getStatusCfg(r.status),scopes=getRecordScopes(r),d=r.scopeDetails||{},survey=r.survey||{};
   host.innerHTML='<div class="detail-head"><div class="detail-title"><h2>'+escHtml(r.name||'고객명 미입력')+' <small>고객님</small></h2><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></div><div class="detail-actions"><button class="outline-btn" onclick="openEditModal(\''+r.id+'\')">✎ 상담 정보 수정</button></div></div>'
-  +'<div class="detail-grid"><article class="info-card"><h3>고객 정보</h3><dl class="info-lines"><dt>이름</dt><dd>'+escHtml(r.name||'—')+'</dd><dt>연락처</dt><dd>'+escHtml(r.tel||'—')+'</dd><dt>상담일</dt><dd>'+escHtml((r.schedDate||'—')+' '+(r.schedTime||''))+'</dd><dt>담당자</dt><dd>'+escHtml(r.manager||'—')+'</dd></dl></article>'
+  +'<div class="detail-row-primary"><article class="info-card"><h3>고객 정보</h3><dl class="info-lines"><dt>이름</dt><dd>'+escHtml(r.name||'—')+'</dd><dt>연락처</dt><dd>'+escHtml(r.tel||'—')+'</dd><dt>상담일</dt><dd>'+escHtml((r.schedDate||'—')+' '+(r.schedTime||''))+'</dd><dt>담당자</dt><dd>'+escHtml(r.manager||'—')+'</dd></dl></article>'
   +'<article class="info-card"><h3>주소</h3><dl class="info-lines"><dt>주소</dt><dd>'+escHtml(r.addr||'—')+'</dd><dt>상세주소</dt><dd>'+escHtml(r.addrDetail||'—')+'</dd><dt>평형</dt><dd>'+escHtml(r.area||'—')+(r.area?'평':'')+'</dd></dl></article>'
-  +'<article class="info-card"><h3>프로젝트 정보</h3><dl class="info-lines"><dt>공사시기</dt><dd>'+escHtml(r.moveDate||'—')+'</dd><dt>예산</dt><dd>'+escHtml(r.budget||'—')+'</dd><dt>유입경로</dt><dd>'+escHtml(r.source||'—')+'</dd><dt>메모</dt><dd>'+escHtml(r.memo||'—')+'</dd></dl></article></div>'
-  +'<section class="scope-section"><h3>공종 선택</h3><div class="scope-grid">'+CONSULT_SCOPES.map(function(s){return '<button class="scope-chip'+(scopes.indexOf(s)>=0?' selected':'')+'" onclick="openEditModal(\''+r.id+'\')">'+s+'</button>';}).join('')+'</div><div class="scope-details">'+scopes.slice(0,5).map(function(s){return '<div class="scope-detail-card"><h4>'+escHtml(s)+'</h4><div style="font-size:11px;color:#687085;line-height:1.6">'+escHtml(formatScopeDetail(s,d[s]))+'</div></div>';}).join('')+'</div></section>'
-  +'<section class="survey-section"><h3>현장 실측 / Polycam 정보</h3><div class="survey-grid"><div class="survey-item"><span>방문일</span><strong>'+escHtml(survey.visitDate||'미정')+'</strong></div><div class="survey-item"><span>실측 완료</span><strong>'+(survey.measured?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 완료</span><strong>'+(survey.polycamDone?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 링크</span>'+(survey.polycamUrl?'<a href="'+escAttr(survey.polycamUrl)+'" target="_blank">링크 열기</a>':'<strong>—</strong>')+'</div><div class="survey-item"><span>특이사항</span><strong>'+escHtml(survey.note||'—')+'</strong></div></div></section>'
-  +'<div class="detail-footer"><button class="outline-btn" onclick="openEditModal(\''+r.id+'\')">정보 수정</button>'+(r.projId?'<button class="outline-btn primary" onclick="openProject(\''+r.projId+'\')">견적서 열기 →</button>':'')+'</div>';
+  +'<article class="info-card"><h3>프로젝트 정보</h3><dl class="info-lines"><dt>현장명</dt><dd>'+escHtml(r.siteName||r.addrDetail||r.addr||'—')+'</dd><dt>평형</dt><dd>'+escHtml(r.area||'—')+(r.area?'평':'')+'</dd><dt>유입경로</dt><dd>'+escHtml(r.source||'—')+'</dd><dt>상태</dt><dd>'+escHtml(sc.label)+'</dd></dl></article></div>'
+  +'<div class="detail-row-secondary"><article class="info-card schedule-card"><h3>희망 일정</h3><dl class="info-lines"><dt>희망 공사 시점</dt><dd>'+escHtml(r.moveDate||'—')+'</dd><dt>상담 장소</dt><dd>'+escHtml(r.schedPlace||'—')+'</dd></dl></article><article class="info-card budget-card"><h3>예산 범위</h3><div class="memo-copy">'+escHtml(r.budget||'미정')+'</div></article><article class="info-card memo-card"><h3>메모</h3><div class="memo-copy">'+escHtml(r.memo||'—')+'</div></article></div>'
+  +'<section class="scope-section"><h3>공종 선택</h3><div class="scope-grid">'+CONSULT_SCOPES.map(function(s){return '<button class="scope-chip'+(scopes.indexOf(s)>=0?' selected':'')+'" onclick="openEditModal(\''+r.id+'\')">'+s+'</button>';}).join('')+'</div><div class="scope-details">'+scopes.map(function(s){return '<div class="scope-detail-card"><h4>'+escHtml(s)+'</h4><div class="scope-detail-rows">'+scopeDetailRows(s,d[s])+'</div></div>';}).join('')+'</div></section>'
+  +'<section class="survey-section"><h3>현장 실측 / Polycam 정보</h3><div class="survey-grid"><div class="survey-item"><span>방문일</span><strong>'+escHtml(survey.visitDate||'미정')+'</strong></div><div class="survey-item"><span>실측 완료</span><strong>'+(survey.measured?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 완료</span><strong>'+(survey.polycamDone?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 링크</span>'+(survey.polycamUrl?'<a href="'+escAttr(survey.polycamUrl)+'" target="_blank">링크 열기</a>':'<strong>—</strong>')+'</div><div class="survey-item"><span>현장사진</span>'+renderSurveyPhotos(survey.photoUrls||[])+'</div><div class="survey-item"><span>특이사항</span><strong>'+escHtml(survey.note||'—')+'</strong></div></div></section>'
+  +'<div class="detail-bottom-actions"><button class="outline-btn" onclick="cancelConsult(\''+r.id+'\')">상담 취소</button><button class="outline-btn estimate-go" onclick="'+(r.projId?'openProject(\''+r.projId+'\')':'goEstimateFrom(\''+r.id+'\')')+'">견적서 작성으로 이동 →</button></div>';
 }
-function formatScopeDetail(name,value){if(!value)return '세부 선택 없음';if(typeof value==='string')return value;return Object.keys(value).map(function(k){return k+': '+value[k];}).join(' · ');}
+function scopeDetailRows(name,value){if(!value)return '<div class="scope-detail-row">세부 선택 없음</div>';if(typeof value==='string')return '<div class="scope-detail-row">'+escHtml(value)+'</div>';var labels={grade:'벽지 등급',wood:'마루 규격',vinyl:'장판 두께',place:'욕실 위치',mode:'공사 방식',tile:'타일 규격',brand:'브랜드',range:'교체 범위',note:'메모',items:'가구 품목',closetRooms:'붙박이장 위치'};return Object.keys(value).filter(function(k){return value[k]&&(!Array.isArray(value[k])||value[k].length);}).map(function(k){var v=Array.isArray(value[k])?value[k].join(', '):value[k];return '<div class="scope-detail-row"><b>'+escHtml(labels[k]||'선택 내용')+'</b>'+escHtml(v)+'</div>';}).join('')||'<div class="scope-detail-row">세부 선택 없음</div>';}
+function renderSurveyPhotos(urls){if(!urls.length)return '<strong>—</strong>';return '<div class="survey-photo-list">'+urls.slice(0,3).map(function(url){return '<a href="'+escAttr(url)+'" target="_blank"><img class="survey-photo-thumb" src="'+escAttr(url)+'" alt="현장사진"></a>';}).join('')+(urls.length>3?'<span class="survey-photo-more">+'+(urls.length-3)+'</span>':'')+'</div>';}
+function cancelConsult(id){var r=_records.find(function(x){return x.id===id;});if(!r||!window.confirm('상담을 취소 상태로 변경할까요?'))return;var db=loadDB(),idx=db.findIndex(function(x){return x.id===id;});if(idx<0)return;db[idx]=Object.assign({},db[idx],{status:'cancelled',updatedAt:nowISO()});saveDB(db);_records=db;renderTabs();renderList();showToast('상담이 취소 상태로 변경됐습니다');}
 
 /* 모달 열기 */
 function openAddModal(){
@@ -402,11 +424,13 @@ function goChecklist(id){
 function goEstimateFrom(id){
   var r=_records.find(function(x){return x.id===id;});
   if(!r) return;
+  var scopes=getRecordScopes(r);
+  localStorage.setItem('daham_prefill_consult',JSON.stringify({id:r.id,name:r.name||'',tel:r.tel||'',addr:r.addr||'',addrDetail:r.addrDetail||'',moveDate:r.moveDate||'',area:r.area||'',budget:r.budget||'',memo:r.memo||'',scopes:scopes,scopeDetails:r.scopeDetails||{},survey:r.survey||null}));
   localStorage.setItem('daham_consult',JSON.stringify({
     name:r.name||'',tel:r.tel||'',addr:r.addr||'',
     movein:r.moveDate||'',consultDate:new Date().toISOString().slice(0,10),
     area:r.area||'',bath:'',room:'',budget:r.budget||'',
-    scopes:[],scopeDetails:{},env:[],
+    scopes:scopes,scopeDetails:r.scopeDetails||{},env:[],
     specialReq:r.memo||'',memo:''
   }));
   location.href='estimate.html';
