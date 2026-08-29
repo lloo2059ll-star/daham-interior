@@ -50,3 +50,30 @@ test('database integration script exercises staff denial and owner deletion with
   assert.match(sql, /rollback\s*;/);
 });
 
+test('database migration protects price settings writes with active owner or admin authorization', () => {
+  const migrationsDir = path.join(__dirname, '..', 'supabase', 'migrations');
+  const sql = fs.readdirSync(migrationsDir)
+    .filter((name) => name.endsWith('.sql'))
+    .map((name) => fs.readFileSync(path.join(migrationsDir, name), 'utf8'))
+    .join('\n')
+    .toLowerCase();
+
+  assert.match(sql, /create\s+trigger\s+protect_price_settings/);
+  assert.match(sql, /daham_settings_v1/);
+  assert.match(sql, /role\s+in\s*\(\s*'owner'\s*,\s*'admin'\s*\)/);
+  assert.match(sql, /is_active\s*=\s*true/);
+  assert.match(sql, /before\s+insert\s+or\s+update\s+or\s+delete\s+on\s+public\.sync_data/);
+});
+
+test('database integration script proves staff denial and owner price settings update with rollback', () => {
+  const sql = fs.readFileSync(
+    path.join(__dirname, '..', 'supabase', 'tests', 'price_settings_security.sql'),
+    'utf8',
+  ).toLowerCase();
+  assert.match(sql, /set_config\('request\.jwt\.claim\.sub',\s*staff_id::text/);
+  assert.match(sql, /daham_settings_v1/);
+  assert.match(sql, /raise exception 'staff price update unexpectedly succeeded'/);
+  assert.match(sql, /set_config\('request\.jwt\.claim\.sub',\s*owner_id::text/);
+  assert.match(sql, /rollback\s*;/);
+});
+
