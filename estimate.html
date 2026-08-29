@@ -882,6 +882,68 @@ body{background:#eef1f6!important}
   html.daham-touch-tablet .sec-summary { display: flex !important; gap: 5px !important; font-size: 9px !important; }
   html.daham-touch-tablet body.v2-customer-view .v2-workgrid { grid-template-areas: "summary" "center"; grid-template-columns: minmax(0, 1fr) !important; }
 }
+/* Approved tablet estimate: preserve project header/tabs, remove only trade navigator. */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  .v2-workgrid {
+    grid-template-areas: "center summary";
+    grid-template-columns: minmax(0, 1fr) 280px !important;
+    align-items: start;
+    gap: 12px !important;
+  }
+  .v2-side { display: none !important; }
+  .v2-center { grid-area: center; }
+  .v2-right {
+    grid-area: summary;
+    display: block !important;
+    position: sticky !important;
+    top: 10px !important;
+  }
+  .v2-summary-card { display: block; }
+  .v2-summary-card,
+  .v2-quick-card,
+  .v2-help { margin-bottom: 12px !important; }
+  .v2-client-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  .v2-client-card,
+  .v2-estimate-card { border-radius: 14px !important; }
+  .v2-action,
+  .v2-search,
+  .v2-client-grid input { min-height: 42px; }
+  th.hide-sm,
+  td.hide-sm { display: none !important; }
+  .items-tbl col.hide-sm { width: 0 !important; }
+  body.v2-customer-view .v2-workgrid {
+    grid-template-areas: "center summary";
+    grid-template-columns: minmax(0, 1fr) 280px !important;
+  }
+}
+@media screen and (min-width: 1025px) and (max-width: 1366px) {
+  html.daham-touch-tablet .v2-workgrid {
+    grid-template-areas: "center summary";
+    grid-template-columns: minmax(0, 1fr) 300px !important;
+    align-items: start;
+    gap: 14px !important;
+  }
+  html.daham-touch-tablet .v2-side { display: none !important; }
+  html.daham-touch-tablet .v2-center { grid-area: center; }
+  html.daham-touch-tablet .v2-right {
+    grid-area: summary;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    display: block !important;
+    position: sticky !important;
+    top: 10px !important;
+  }
+  html.daham-touch-tablet .v2-summary-card { display: block; }
+  html.daham-touch-tablet .v2-summary-card,
+  html.daham-touch-tablet .v2-quick-card,
+  html.daham-touch-tablet .v2-help { margin-bottom: 12px !important; }
+  html.daham-touch-tablet .v2-client-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
+  html.daham-touch-tablet th.hide-sm,
+  html.daham-touch-tablet td.hide-sm { display: none !important; }
+  html.daham-touch-tablet .v2-action,
+  html.daham-touch-tablet .v2-search,
+  html.daham-touch-tablet .v2-client-grid input { min-height: 42px; }
+}
 </style>
 <script src="auth.js"></script><script src="consult-estimate-link.js"></script></head>
 <body>
