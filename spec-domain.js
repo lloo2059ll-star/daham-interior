@@ -42,7 +42,8 @@
     var parsed=splitMaterial(item&&item.det);
     return {id:'material-'+index+'-'+slug((item&&item.sub)||'item'),category:text(item&&item.sub),brand:parsed.brand,product:parsed.product||text(item&&item.det),spec:parsed.spec,finish:parsed.finish,note:''};
   }
-  function trade(name,index){return {id:'trade-'+slug(name),name:name,scope:'',contents:[],materials:[],sourceOrder:index};}
+  function materialLine(m){return [text(m&&m.category),text(m&&m.brand),text(m&&m.product),text(m&&m.spec),text(m&&m.finish),text(m&&m.note)].filter(Boolean).join(' / ');}
+  function trade(name,index){return {id:'trade-'+slug(name),name:name,scope:'',contents:[],materialText:'',materials:[],sourceOrder:index};}
   function createModel(schedule,estimate,now){
     schedule=schedule||{}; estimate=estimate||{};
     var names=[], byName={};
@@ -53,6 +54,7 @@
       var name=normalizeTradeName(SECTION_NAMES[text(item&&item.sec)]||text(item&&item.sec));
       if(byName[name]) byName[name].materials.push(materialFromEstimate(item,index));
     });
+    names.forEach(function(name){byName[name].materialText=byName[name].materials.map(materialLine).filter(Boolean).join('\n');});
     var info=schedule.info||{}, client=estimate.client||{};
     return {
       version:1,siteId:text(schedule.id),estimateId:text(schedule.estimateId||estimate.id),estimateNo:text(estimate.docNo),
@@ -62,7 +64,7 @@
     };
   }
   function normalizeMaterial(m,index){return {id:text(m&&m.id)||'material-saved-'+index,category:text(m&&m.category),brand:text(m&&m.brand),product:text(m&&m.product),spec:text(m&&m.spec),finish:text(m&&m.finish),note:text(m&&m.note)};}
-  function normalizeTrade(t,index){return {id:text(t&&t.id)||'trade-'+slug(t&&t.name),name:text(t&&t.name),scope:text(t&&t.scope),contents:(t&&Array.isArray(t.contents)?t.contents:[]).map(text).filter(Boolean),materials:(t&&Array.isArray(t.materials)?t.materials:[]).map(normalizeMaterial),sourceOrder:index};}
+  function normalizeTrade(t,index){var materials=(t&&Array.isArray(t.materials)?t.materials:[]).map(normalizeMaterial);return {id:text(t&&t.id)||'trade-'+slug(t&&t.name),name:text(t&&t.name),scope:text(t&&t.scope),contents:(t&&Array.isArray(t.contents)?t.contents:[]).map(text).filter(Boolean),materialText:text(t&&t.materialText)||materials.map(materialLine).filter(Boolean).join('\n'),materials:materials,sourceOrder:index};}
   function mergeSaved(base,saved){
     if(!saved) return clone(base);
     var out=clone(base), savedTrades=(saved.trades||[]).map(normalizeTrade), used={};
@@ -82,7 +84,7 @@
   function getTradeStatus(t){
     var hasScope=!!text(t&&t.scope), hasContent=!!(t&&t.contents||[]).some(function(v){return text(v);});
     if(hasScope&&hasContent) return 'completed';
-    if(hasScope||hasContent||(t&&t.materials||[]).some(materialHasValue)) return 'in-progress';
+    if(hasScope||hasContent||text(t&&t.materialText)||(t&&t.materials||[]).some(materialHasValue)) return 'in-progress';
     return 'empty';
   }
   function getProgress(trades){
@@ -97,7 +99,8 @@
     var site=model.site||{}, basicInfo=compact({siteName:text(site.name),address:text(site.address),clientName:text(site.clientName),phone:text(site.phone),start:text(site.start),end:text(site.end),estimateNo:text(model.estimateNo)});
     var trades=(model.trades||[]).map(function(t){return compact({name:text(t.name),scope:text(t.scope),contents:(t.contents||[]).map(text).filter(Boolean)});}).filter(function(t){return t.name&&(t.scope||(t.contents||[]).length);});
     var materials=[];(model.trades||[]).forEach(function(t){(t.materials||[]).forEach(function(m){var safe=compact({trade:text(t.name),category:text(m.category),brand:text(m.brand),product:text(m.product),spec:text(m.spec),finish:text(m.finish),note:text(m.note)});if(Object.keys(safe).length>1)materials.push(safe);});});
-    return compact({basicInfo:basicInfo,scopes:trades.map(function(t){return compact({name:t.name,scope:t.scope});}).filter(function(t){return t.scope;}),materials:materials,trades:trades,notes:text(model.notes)});
+    var materialSections=(model.trades||[]).map(function(t){return compact({trade:text(t.name),text:text(t.materialText)||((t.materials||[]).map(materialLine).filter(Boolean).join('\n'))});}).filter(function(s){return s.trade&&s.text;});
+    return compact({basicInfo:basicInfo,scopes:trades.map(function(t){return compact({name:t.name,scope:t.scope});}).filter(function(t){return t.scope;}),materials:materials,materialSections:materialSections,trades:trades,notes:text(model.notes)});
   }
   return {createModel:createModel,mergeSaved:mergeSaved,getTradeStatus:getTradeStatus,getProgress:getProgress,toCustomerDocument:toCustomerDocument,normalizeTradeName:normalizeTradeName};
 });
