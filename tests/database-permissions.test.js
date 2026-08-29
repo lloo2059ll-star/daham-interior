@@ -77,3 +77,12 @@ test('database integration script proves staff denial and owner price settings u
   assert.match(sql, /rollback\s*;/);
 });
 
+test('project price overrides are merged atomically through the protected settings record', () => {
+  const sql = fs.readFileSync(path.join(__dirname, '..', 'supabase/migrations/20260830103000_atomic_project_price_overrides.sql'), 'utf8');
+  assert.match(sql, /create or replace function public\.update_project_price_overrides/);
+  assert.match(sql, /private\.can_manage_prices\(\)/);
+  assert.match(sql, /for update/);
+  assert.match(sql, /projectPriceOverrides/);
+  assert.match(sql, /grant execute .* to authenticated/i);
+});
+

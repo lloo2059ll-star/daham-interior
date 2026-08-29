@@ -84,3 +84,78 @@ test('staff save is rejected before either local or remote storage is changed', 
   assert.equal(remoteWrites, 0);
 });
 
+test('project price adjustment replaces snapshots only for items already used in the selected estimate', () => {
+  const section = { name: '전기/조명', items: [
+    { sub: '거실등', det: '기본형', unit: '개', lu: 12000, mu: 130000 },
+    { sub: '현관등', det: '센서형', unit: '개', lu: 8000, mu: 45000 }
+  ] };
+  const project = {
+    id: 'estimate-1',
+    qtys: {
+      '전기/조명|거실등|기본형': 2,
+      '전기/조명|현관등|센서형': 0
+    },
+    priceSnapshots: {}
+  };
+  const livingKey = prices.itemKey(section, section.items[0]);
+  const hallKey = prices.itemKey(section, section.items[1]);
+
+  prices.applyDraftToProject(project, [section], {
+    [livingKey]: { labor: '13,500', material: '145,000' },
+    [hallKey]: { labor: '9,000', material: '50,000' }
+  });
+
+  assert.deepEqual(project.priceSnapshots, {
+    [livingKey]: { labor: 13500, material: 145000 }
+  });
+});
+
+test('project-specific overrides take priority without changing another estimate snapshot', () => {
+  const section = catalog[0], item = section.items[0], key = prices.itemKey(section, item);
+  const selected = { id: 'estimate-1', priceSnapshots: { [key]: { labor: 12000, material: 130000 } } };
+  const other = { id: 'estimate-2', priceSnapshots: { [key]: { labor: 12000, material: 130000 } } };
+  const scoped = { 'estimate-1': { [key]: { labor: 13500, material: 145000 } } };
+
+  assert.deepEqual(prices.priceForProject(selected, section, item, {}, scoped), { labor: 13500, material: 145000 });
+  assert.deepEqual(prices.priceForProject(other, section, item, {}, scoped), { labor: 12000, material: 130000 });
+});
+
+test('project price save uses protected settings and keeps only items used by that estimate', async () => {
+  const section = catalog[0], used = section.items[0], unused = section.items[1];
+  const usedKey = prices.itemKey(section, used), unusedKey = prices.itemKey(section, unused);
+  const project = { id: 'estimate-1', qtys: {
+    '전기/조명|거실등|[1]파인3등(380*710)': 2,
+    '전기/조명|매입등 2인치|': 0
+  }};
+  let remote, local;
+  await prices.saveProjectOverrides({
+    user: { role: 'owner', isActive: true }, project, catalog,
+    draft: {
+      [usedKey]: { labor: '13,500', material: '145,000' },
+      [unusedKey]: { labor: '17,000', material: '6,000' }
+    },
+    readSettings: () => ({ priceOverrides: {} }),
+    writeRemote: async (projectId, scoped) => {
+      remote = { priceOverrides: {}, projectPriceOverrides: { [projectId]: scoped } };
+      return remote;
+    },
+    writeLocal: value => { local = value; }
+  });
+  assert.deepEqual(remote.projectPriceOverrides['estimate-1'], {
+    [usedKey]: { labor: 13500, material: 145000 }
+  });
+  assert.deepEqual(local, remote);
+});
+
+test('selected project total is recalculated from its scoped labor and material prices', () => {
+  const section = catalog[0], item = section.items[0], key = prices.itemKey(section, item);
+  const project = {
+    id: 'estimate-1',
+    qtys: { '전기/조명|거실등|[1]파인3등(380*710)': 2 },
+    margins: { profit: '15' },
+    priceSnapshots: { [key]: { labor: 12000, material: 130000 } }
+  };
+  const scoped = { 'estimate-1': { [key]: { labor: 13500, material: 145000 } } };
+  assert.equal(prices.projectTotal(project, [section], {}, scoped), 364600);
+});
+

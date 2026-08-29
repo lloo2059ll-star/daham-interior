@@ -1232,11 +1232,15 @@ const PRICE_BASE_SECTIONS = JSON.parse(JSON.stringify(SECTIONS));
 function getPriceOverrides(){
   try{return (JSON.parse(localStorage.getItem('daham_settings')||'{}').priceOverrides)||{};}catch(e){return {};}
 }
+function getProjectPriceOverrides(){
+  try{return (JSON.parse(localStorage.getItem('daham_settings')||'{}').projectPriceOverrides)||{};}catch(e){return {};}
+}
 function applyProjectPrices(project){
   const overrides=getPriceOverrides();
+  const projectOverrides=getProjectPriceOverrides();
   PRICE_BASE_SECTIONS.forEach(function(sec,si){
     sec.items.forEach(function(baseItem,ii){
-      const price=DAHAM_PRICES.priceForProject(project,sec,baseItem,overrides);
+      const price=DAHAM_PRICES.priceForProject(project,sec,baseItem,overrides,projectOverrides);
       SECTIONS[si].items[ii].lu=price.labor;
       SECTIONS[si].items[ii].mu=price.material;
     });
@@ -2145,7 +2149,7 @@ function calcProjectTotal(p){
   PRICE_BASE_SECTIONS.forEach(function(sec, si){
     sec.items.forEach(function(item, ii){
       var qty = getQtyVal(qtys, sec, si, item, ii);
-      var price=DAHAM_PRICES.priceForProject(p,sec,item,getPriceOverrides());
+      var price=DAHAM_PRICES.priceForProject(p,sec,item,getPriceOverrides(),getProjectPriceOverrides());
       totalL += r100(qty * price.labor * (item.k||1));
       totalM += r100(qty * price.material * (item.s||1) * matMult);
     });
@@ -3354,7 +3358,7 @@ if(VIEW_COMPLETED){
       }
     }
   } catch(e){}
-  cloudPullSettings(function(){});
+  cloudPullSettings(function(){
   cloudPull(function(){
     /* 상담 관리에서 "프로젝트 열기"로 넘어온 경우 */
     var openId = sessionStorage.getItem('daham_open_proj');
@@ -3364,6 +3368,7 @@ if(VIEW_COMPLETED){
       if(target){ openProject(openId); return; }
     }
     showListView();
+  });
   });
 }());
 </script>

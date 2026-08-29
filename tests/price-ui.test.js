@@ -42,3 +42,10 @@ test('estimate loads the shared catalog and preserves per-project unit price sna
   assert.match(html, /const r100\s*=\s*n\s*=>/);
 });
 
+test('price modal can target one existing estimate and persists its updated price snapshot', () => {
+  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  assert.match(html, /id="priceProject"/);
+  assert.match(html, /DAHAM_PRICES\.saveProjectOverrides/);
+  assert.match(html, /key:'daham_settings_v1'/);
+});
+

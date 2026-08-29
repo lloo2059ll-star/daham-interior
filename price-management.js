@@ -68,8 +68,10 @@
     return project;
   }
 
-  function priceForProject(project, section, item, overrides) {
+  function priceForProject(project, section, item, overrides, projectOverrides) {
     const key = itemKey(section, item);
+    const scoped = project && projectOverrides && projectOverrides[project.id];
+    if (scoped && scoped[key]) return scoped[key];
     return project && project.priceSnapshots && project.priceSnapshots[key]
       ? project.priceSnapshots[key]
       : overridePrice(section, item, overrides);
@@ -86,6 +88,34 @@
     return project.priceSnapshots[key];
   }
 
+  function applyDraftToProject(project, catalog, draft) {
+    if (!project) throw new Error('견적 프로젝트를 찾을 수 없습니다.');
+    const prices = validateOverrides(catalog, draft);
+    project.priceSnapshots = project.priceSnapshots || {};
+    const qtys = project.qtys || {};
+    (catalog || []).forEach(section => (section.items || []).forEach(item => {
+      if (Number(qtys[quantityKey(section, item)] || 0) <= 0) return;
+      const key = itemKey(section, item);
+      project.priceSnapshots[key] = { labor: prices[key].labor, material: prices[key].material };
+    }));
+    return project;
+  }
+
+  function projectTotal(project, catalog, overrides, projectOverrides) {
+    let labor = 0, material = 0;
+    const qtys = project && project.qtys || {};
+    (catalog || []).forEach(section => (section.items || []).forEach(item => {
+      const quantity = Number(qtys[quantityKey(section, item)] || 0);
+      if (quantity <= 0) return;
+      const price = priceForProject(project, section, item, overrides, projectOverrides);
+      labor += Math.round(quantity * price.labor * (item.k || 1) / 100) * 100;
+      material += Math.round(quantity * price.material * (item.s || 1) / 100) * 100;
+    }));
+    const subtotal = labor + material;
+    const rate = Number(project && project.margins && project.margins.profit || 15) / 100;
+    return subtotal + Math.round(subtotal * rate / 100) * 100;
+  }
+
   async function saveOverrides(options) {
     if (!canManage(options.user)) throw new Error('단가를 저장할 권한이 없습니다.');
     const priceOverrides = validateOverrides(options.catalog, options.draft);
@@ -95,10 +125,31 @@
     return settings;
   }
 
+  async function saveProjectOverrides(options) {
+    if (!canManage(options.user)) throw new Error('단가를 저장할 권한이 없습니다.');
+    if (!options.project || !options.project.id) throw new Error('견적 프로젝트를 선택하세요.');
+    const validated = validateOverrides(options.catalog, options.draft);
+    const scoped = {};
+    const qtys = options.project.qtys || {};
+    (options.catalog || []).forEach(section => (section.items || []).forEach(item => {
+      if (Number(qtys[quantityKey(section, item)] || 0) <= 0) return;
+      const key = itemKey(section, item);
+      scoped[key] = validated[key];
+    }));
+    const settings = Object.assign({}, options.readSettings() || {});
+    settings.projectPriceOverrides = Object.assign({}, settings.projectPriceOverrides || {}, {
+      [options.project.id]: scoped
+    });
+    const saved = await options.writeRemote(options.project.id, scoped);
+    const finalSettings = saved || settings;
+    options.writeLocal(finalSettings);
+    return finalSettings;
+  }
+
   return {
     itemKey, quantityKey, parseMoney, canManage, validateOverrides,
-    snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice,
-    saveOverrides,
+    snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice, applyDraftToProject, projectTotal,
+    saveOverrides, saveProjectOverrides,
   };
 });
 
