@@ -250,6 +250,7 @@ select.mf-inp{cursor:pointer}
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
 <script src="schedule-domain.js"></script>
+<script src="consult-schedule-link.js"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
 :root{--sch-navy:#14213b;--sch-navy-2:#1b2b4b;--sch-purple:#7047e8;--sch-purple-soft:#f1edff;--sch-canvas:#f6f7fb;--sch-text:#172033;--sch-muted:#788196;--sch-border:#e1e5ee}
@@ -964,7 +965,7 @@ function renderAgenda(){
   var host=document.getElementById('agenda-area');if(!host)return;
   var base=getBaseMonth(), events=[];
   allProjects.forEach(function(p){(p.tasks||[]).forEach(function(t){events.push({id:t.id,date:t.start,end:t.end||t.start,name:((p.info||{}).name||'현장')+' · '+(t.name||'')+(t.worker?' · '+t.worker:''),color:p.color||COLORS[0],projId:p.id});});});
-  allGeneralEvents.forEach(function(e){events.push({id:e.id,date:e.start,end:e.end||e.start,name:generalTypeLabel(e.generalType)+' · '+(e.name||''),color:'#555',general:true});});
+  allGeneralEvents.forEach(function(e){events.push({id:e.id,date:e.start,end:e.end||e.start,name:DAHAM_CONSULT_SCHEDULE.generalDisplayName(e,generalTypeLabel(e.generalType)),color:'#555',general:true});});
   events=DAHAM_SCHEDULE_DOMAIN.agendaOccurrences(events.map(function(e){return Object.assign({},e,{start:e.date});}),base.year,base.month).sort(function(a,b){return a.date.localeCompare(b.date);});
   var groups={};events.forEach(function(e){(groups[e.date]||(groups[e.date]=[])).push(e);});
   host.innerHTML=Object.keys(groups).map(function(date){return '<div class="agenda-day"><div class="agenda-date">'+fmtDate(date)+' '+(getHoliday(date)||'')+'</div>'+groups[date].map(function(e){return '<div class="agenda-item'+(e.general?' general':'')+'" style="--item-color:'+e.color+'" onclick="'+(e.general?'openGeneralModal(\''+e.id+'\',null)':'goToProjectTask(\''+e.projId+'\',\''+e.id+'\')')+'">'+esc(e.name)+(e.end!==e.date?' · '+esc(e.date)+'~'+esc(e.end):'')+'</div>';}).join('')+'</div>';}).join('')||'<div class="agenda-day">이번 달 일정이 없습니다.</div>';
@@ -1121,7 +1122,7 @@ function _doRenderCalendar(numMonths){
       return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,
               worker:t.worker||'',status:t.status||'planned',color:pc,isCurrent:true,projId:p.id,projName:(p.info&&p.info.name)||''};
     }):[];
-    allGeneralEvents.forEach(function(e){tasks.push({id:e.id,name:e.name,start:e.start,end:e.end||e.start,worker:'',status:e.status||'planned',color:'#555',general:true,generalType:e.generalType});});
+    allGeneralEvents.forEach(function(e){tasks.push({id:e.id,name:e.name,start:e.start,end:e.end||e.start,worker:'',status:e.status||'planned',color:'#555',general:true,generalType:e.generalType,source:e.source||''});});
     for(var mi=0;mi<numMonths;mi++){
       var mo=base.month+mi, yr=base.year;
       while(mo>11){ mo-=12; yr++; }
@@ -1158,7 +1159,7 @@ function _doRenderCalendar(numMonths){
           projName:(p.info&&p.info.name)||'현장명 미입력',projId:p.id});
       });
     });
-    allGeneralEvents.forEach(function(e){allTasks.push({id:e.id,name:e.name||'',start:e.start,end:e.end||e.start,color:'#555',status:e.status||'planned',general:true,generalType:e.generalType});});
+    allGeneralEvents.forEach(function(e){allTasks.push({id:e.id,name:e.name||'',start:e.start,end:e.end||e.start,color:'#555',status:e.status||'planned',general:true,generalType:e.generalType,source:e.source||''});});
     for(var mi=0;mi<numMonths;mi++){
       var mo=base.month+mi, yr=base.year;
       while(mo>11){ mo-=12; yr++; }
@@ -1198,7 +1199,7 @@ function renderMonth(year, month, tasks, today, isProject){
       var sc=bsD.getDay();
       var ec=beD.getDay();
       bars.push({id:t.id,name:t.name,color:t.color||COLORS[0],
-        worker:t.worker||'',status:t.status,projName:t.projName||'',projId:t.projId||'',general:!!t.general,generalType:t.generalType||'',isCurrent:!!t.isCurrent,
+        worker:t.worker||'',status:t.status,projName:t.projName||'',projId:t.projId||'',general:!!t.general,generalType:t.generalType||'',source:t.source||'',isCurrent:!!t.isCurrent,
         startCol:sc,endCol:ec,isCont:ts<weekStart,isCont2:te>weekEnd});
     });
     bars.sort(function(a,b){ return a.startCol-b.startCol; });
@@ -1249,7 +1250,7 @@ function renderMonth(year, month, tasks, today, isProject){
       var pL=bar.isCont?'3px':'8px';
       var label, clickFn;
       if(bar.general){
-        label=bar.isCont?'':esc(generalTypeLabel(bar.generalType)+' · '+bar.name);
+        label=bar.isCont?'':esc(DAHAM_CONSULT_SCHEDULE.generalDisplayName(bar,generalTypeLabel(bar.generalType)));
         clickFn='openGeneralModal(\''+bar.id+'\',null)';
       } else if(isProject){
         label=bar.isCont?'':esc(bar.projName+' · '+bar.name+(bar.worker?' · '+bar.worker:''));
@@ -1415,8 +1416,10 @@ function forceSaveConflict(){if(!DAHAM_SCHEDULE_DOMAIN.canForceConflict(DAHAM_AU
 function saveGeneralEvent(){
   var name=document.getElementById('m-name').value.trim(),start=document.getElementById('m-start').value,end=document.getElementById('m-end').value||start;
   if(!name||!start){showToast('일정명과 시작일을 입력하세요');return;}if(end<start)end=start;
-  var value={id:editTaskId||uid(),kind:'general',generalType:document.getElementById('m-general-type').value,name:name,start:start,end:end,status:document.getElementById('m-status').value,memo:document.getElementById('m-memo').value.trim()};
-  var ix=allGeneralEvents.findIndex(function(x){return x.id===editTaskId;});if(ix>=0)allGeneralEvents[ix]=value;else allGeneralEvents.push(value);
+  var ix=allGeneralEvents.findIndex(function(x){return x.id===editTaskId;});
+  var editable={id:editTaskId||uid(),kind:'general',generalType:document.getElementById('m-general-type').value,name:name,start:start,end:end,status:document.getElementById('m-status').value,memo:document.getElementById('m-memo').value.trim()};
+  var value=DAHAM_CONSULT_SCHEDULE.mergeEditableGeneralEvent(ix>=0?allGeneralEvents[ix]:null,editable);
+  if(ix>=0)allGeneralEvents[ix]=value;else allGeneralEvents.push(value);
   saveGeneralDB();closeTaskModal();renderCalendar();showToast('✓ 일반 일정 저장');
 }
 function deleteTask(){
