@@ -232,6 +232,7 @@ a.tb-btn{text-decoration:none}
 <link rel="stylesheet" href="v2-theme.css">
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
+<script src="notice-domain.js?v=202608301210"></script>
 <link rel="stylesheet" href="operations-ui.css">
 </head>
 <body class="operations-ui operations-document">
@@ -242,6 +243,7 @@ a.tb-btn{text-decoration:none}
     <span class="brand">DAHAM</span>
   </div>
   <div class="tb-actions">
+    <button class="tb-btn" onclick="saveNotice()">저장</button>
     <button class="tb-btn" onclick="showPreview()">미리보기</button>
     <button class="tb-btn primary" onclick="printDoc()">인쇄 / PDF</button>
   </div>
@@ -254,7 +256,7 @@ a.tb-btn{text-decoration:none}
 
   <!-- 일정표 연동 -->
   <div class="form-sec" style="border-left:3px solid var(--orange)">
-    <div class="form-sec-hd">일정표에서 불러오기</div>
+    <div class="form-sec-hd">일정 연동 요약</div>
     <div class="form-row wide" style="border:none;flex-direction:row;align-items:center;gap:12px">
       <select id="sched-sel" onchange="loadFromSchedule()"
         style="font-family:var(--sans);font-size:13px;border:1.5px solid var(--line);
@@ -290,7 +292,7 @@ a.tb-btn{text-decoration:none}
         <input type="text" id="f-off" placeholder="예) 일요일 · 공휴일">
       </div>
       <div class="form-row wide">
-        <label>소음 심한 날 / 작업 내용</label>
+        <label>소음 집중 작업 자동판단</label>
         <textarea id="f-noise" placeholder="예) 5월 2일(목) — 철거 작업으로 소음이 심할 예정입니다.&#10;5월 7일(화) — 바닥 타일 철거 작업"></textarea>
       </div>
     </div>
@@ -332,7 +334,7 @@ a.tb-btn{text-decoration:none}
 <!-- PREVIEW -->
 <div class="preview-wrap" id="preview-wrap">
   <div class="preview-topbar" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div style="font-size:12px;color:var(--mid)">미리보기 — 실제 인쇄 결과와 유사합니다</div>
+    <div style="font-size:12px;color:var(--mid)">A4 미리보기 — 실제 인쇄 결과와 유사합니다</div>
     <button class="tb-btn" onclick="showEditor()">← 편집으로</button>
   </div>
   <div class="doc" id="doc"></div>
@@ -359,7 +361,6 @@ var TASK_TO_WORK = {
   '목공':'목공','필름·유리':'목공','중문':'목공',
   '창호':'창호','시스템에어컨':'에어컨'
 };
-var NOISY_TASKS = ['철거','마루철거','목공','타일','마루시공','마루','에어컨타공','에어컨 타공'];
 var DOW_KO = ['일','월','화','수','목','금','토'];
 
 var selected = new Set();
@@ -495,7 +496,8 @@ function buildDoc(){
         <div class="sig-company">다함인테리어</div>
         <div class="sig-detail">대표 &nbsp; 최일성</div>
         <div class="sig-detail">TEL &nbsp; 010-2059-0347</div>
-        <div class="sig-detail">경북 구미시 신시로10길 75-2</div>
+        <div class="sig-detail">구미시 신시로10길 75-2</div>
+        <div class="sig-detail">lloo2059ll@gmail.com</div>
         <div><span class="sig-stamp">DAHAM INTERIOR</span></div>
       </div>
     </div>
@@ -524,6 +526,12 @@ function printDoc(){
 function toast(m){
   var t=document.getElementById('toast'); t.textContent=m;
   t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},2000);
+}
+function saveNotice(){
+  var id=document.getElementById('sched-sel').value||'manual';
+  var data={addr:gv('f-addr'),start:gv('f-start'),end:gv('f-end'),off:gv('f-off'),noise:gv('f-noise'),mgr:gv('f-mgr'),tel:gv('f-tel'),extra:gv('f-extra'),works:Array.from(selected),savedAt:new Date().toISOString()};
+  var all={};try{all=JSON.parse(localStorage.getItem('daham_notice_v1')||'{}');}catch(e){}
+  all[id]=data;localStorage.setItem('daham_notice_v1',JSON.stringify(all));toast('✓ 공사 안내문을 저장했습니다');
 }
 
 /* ── 일정표 연동 ── */
@@ -568,12 +576,8 @@ function loadFromSchedule(){
   /* 공종 자동 선택 */
   selected.clear();
   document.querySelectorAll('.work-chip').forEach(function(c){ c.classList.remove('checked'); });
-  (p.tasks||[]).forEach(function(t){
-    var w=null;
-    Object.keys(TASK_TO_WORK).forEach(function(k){
-      if(!w&&t.name.indexOf(k)>=0) w=TASK_TO_WORK[k];
-    });
-    if(w&&WORK_TYPES.indexOf(w)>=0&&!selected.has(w)){
+  DAHAM_NOTICE_DOMAIN.workTypes(p.tasks||[]).forEach(function(w){
+    if(WORK_TYPES.indexOf(w)>=0&&!selected.has(w)){
       selected.add(w);
       var chip=document.getElementById('chip_'+w);
       if(chip) chip.classList.add('checked');
@@ -581,18 +585,7 @@ function loadFromSchedule(){
   });
 
   /* 소음 심한 날 자동 생성 (날짜순 정렬) */
-  var noisyList=[];
-  (p.tasks||[]).forEach(function(t){
-    var matched=NOISY_TASKS.some(function(n){ return t.name.indexOf(n)>=0; });
-    if(!matched) return;
-    noisyList.push(t);
-  });
-  noisyList.sort(function(a,b){ return (a.start||'')>(b.start||'')?1:-1; });
-  var lines=noisyList.map(function(t){
-    var e=(t.end&&t.end!==t.start)?' ~ '+fmtDateSimple(t.end):'';
-    var taskName=t.name.replace(/\s*\([^)]*\)/g,'').trim();
-    return taskName+' '+fmtDateSimple(t.start)+e;
-  });
+  var lines=DAHAM_NOTICE_DOMAIN.noiseDays(p.tasks||[]).map(function(t){return t.label;});
   document.getElementById('f-noise').value=lines.join('\n');
 
   toast('✓ 일정표에서 불러왔습니다');
