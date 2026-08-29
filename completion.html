@@ -154,6 +154,13 @@ body{background:#f4f6fa;color:#14213a}.toolbar{height:64px;border-bottom:1px sol
 .estimate-link-badge{float:right;border:1px solid #8067ef;background:#f5f2ff;color:#6547e8;border-radius:16px;padding:3px 9px;font-size:10px}
 .page-footer{position:absolute;left:46px;right:46px;bottom:26px;border-top:1px solid #dfe4ed;padding-top:12px;color:#7b8496;font-size:10px;display:flex;justify-content:space-between}
 .doc-mini-brand{text-align:right;color:#0b1f3a;font-weight:800;letter-spacing:.16em;margin-bottom:28px;font-size:12px}
+.doc-page:first-child{font-size:10.5px;line-height:1.45;padding-top:32px}
+.doc-page:first-child .doc-header{padding-bottom:10px;margin-bottom:14px}.doc-page:first-child .doc-brand{font-size:25px}.doc-page:first-child .doc-title{font-size:23px!important}
+.doc-page:first-child .sec-title{margin:12px 0 6px;padding-top:5px;padding-bottom:5px;font-size:11.5px}
+.doc-page:first-child .info-tbl th,.doc-page:first-child .info-tbl td{padding:5px 9px;font-size:10.5px}
+.doc-page:first-child .done-tbl th,.doc-page:first-child .done-tbl td{padding:4px 7px;font-size:10px}.doc-page:first-child .done-chk{width:17px;height:17px;font-size:11px}
+.doc-page:first-child .warranty-tbl th,.doc-page:first-child .warranty-tbl td{padding:4px 8px;font-size:10px}
+.warranty-notice{font-size:10px!important;line-height:1.55!important;margin-bottom:6px!important;padding:6px 10px!important}
 
 /* ── PRINT ── */
 @media print{
@@ -486,7 +493,7 @@ function buildDoc(){
     </table>
 
     <div class="sec-title">3. 하자 보증 조건</div>
-    <div style="font-size:12px;line-height:2;color:var(--mid);margin-bottom:12px;padding:10px 16px;background:#E8F5E9;border:1px solid #A5D6A7;border-left:4px solid var(--green)">
+    <div class="warranty-notice" style="font-size:12px;line-height:2;color:var(--mid);margin-bottom:12px;padding:10px 16px;background:#E8F5E9;border:1px solid #A5D6A7;border-left:4px solid var(--green)">
       · 시공사(다함인테리어)는 준공일로부터 아래 보증 기간 동안 하자 발생 시 <strong style="color:var(--green)">무상 보수</strong>를 시행할 것을 보증합니다.<br>
       · 단, 고객의 고의·과실, 천재지변, 정상 마모에 의한 손상은 보증에서 제외됩니다.<br>
       · 하자 접수: 대표 최일성 &nbsp; 010-2059-0347
