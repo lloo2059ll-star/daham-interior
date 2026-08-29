@@ -43,12 +43,12 @@
     return {id:'material-'+index+'-'+slug((item&&item.sub)||'item'),category:text(item&&item.sub),brand:parsed.brand,product:parsed.product||text(item&&item.det),spec:parsed.spec,finish:parsed.finish,note:''};
   }
   function materialLine(m){return [text(m&&m.category),text(m&&m.brand),text(m&&m.product),text(m&&m.spec),text(m&&m.finish),text(m&&m.note)].filter(Boolean).join(' / ');}
-  function trade(name,index){return {id:'trade-'+slug(name),name:name,scope:'',contents:[],materialText:'',materials:[],sourceOrder:index};}
+  function trade(name,index){return {id:'trade-'+slug(name),name:name,scope:'',contents:[],materialText:'',materials:[],scheduleStart:'',scheduleEnd:'',sourceOrder:index};}
   function createModel(schedule,estimate,now){
     schedule=schedule||{}; estimate=estimate||{};
     var names=[], byName={};
-    function ensure(raw){var name=normalizeTradeName(raw);if(!name||byName[name])return;byName[name]=trade(name,names.length);names.push(name);}
-    (schedule.tasks||[]).forEach(function(task){ensure(task&&task.name);});
+    function ensure(raw){var name=normalizeTradeName(raw);if(!name)return null;if(!byName[name]){byName[name]=trade(name,names.length);names.push(name);}return byName[name];}
+    (schedule.tasks||[]).forEach(function(task){var t=ensure(task&&task.name),start=text(task&&task.start),end=text(task&&(task.end||task.start));if(!t)return;if(start&&(!t.scheduleStart||start<t.scheduleStart))t.scheduleStart=start;if(end&&(!t.scheduleEnd||end>t.scheduleEnd))t.scheduleEnd=end;});
     (estimate.selectedMaterials||[]).forEach(function(item){ensure(SECTION_NAMES[text(item&&item.sec)]||text(item&&item.sec));});
     (estimate.selectedMaterials||[]).forEach(function(item,index){
       var name=normalizeTradeName(SECTION_NAMES[text(item&&item.sec)]||text(item&&item.sec));
@@ -63,12 +63,13 @@
     };
   }
   function normalizeMaterial(m,index){return {id:text(m&&m.id)||'material-saved-'+index,category:text(m&&m.category),brand:text(m&&m.brand),product:text(m&&m.product),spec:text(m&&m.spec),finish:text(m&&m.finish),note:text(m&&m.note)};}
-  function normalizeTrade(t,index){var materials=(t&&Array.isArray(t.materials)?t.materials:[]).map(normalizeMaterial),legacyText=materials.map(materialLine).filter(Boolean).join('\n'),written=text(t&&t.materialText);if(written===legacyText)written='';return {id:text(t&&t.id)||'trade-'+slug(t&&t.name),name:text(t&&t.name),scope:text(t&&t.scope),contents:(t&&Array.isArray(t.contents)?t.contents:[]).map(text).filter(Boolean),materialText:written,materials:materials,sourceOrder:index};}
+  function normalizeTrade(t,index){var materials=(t&&Array.isArray(t.materials)?t.materials:[]).map(normalizeMaterial),legacyText=materials.map(materialLine).filter(Boolean).join('\n'),written=text(t&&t.materialText);if(written===legacyText)written='';return {id:text(t&&t.id)||'trade-'+slug(t&&t.name),name:text(t&&t.name),scope:text(t&&t.scope),contents:(t&&Array.isArray(t.contents)?t.contents:[]).map(text).filter(Boolean),materialText:written,materials:materials,scheduleStart:text(t&&t.scheduleStart),scheduleEnd:text(t&&t.scheduleEnd),sourceOrder:index};}
   function mergeSaved(base,saved){
     if(!saved) return clone(base);
     var out=clone(base), savedTrades=(saved.trades||[]).map(normalizeTrade), used={};
     out.trades=savedTrades.map(function(t){used[t.name]=1;return t;});
     (base.trades||[]).forEach(function(t){if(!used[t.name])out.trades.push(clone(t));});
+    out.trades.forEach(function(t){var live=(base.trades||[]).find(function(b){return b.name===t.name;});if(live){t.scheduleStart=text(live.scheduleStart);t.scheduleEnd=text(live.scheduleEnd);}});
     out.notes=text(saved.notes||saved.special);
     out.createdAt=text(saved.createdAt)||out.createdAt;
     out.savedAt=text(saved.savedAt);
@@ -96,7 +97,7 @@
   function toCustomerDocument(model){
     model=model||{};
     var site=model.site||{}, basicInfo=compact({siteName:text(site.name),address:text(site.address),clientName:text(site.clientName),phone:text(site.phone),start:text(site.start),end:text(site.end),estimateNo:text(model.estimateNo)});
-    var trades=(model.trades||[]).map(function(t){return compact({name:text(t.name),scope:text(t.scope),contents:(t.contents||[]).map(text).filter(Boolean)});}).filter(function(t){return t.name&&(t.scope||(t.contents||[]).length);});
+    var trades=(model.trades||[]).map(function(t){return compact({name:text(t.name),scope:text(t.scope),contents:(t.contents||[]).map(text).filter(Boolean),scheduleStart:text(t.scheduleStart),scheduleEnd:text(t.scheduleEnd)});}).filter(function(t){return t.name&&(t.scope||(t.contents||[]).length||t.scheduleStart||t.scheduleEnd);});
     var materials=[];(model.trades||[]).forEach(function(t){(t.materials||[]).forEach(function(m){var safe=compact({trade:text(t.name),category:text(m.category),brand:text(m.brand),product:text(m.product),spec:text(m.spec),finish:text(m.finish),note:text(m.note)});if(Object.keys(safe).length>1)materials.push(safe);});});
     var materialSections=(model.trades||[]).map(function(t){return compact({trade:text(t.name),text:text(t.materialText)});}).filter(function(s){return s.trade&&s.text;});
     return compact({basicInfo:basicInfo,scopes:trades.map(function(t){return compact({name:t.name,scope:t.scope});}).filter(function(t){return t.scope;}),materials:materials,materialSections:materialSections,trades:trades,notes:text(model.notes)});
