@@ -63,7 +63,7 @@
     };
   }
   function normalizeMaterial(m,index){return {id:text(m&&m.id)||'material-saved-'+index,category:text(m&&m.category),brand:text(m&&m.brand),product:text(m&&m.product),spec:text(m&&m.spec),finish:text(m&&m.finish),note:text(m&&m.note)};}
-  function normalizeTrade(t,index){var materials=(t&&Array.isArray(t.materials)?t.materials:[]).map(normalizeMaterial);return {id:text(t&&t.id)||'trade-'+slug(t&&t.name),name:text(t&&t.name),scope:text(t&&t.scope),contents:(t&&Array.isArray(t.contents)?t.contents:[]).map(text).filter(Boolean),materialText:text(t&&t.materialText),materials:materials,sourceOrder:index};}
+  function normalizeTrade(t,index){var materials=(t&&Array.isArray(t.materials)?t.materials:[]).map(normalizeMaterial),legacyText=materials.map(materialLine).filter(Boolean).join('\n'),written=text(t&&t.materialText);if(written===legacyText)written='';return {id:text(t&&t.id)||'trade-'+slug(t&&t.name),name:text(t&&t.name),scope:text(t&&t.scope),contents:(t&&Array.isArray(t.contents)?t.contents:[]).map(text).filter(Boolean),materialText:written,materials:materials,sourceOrder:index};}
   function mergeSaved(base,saved){
     if(!saved) return clone(base);
     var out=clone(base), savedTrades=(saved.trades||[]).map(normalizeTrade), used={};
