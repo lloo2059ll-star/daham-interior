@@ -15,6 +15,7 @@
 <script src="consult-delete.js"></script>
 <script src="consult-estimate-link.js"></script>
 <script src="consult-modal.js"></script>
+<script src="consult-schedule-link.js"></script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -232,6 +233,7 @@ body.modal-open{overflow-y:hidden}
 <script>
 var DB_KEY  = 'daham_consult_v1';
 var PROJ_DB = 'daham_detail_v2';
+var GENERAL_SCHEDULE_DB_KEY = 'daham_schedule_general_v1';
 var _AUTH_CONFIG = DAHAM_AUTH.getSupabaseConfig();
 var SUPA_URL = _AUTH_CONFIG.url;
 var SUPA_KEY = _AUTH_CONFIG.key;
@@ -314,6 +316,37 @@ function cloudPull(onDone){
       }
       setSyncDot('ok'); onDone&&onDone();
     });
+}
+
+function loadGeneralScheduleEvents(){
+  try{var value=JSON.parse(localStorage.getItem(GENERAL_SCHEDULE_DB_KEY)||'[]');return Array.isArray(value)?value:[];}catch(e){return [];}
+}
+function saveGeneralScheduleEvents(events,ts){
+  localStorage.setItem(GENERAL_SCHEDULE_DB_KEY,JSON.stringify(events));
+  localStorage.setItem(GENERAL_SCHEDULE_DB_KEY+'_ts',ts);
+}
+function syncConsultSchedule(record,mode){
+  if(!record||!window.DAHAM_CONSULT_SCHEDULE) return Promise.resolve([]);
+  var reconcileAt=nowISO();
+  var localEvents=loadGeneralScheduleEvents();
+  var nextLocal=DAHAM_CONSULT_SCHEDULE.reconcile(localEvents,record,mode||'save',reconcileAt);
+  saveGeneralScheduleEvents(nextLocal,reconcileAt);
+  if(!_sb) return Promise.resolve(nextLocal);
+  setSyncDot('up');
+  return _sb.from('sync_data').select('value,updated_at').eq('key',GENERAL_SCHEDULE_DB_KEY).maybeSingle()
+    .then(function(result){
+      if(result.error) throw result.error;
+      var remoteEvents=[];
+      try{remoteEvents=result.data&&JSON.parse(result.data.value||'[]')||[];}catch(e){remoteEvents=[];}
+      if(!Array.isArray(remoteEvents)) remoteEvents=[];
+      var merged=DAHAM_CONSULT_SCHEDULE.mergeEventCollections(remoteEvents,nextLocal);
+      var nextRemote=DAHAM_CONSULT_SCHEDULE.reconcile(merged,record,mode||'save',reconcileAt);
+      var ts=nowISO();
+      saveGeneralScheduleEvents(nextRemote,ts);
+      return _sb.from('sync_data').upsert({key:GENERAL_SCHEDULE_DB_KEY,value:JSON.stringify(nextRemote),updated_at:ts})
+        .then(function(writeResult){if(writeResult.error)throw writeResult.error;setSyncDot('ok');return nextRemote;});
+    })
+    .catch(function(){setSyncDot('err');return nextLocal;});
 }
 
 /* DB */
@@ -417,7 +450,15 @@ function renderSelectedDetail(){
 }
 function scopeDetailRows(name,value){if(!value)return '<div class="scope-detail-row">세부 선택 없음</div>';if(typeof value==='string')return '<div class="scope-detail-row">'+escHtml(value)+'</div>';var labels={grade:'벽지 등급',wood:'마루 규격',vinyl:'장판 두께',place:'욕실 위치',mode:'공사 방식',tile:'타일 규격',brand:'브랜드',range:'교체 범위',note:'메모',items:'선택 항목',closetRooms:'붙박이장 위치',count:'수량',places:'위치',itemLabel:'중문 옵션'};return Object.keys(value).filter(function(k){return k!=='itemRef'&&value[k]&&(!Array.isArray(value[k])||value[k].length);}).map(function(k){var v=Array.isArray(value[k])?value[k].join(', '):value[k];return '<div class="scope-detail-row"><b>'+escHtml(labels[k]||'선택 내용')+'</b>'+escHtml(v)+'</div>';}).join('')||'<div class="scope-detail-row">세부 선택 없음</div>';}
 function renderSurveyPhotos(urls){if(!urls.length)return '<strong>—</strong>';return '<div class="survey-photo-list">'+urls.slice(0,3).map(function(url){return '<a href="'+escAttr(url)+'" target="_blank"><img class="survey-photo-thumb" src="'+escAttr(url)+'" alt="현장사진"></a>';}).join('')+(urls.length>3?'<span class="survey-photo-more">+'+(urls.length-3)+'</span>':'')+'</div>';}
-function cancelConsult(id){var r=_records.find(function(x){return x.id===id;});if(!r||!window.confirm('상담을 취소 상태로 변경할까요?'))return;var db=loadDB(),idx=db.findIndex(function(x){return x.id===id;});if(idx<0)return;db[idx]=Object.assign({},db[idx],{status:'cancelled',updatedAt:nowISO()});saveDB(db);_records=db;renderTabs();renderList();showToast('상담이 취소 상태로 변경됐습니다');}
+function cancelConsult(id){
+  var r=_records.find(function(x){return x.id===id;});
+  if(!r||!window.confirm('상담을 취소 상태로 변경할까요?'))return;
+  var db=loadDB(),idx=db.findIndex(function(x){return x.id===id;});if(idx<0)return;
+  var cancelled=Object.assign({},db[idx],{status:'cancelled',updatedAt:nowISO()});
+  cancelled.scheduleReservations=DAHAM_CONSULT_SCHEDULE.updateReservations(db[idx],cancelled,nowISO());
+  db[idx]=cancelled;saveDB(db);syncConsultSchedule(cancelled,'cancel');
+  _records=db;renderTabs();renderList();showToast('상담이 취소 상태로 변경됐습니다');
+}
 
 /* 모달 열기 */
 function openAddModal(){
@@ -674,8 +715,9 @@ function saveModal(){
 
   /* 계약 단계 진입 → 프로젝트 생성 */
   var prevProjId=null;
+  var prevR=null;
   if(_editId){
-    var prevR=db.find(function(r){return r.id===_editId;});
+    prevR=db.find(function(r){return r.id===_editId;});
     if(prevR) prevProjId=prevR.projId;
   }
   if(isContract&&!prevProjId){
@@ -684,6 +726,9 @@ function saveModal(){
     projCreated=true;
   }
 
+  var scheduleDraft={status:status,schedDate:sdate,schedTime:stime};
+  var scheduleReservations=DAHAM_CONSULT_SCHEDULE.updateReservations(prevR,scheduleDraft,nowISO());
+
   if(_editId){
     var idx=db.findIndex(function(r){return r.id===_editId;});
     if(idx<0){closeModal();return;}
@@ -691,7 +736,7 @@ function saveModal(){
       consultTitle:consultTitle,consultContent:consultContent,name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,unit:unit,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
       works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
-      history:_modalHist.slice(),updatedAt:nowISO()
+      history:_modalHist.slice(),scheduleReservations:scheduleReservations,updatedAt:nowISO()
     });
     if(newProjId) db[idx].projId=newProjId;
   } else {
@@ -700,12 +745,14 @@ function saveModal(){
       consultTitle:consultTitle,consultContent:consultContent,name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,unit:unit,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
       works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
-      projId:newProjId||null,history:_modalHist.slice()
+      projId:newProjId||null,history:_modalHist.slice(),scheduleReservations:scheduleReservations
     });
   }
 
   saveDB(db);
   _selectedId=_editId||newId;
+  var savedRecord=db.find(function(r){return r.id===_selectedId;});
+  syncConsultSchedule(savedRecord,'save');
   closeModal();
   renderTabs();
   renderList();
@@ -750,6 +797,7 @@ function addHistNote(){
 function deleteRecord(id){
   if(!_canDeleteConsult){ showToast('대표 또는 관리자만 삭제할 수 있습니다.'); return; }
   if(!_sb){ showToast('DB 연결 후 다시 시도해 주세요.'); return; }
+  var linkedRecord=loadDB().find(function(r){return r.id===id;});
   DAHAM_CONSULT_DELETE.removeConsult({
     id:id,
     user:_currentUser,
@@ -760,6 +808,7 @@ function deleteRecord(id){
     setTimestamp:function(ts){localStorage.setItem(DB_KEY+'_ts',ts);}
   }).then(function(result){
     if(!result.deleted) return;
+    syncConsultSchedule(linkedRecord,'delete');
     closeModal();renderTabs();renderList();showToast('✓ 삭제됐습니다');
   }).catch(function(error){showToast('삭제하지 못했습니다: '+error.message);});
 }
@@ -788,4 +837,3 @@ DAHAM_AUTH.ready.then(function(ready){
 </script>
 </body>
 </html>
-
