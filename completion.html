@@ -10,7 +10,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --orange:#E65100;--orange-dk:#BF360C;--orange-lt:#FFF3EE;
+  --orange:#6547E8;--orange-dk:#4F35C8;--orange-lt:#F1EDFF;
   --green:#2E7D32;--green-lt:#E8F5E9;
   --ink:#1a1a1a;--mid:#555;--dim:#aaa;--line:#e0e0e0;--line-lt:#f5f5f5;
   --bg:#f2f2f2;--white:#fff;
@@ -143,6 +143,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .sig-stamp{display:inline-block;margin-top:8px;padding:6px 18px;
   border:2px solid var(--orange);color:var(--orange);font-size:13px;font-weight:700;letter-spacing:.08em}
 
+/* Modern DAHAM certificate */
+body{background:#f4f6fa;color:#14213a}.toolbar{height:64px;border-bottom:1px solid #dde2ec}.brand{color:#0b1f3a}
+.editor{max-width:1080px}.form-sec{border-radius:12px;overflow:hidden;box-shadow:0 3px 16px rgba(11,31,58,.04)}
+.form-sec-hd{background:#f8f9fc;color:#4f5b70}.doc{padding:0;background:transparent;border:0;box-shadow:none}
+.doc-page{background:#fff;border:1px solid #dfe4ed;box-shadow:0 8px 30px rgba(11,31,58,.08);padding:42px 46px;margin-bottom:22px;min-height:1120px;position:relative;overflow:hidden}
+.doc-page:before{content:"";position:absolute;left:0;top:0;width:180px;height:12px;background:#0b1f3a}
+.doc-header{border-bottom:2px solid #0b1f3a}.doc-brand{color:#0b1f3a}.doc-title{color:#0b1f3a}
+.sec-title{border-left:4px solid #0b1f3a;color:#0b1f3a}.info-tbl th,.done-tbl thead th,.warranty-tbl th{background:#0b1f3a;border-color:#0b1f3a}
+.estimate-link-badge{float:right;border:1px solid #8067ef;background:#f5f2ff;color:#6547e8;border-radius:16px;padding:3px 9px;font-size:10px}
+.page-footer{position:absolute;left:46px;right:46px;bottom:26px;border-top:1px solid #dfe4ed;padding-top:12px;color:#7b8496;font-size:10px;display:flex;justify-content:space-between}
+.doc-mini-brand{text-align:right;color:#0b1f3a;font-weight:800;letter-spacing:.16em;margin-bottom:28px;font-size:12px}
+
 /* ── PRINT ── */
 @media print{
   @page{size:A4 portrait;margin:12mm 14mm}
@@ -150,6 +162,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
   .preview-wrap{display:block!important;max-width:100%;margin:0;padding:0}
   body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .doc{border:none;box-shadow:none;padding:0}
+  .doc-page{border:0;box-shadow:none;margin:0;min-height:0;padding:0;overflow:visible;page-break-after:always}.doc-page:last-child{page-break-after:auto}.doc-page:before,.page-footer{display:none}
   .doc-header{padding-bottom:12px;margin-bottom:18px}
   .doc-brand{font-size:24px}.doc-title{font-size:26px}
   .sec-title{margin:16px 0 8px;font-size:12px}
@@ -163,6 +176,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
+<script src="warranty-domain.js?v=202608301900"></script>
 </head>
 <body class="operations-ui operations-document">
 
@@ -172,6 +186,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
     <span class="brand">DAHAM</span>
   </div>
   <div style="display:flex;gap:6px">
+    <button class="tb-btn" onclick="saveCertificate()">저장</button>
     <button class="tb-btn" onclick="showPreview()">미리보기</button>
     <button class="tb-btn primary" onclick="printDoc()">인쇄 / PDF</button>
   </div>
@@ -254,6 +269,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 
 <script>
 var SCHED_KEY = 'daham_schedule_v1';
+var EST_KEY   = 'daham_detail_v2';
+var SAVE_KEY  = 'daham_completion_v1';
 var DOW_KO    = ['일','월','화','수','목','금','토'];
 
 var WARRANTY = [
@@ -270,11 +287,14 @@ var WARRANTY = [
 
 var SKIP_TASKS = ['에어컨 타공','에어컨 마감'];
 
-var schedProjects = [];
+var schedProjects = [], estimates = [], savedCertificates = {};
 var currentSched  = null;
+var currentEstimate = null, currentSaved = null;
 
 function loadProjects(){
   try{ schedProjects = JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+  try{ estimates = JSON.parse(localStorage.getItem(EST_KEY)||'[]'); }catch(e){ estimates=[]; }
+  try{ savedCertificates = JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'); }catch(e){ savedCertificates={}; }
 }
 
 function populateSelector(){
@@ -288,16 +308,19 @@ function populateSelector(){
 
 function loadFromSchedule(){
   var id = document.getElementById('sched-sel').value;
-  if(!id){ currentSched=null; hideTaskSec(); return; }
+  if(!id){ currentSched=null; currentEstimate=null; hideTaskSec(); return; }
   currentSched = null;
   schedProjects.forEach(function(p){ if(p.id===id) currentSched=p; });
   if(!currentSched) return;
+  currentEstimate = estimates.find(function(e){return String(e.id)===String(currentSched.estimateId);})||null;
   var info = currentSched.info||{};
-  document.getElementById('f-addr').value   = info.addr||info.name||'';
+  var customer = currentEstimate ? DAHAM_WARRANTY_DOMAIN.customerInfo(currentEstimate) : {name:'',phone:'',address:''};
+  document.getElementById('f-addr').value   = customer.address||info.addr||info.name||'';
   document.getElementById('f-start').value  = info.start||'';
   document.getElementById('f-end').value    = info.end||'';
-  document.getElementById('f-client').value = info.name||'';
-  document.getElementById('f-tel').value    = info.tel||'';
+  document.getElementById('f-client').value = customer.name||'';
+  document.getElementById('f-tel').value    = customer.phone||info.tel||'';
+  loadSavedCertificate(id);
   renderTaskChecks();
   showToast('✓ 불러왔습니다');
 }
@@ -310,14 +333,14 @@ function renderTaskChecks(){
   var sec  = document.getElementById('task-check-sec');
   var rows = document.getElementById('task-check-rows');
   if(!currentSched){ sec.style.display='none'; return; }
-  var tasks = (currentSched.tasks||[]).filter(function(t){
-    return SKIP_TASKS.indexOf(t.name)<0;
-  });
+  var tasks = currentEstimate ? DAHAM_WARRANTY_DOMAIN.completionRows(currentEstimate,currentSched.tasks||[]) : [];
   if(!tasks.length){ sec.style.display='none'; return; }
   sec.style.display='block';
   var html='';
-  tasks.forEach(function(t){
-    var isDone = t.status==='done';
+  tasks.forEach(function(t,i){
+    t.id='estimate-trade-'+i;
+    var savedTrade=currentSaved&&currentSaved.trades&&currentSaved.trades[t.name]||{};
+    var isDone = savedTrade.done==null?t.done:savedTrade.done;
     var period = fmtPeriod(t.start, t.end);
     html+='<div class="task-check-row">'
       +'<div class="task-done-wrap">'
@@ -328,7 +351,7 @@ function renderTaskChecks(){
         +'<div class="task-period">'+esc(period)+'</div>'
       +'</div>'
       +'<div></div>'
-      +'<input class="task-note" id="note-'+t.id+'" type="text" placeholder="특이사항">'
+      +'<input class="task-note" id="note-'+t.id+'" type="text" placeholder="특이사항" value="'+esc(savedTrade.note||'')+'">'
       +'</div>';
   });
   rows.innerHTML=html;
@@ -374,15 +397,14 @@ function buildDoc(){
     +String(today.getDate()).padStart(2,'0');
 
   /* 공종 완료 행 */
-  var tasks = currentSched ? (currentSched.tasks||[]).filter(function(t){
-    return SKIP_TASKS.indexOf(t.name)<0;
-  }) : [];
+  var tasks = currentSched&&currentEstimate ? DAHAM_WARRANTY_DOMAIN.completionRows(currentEstimate,currentSched.tasks||[]) : [];
 
   var doneRows='';
   tasks.forEach(function(t,i){
-    var chkEl = document.getElementById('chk-'+t.id);
-    var noteEl= document.getElementById('note-'+t.id);
-    var isDone= chkEl ? chkEl.checked : t.status==='done';
+    var rowId='estimate-trade-'+i;
+    var chkEl = document.getElementById('chk-'+rowId);
+    var noteEl= document.getElementById('note-'+rowId);
+    var isDone= chkEl ? chkEl.checked : t.done;
     var note  = noteEl ? noteEl.value.trim() : '';
     doneRows+='<tr>'
       +'<td style="text-align:center;color:var(--dim);font-size:11px">'+(i+1)+'</td>'
@@ -398,7 +420,7 @@ function buildDoc(){
   function calcExpiry(startDs, period){
     if(!startDs) return '준공일 확정 후 산정';
     var years = parseInt(period);
-    if(isNaN(years)) return '제조사 문의';
+    if(isNaN(years)) return '제작사 보증 기준';
     var d = new Date(startDs+'T00:00:00');
     d.setFullYear(d.getFullYear()+years);
     d.setDate(d.getDate()-1);
@@ -406,23 +428,26 @@ function buildDoc(){
   }
 
   /* 보증 행 */
-  var wRows = WARRANTY.map(function(w){
+  var warrantyRows = currentEstimate ? DAHAM_WARRANTY_DOMAIN.buildWarrantyRows(currentEstimate) : [];
+  var wRows = warrantyRows.map(function(w){
     var expiry = calcExpiry(end, w.period);
     var expiryStyle = end && !isNaN(parseInt(w.period))
       ? 'font-weight:700;color:#C62828'
       : 'color:var(--mid);font-size:11px';
     return '<tr><td>'+w.phase+'</td>'
       +'<td style="font-weight:700;color:var(--orange-dk)">'+w.period+'</td>'
-      +'<td style="color:var(--mid);font-size:11px">'+(end?esc(fmtDFull(end)):'준공일 기준')+'</td>'
+      +'<td style="color:var(--mid);font-size:11px">'+(w.basis==='제작사 기준'?'제작사 기준':(end?esc(fmtDFull(end)):'준공일 기준'))+'</td>'
       +'<td style="'+expiryStyle+'">'+esc(expiry)+'</td>'
       +'</tr>';
   }).join('');
+  if(!wRows) wRows='<tr><td colspan="4" style="text-align:center;color:var(--dim)">견적에 연결된 공종이 없습니다.</td></tr>';
 
   var specialBlock = special
     ? '<div class="special-box">'+esc(special)+'</div>'
     : '<div class="special-box" style="color:var(--dim);font-size:12px">해당 없음</div>';
 
   document.getElementById('doc').innerHTML = `
+    <section class="doc-page">
     <div class="doc-header">
       <div>
         <div class="doc-brand">DAHAM<span style="opacity:.4">·</span>INTERIOR</div>
@@ -435,7 +460,7 @@ function buildDoc(){
       </div>
     </div>
 
-    <div class="sec-title">1. 공사 개요</div>
+    <div class="sec-title">1. 공사 개요 <span class="estimate-link-badge">견적 공종 자동 연동</span></div>
     <table class="info-tbl">
       <tr><th>공사 현장</th><td>${esc(addr)}</td></tr>
       <tr><th>공사 기간</th><td>${esc(period)}</td></tr>
@@ -470,7 +495,11 @@ function buildDoc(){
       <thead><tr><th style="width:28%">공종</th><th style="width:12%">보증 기간</th><th style="width:25%">보증 시작일</th><th style="width:25%">만료일</th></tr></thead>
       <tbody>${wRows.replace(/준공일 기준/g, end?esc(fmtDFull(end)):'준공일 기준')}</tbody>
     </table>
+    <div class="page-footer"><span>DAHAM INTERIOR · COMPLETION &amp; WARRANTY</span><span>1 / 2</span></div>
+    </section>
 
+    <section class="doc-page">
+    <div class="doc-mini-brand">DAHAM INTERIOR</div>
     <div class="sec-title">4. 특이사항 및 인수인계</div>
     ${specialBlock}
 
@@ -511,21 +540,47 @@ function buildDoc(){
         <div class="sig-company">다함인테리어</div>
         <div class="sig-detail">대표 &nbsp; 최일성</div>
         <div class="sig-detail">TEL &nbsp; 010-2059-0347</div>
+        <div class="sig-detail">EMAIL &nbsp; lloo2059ll@gmail.com</div>
         <div class="sig-detail">경북 구미시 신시로10길 75-2</div>
-        <div><span class="sig-stamp">DAHAM INTERIOR</span></div>
       </div>
     </div>
+    <div class="page-footer"><span>구미시 신시로10길 75-2 · lloo2059ll@gmail.com · 010-2059-0347</span><span>2 / 2</span></div>
+    </section>
   `;
 }
 
+function loadSavedCertificate(id){
+  currentSaved=savedCertificates[id]||null;
+  if(!currentSaved)return;
+  var f=currentSaved.fields||{};
+  ['addr','start','end','client','tel','special'].forEach(function(k){var el=document.getElementById('f-'+k);if(el&&f[k]!=null)el.value=f[k];});
+}
+function saveCertificate(){
+  if(!currentSched){showToast('현장을 먼저 선택해주세요');return;}
+  var fields={addr:document.getElementById('f-addr').value,start:document.getElementById('f-start').value,end:document.getElementById('f-end').value,client:document.getElementById('f-client').value,tel:document.getElementById('f-tel').value,special:document.getElementById('f-special').value};
+  var trades={};
+  (currentEstimate?DAHAM_WARRANTY_DOMAIN.completionTrades(currentEstimate):[]).forEach(function(name,i){var chk=document.getElementById('chk-estimate-trade-'+i),note=document.getElementById('note-estimate-trade-'+i);trades[name]={done:!!(chk&&chk.checked),note:note?note.value:''};});
+  currentSaved={fields:fields,trades:trades,updatedAt:new Date().toISOString()};
+  savedCertificates[currentSched.id]=currentSaved;
+  localStorage.setItem(SAVE_KEY,JSON.stringify(savedCertificates));
+  var token=window.DAHAM_AUTH&&DAHAM_AUTH.getAccessToken&&DAHAM_AUTH.getAccessToken(),cfg=window.DAHAM_AUTH&&DAHAM_AUTH.getSupabaseConfig&&DAHAM_AUTH.getSupabaseConfig();
+  if(token&&cfg&&cfg.url)fetch(cfg.url+'/rest/v1/sync_data',{method:'POST',headers:{apikey:cfg.anonKey,Authorization:'Bearer '+token,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({key:SAVE_KEY,value:JSON.stringify(savedCertificates),updated_at:new Date().toISOString()})}).catch(function(){});
+  showToast('저장했습니다');
+}
 function showPreview(){ buildDoc(); document.getElementById('editor').style.display='none'; document.getElementById('preview-wrap').style.display='block'; window.scrollTo(0,0); }
 function showEditor(){ document.getElementById('editor').style.display='block'; document.getElementById('preview-wrap').style.display='none'; }
 function printDoc(){ buildDoc(); document.getElementById('editor').style.display='none'; document.getElementById('preview-wrap').style.display='block'; setTimeout(function(){ window.print(); },120); }
 function showToast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(function(){ t.classList.remove('show'); },2000); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function loadRemoteCertificates(){
+  var token=window.DAHAM_AUTH&&DAHAM_AUTH.getAccessToken&&DAHAM_AUTH.getAccessToken(),cfg=window.DAHAM_AUTH&&DAHAM_AUTH.getSupabaseConfig&&DAHAM_AUTH.getSupabaseConfig();
+  if(!token||!cfg||!cfg.url)return;
+  fetch(cfg.url+'/rest/v1/sync_data?key=eq.'+encodeURIComponent(SAVE_KEY)+'&select=value',{headers:{apikey:cfg.anonKey,Authorization:'Bearer '+token}}).then(function(r){return r.ok?r.json():[];}).then(function(rows){if(rows&&rows[0]&&rows[0].value){var remote=typeof rows[0].value==='string'?JSON.parse(rows[0].value):rows[0].value;if(remote&&typeof remote==='object'){savedCertificates=remote;localStorage.setItem(SAVE_KEY,JSON.stringify(remote));}}}).catch(function(){});
+}
 
 loadProjects();
 populateSelector();
+if(window.DAHAM_AUTH&&DAHAM_AUTH.ready)DAHAM_AUTH.ready.then(loadRemoteCertificates);else loadRemoteCertificates();
 </script>
 <script src="auth.js"></script>
 
