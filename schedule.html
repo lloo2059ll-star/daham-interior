@@ -746,6 +746,20 @@ function cloudPullKey(key,onDone){
     onDone();
   }).catch(function(){onDone();});
 }
+function reconcileConsultationCalendar(onDone){
+  var consultKey='daham_consult_v1';
+  fetch(SUPA_URL+'/rest/v1/sync_data?key=eq.'+encodeURIComponent(consultKey)+'&select=value',{headers:_HDRS}).then(function(r){return r.json();}).then(function(rows){
+    var consultations=[];
+    try{consultations=rows&&rows[0]?JSON.parse(rows[0].value||'[]'):[];}catch(e){consultations=[];}
+    if(!Array.isArray(consultations))consultations=[];
+    var next=DAHAM_CONSULT_SCHEDULE.reconcileConsultations(allGeneralEvents,consultations,nowISO());
+    if(JSON.stringify(next)!==JSON.stringify(allGeneralEvents)){
+      allGeneralEvents=next;
+      saveGeneralDB();
+    }
+    onDone();
+  }).catch(function(){onDone();});
+}
 function pullCurrentEstimateCache(onDone){
   var indexKey='daham_proj_index_v1',projectKey='daham_detail_v2';
   fetch(SUPA_URL+'/rest/v1/sync_data?key=eq.'+encodeURIComponent(indexKey)+'&select=value',{headers:_HDRS}).then(function(r){return r.json();}).then(function(rows){
@@ -1481,10 +1495,12 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProject
   }
   cloudPull(function(){
     cloudPullKey(GENERAL_DB_KEY,function(){
-      pullCurrentEstimateCache(function(){
-        syncContractedProjects();renderSidebar();renderSiteCards();
-        var requested=allProjects.find(function(p){return p.estimateId===requestedEstimateId;});
-        if(requested) openProject(requested.id); else showAllCalendar();
+      reconcileConsultationCalendar(function(){
+        pullCurrentEstimateCache(function(){
+          syncContractedProjects();renderSidebar();renderSiteCards();
+          var requested=allProjects.find(function(p){return p.estimateId===requestedEstimateId;});
+          if(requested) openProject(requested.id); else showAllCalendar();
+        });
       });
     });
   });
@@ -1520,4 +1536,5 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProject
 
 </body>
 </html>
+
 
