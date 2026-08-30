@@ -249,7 +249,7 @@ select.mf-inp{cursor:pointer}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
-<script src="schedule-domain.js?v=20260831-address"></script>
+<script src="schedule-domain.js?v=20260831-bars"></script>
 <script src="consult-schedule-link.js?v=20260831-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
@@ -1267,11 +1267,10 @@ function renderMonth(year, month, tasks, today, isProject){
         label=bar.isCont?'':esc(DAHAM_CONSULT_SCHEDULE.generalDisplayName(bar,generalTypeLabel(bar.generalType)));
         clickFn='openGeneralModal(\''+bar.id+'\',null)';
       } else if(isProject){
-        label=bar.isCont?'':esc(bar.projName+' · '+bar.name+(bar.worker?' · '+bar.worker:''));
+        label=bar.isCont?'':esc(DAHAM_SCHEDULE_DOMAIN.constructionDisplayName(bar));
         clickFn='goToProjectTask(\''+bar.projId+'\',\''+bar.id+'\')';
       } else {
-        label=bar.isCont?'':
-          esc(bar.projName+' · '+bar.name+(bar.worker?' · '+bar.worker:''));
+        label=bar.isCont?'':esc(DAHAM_SCHEDULE_DOMAIN.constructionDisplayName(bar));
         clickFn='goToProjectTask(\''+bar.projId+'\',\''+bar.id+'\')';
       }
       var bgColor=hexToRgba(bar.color||'#555',0.75);
