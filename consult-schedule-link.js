@@ -144,10 +144,13 @@
     var config = STATUS_CONFIG[copy.status];
     if (!config) return copy;
     var reservations = Object.assign({}, copy.scheduleReservations || {});
-    if (!reservations[config.key]) {
-      var fallback = reservationFromMilestone(copy, config) || (copy.schedDate && copy.schedTime
+    var milestoneReservation = reservationFromMilestone(copy, config);
+    if (milestoneReservation) {
+      reservations[config.key] = milestoneReservation;
+    } else if (!reservations[config.key]) {
+      var fallback = copy.schedDate && copy.schedTime
         ? { date: copy.schedDate, time: copy.schedTime }
-        : null);
+        : null;
       if (fallback) reservations[config.key] = fallback;
     }
     copy.scheduleReservations = reservations;
