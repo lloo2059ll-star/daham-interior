@@ -153,11 +153,20 @@
     bar=bar||{};
     return String(bar.name||'')+(bar.worker?' · '+bar.worker:'');
   }
+  function scheduleProgress(tasks,today){
+    tasks=Array.isArray(tasks)?tasks:[];
+    if(!tasks.length||!today) return 0;
+    var completed=tasks.filter(function(task){
+      var end=task.end||task.start||'';
+      return !!end&&end<=today;
+    }).length;
+    return Math.round(completed/tasks.length*100);
+  }
 
   return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,
     materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
-    constructionDisplayName:constructionDisplayName};
+    constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress};
 });
 
 
