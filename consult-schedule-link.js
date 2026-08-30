@@ -128,11 +128,45 @@
     return event && event.source === 'consultation' ? name : (typeLabel ? typeLabel + ' · ' + name : name);
   }
 
+  function reservationFromMilestone(consultation, config) {
+    var history = Array.isArray(consultation && consultation.history) ? consultation.history : [];
+    for (var index = history.length - 1; index >= 0; index -= 1) {
+      var item = history[index];
+      if (!item || item.type !== 'milestone' || item.status !== consultation.status || !item.at) continue;
+      var parts = String(item.at).split('T');
+      if (parts[0] && parts[1]) return { date: parts[0], time: parts[1].slice(0, 5) };
+    }
+    return null;
+  }
+
+  function withDerivedReservation(consultation, now) {
+    var copy = Object.assign({}, consultation || {});
+    var config = STATUS_CONFIG[copy.status];
+    if (!config) return copy;
+    var reservations = Object.assign({}, copy.scheduleReservations || {});
+    if (!reservations[config.key]) {
+      var fallback = copy.schedDate && copy.schedTime
+        ? { date: copy.schedDate, time: copy.schedTime }
+        : reservationFromMilestone(copy, config);
+      if (fallback) reservations[config.key] = fallback;
+    }
+    copy.scheduleReservations = reservations;
+    return copy;
+  }
+
+  function reconcileConsultations(events, consultations, now) {
+    return (Array.isArray(consultations) ? consultations : []).reduce(function (current, consultation) {
+      return reconcile(current, withDerivedReservation(consultation, now), 'save', now);
+    }, Array.isArray(events) ? events : []);
+  }
+
   return {
     updateReservations: updateReservations,
     reconcile: reconcile,
     mergeEditableGeneralEvent: mergeEditableGeneralEvent,
     mergeEventCollections: mergeEventCollections,
-    generalDisplayName: generalDisplayName
+    generalDisplayName: generalDisplayName,
+    reconcileConsultations: reconcileConsultations
   };
 });
+
