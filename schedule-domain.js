@@ -106,10 +106,13 @@
       var status=projectStatus(p);
       if(status!=='contracted'&&status!=='construction') return;
       var client=p.client||{}, site=byId[p.id];
-      var info={name:client['cl-name']||'',tel:client['cl-tel']||'',addr:client['cl-addr']||'',start:client['cl-start']||'',end:client['cl-end']||''};
+      var info={name:client['cl-addr']||'',customerName:client['cl-name']||'',tel:client['cl-tel']||'',addr:client['cl-addr']||'',start:client['cl-start']||'',end:client['cl-end']||''};
       if(site){
         var changed=false,nextInfo=Object.assign({},site.info||{});
-        Object.keys(info).forEach(function(k){if(info[k]&&nextInfo[k]!==info[k]){nextInfo[k]=info[k];changed=true;}});
+        Object.keys(info).forEach(function(k){
+          var shouldSync=k==='name'||k==='customerName'||!!info[k];
+          if(shouldSync&&nextInfo[k]!==info[k]){nextInfo[k]=info[k];changed=true;}
+        });
         if(nextInfo.status!==status){nextInfo.status=status;changed=true;}
         if(changed){site.info=nextInfo;updated++;}
       }else{
@@ -151,4 +154,5 @@
     materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences};
 });
+
 
