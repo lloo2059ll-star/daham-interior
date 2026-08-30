@@ -149,10 +149,15 @@
       while(cur<=stop){out.push(Object.assign({},e,{date:cur}));var d=new Date(cur+'T00:00:00');d.setDate(d.getDate()+1);cur=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
     });return out;
   }
+  function constructionDisplayName(bar){
+    bar=bar||{};
+    return String(bar.name||'')+(bar.worker?' · '+bar.worker:'');
+  }
 
   return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,
     materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
-    projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences};
+    projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
+    constructionDisplayName:constructionDisplayName};
 });
 
 
