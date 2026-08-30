@@ -150,4 +150,9 @@ test('general events use a separate backward compatible sync key', () => {
   assert.doesNotMatch(migrate,/\.filter\(/);
 });
 
+test('construction bar label omits the site address while retaining phase and worker', () => {
+  assert.equal(D.constructionDisplayName({projName:'옥계 삼구트리니엔 103동 1001호',name:'도배',worker:'석호성'}),'도배 · 석호성');
+  assert.equal(D.constructionDisplayName({projName:'푸르지오캐슬 c단지 303동 1306호',name:'철거'}),'철거');
+});
+
 
