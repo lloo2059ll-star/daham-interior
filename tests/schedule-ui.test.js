@@ -50,7 +50,7 @@ test('existing modal and domain integration hooks remain available', () => {
 });
 
 test('schedule loads the address-name domain update with a cache-busted asset', () => {
-  assert.match(html, /schedule-domain\.js\?v=20260831-address/);
+  assert.match(html, /schedule-domain\.js\?v=20260831-bars/);
 });
 
 test('static DOM ids are unique and every literal selector resolves', () => {
