@@ -181,3 +181,24 @@ test('linked schedule display keeps the consultation title exact', () => {
   assert.equal(Link.generalDisplayName({ source: 'consultation', name: '다함아파트 · 현장실측' }, '실측'), '다함아파트 · 현장실측');
   assert.equal(Link.generalDisplayName({ name: '고객 미팅' }, '상담'), '상담 · 고객 미팅');
 });
+
+test('site measurement milestone time becomes a calendar reservation when schedule fields are blank', () => {
+  const consultation = {
+    id: 'consult-1',
+    status: 'site_check',
+    name: '홍길동',
+    schedDate: '',
+    schedTime: '',
+    history: [
+      { type: 'milestone', status: 'site_check', at: '2026-09-01T17:30', memo: '' }
+    ]
+  };
+
+  const events = Link.reconcileConsultations([], [consultation], '2026-08-30T23:00:00+09:00');
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].start, '2026-09-01');
+  assert.equal(events[0].startTime, '17:30');
+  assert.equal(events[0].name, '홍길동 · 현장실측');
+});
+
