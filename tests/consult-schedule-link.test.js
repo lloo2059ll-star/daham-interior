@@ -222,3 +222,26 @@ test('current estimate meeting milestone wins over stale site measurement schedu
   assert.equal(meeting.startTime, '15:00');
 });
 
+test('current milestone repairs an already stored stale estimate meeting reservation', () => {
+  const consultation = {
+    id: 'consult-1',
+    status: 'est_meeting',
+    name: '홍길동',
+    schedDate: '2026-08-29',
+    schedTime: '15:00',
+    scheduleReservations: {
+      estimateMeeting: { date: '2026-08-29', time: '15:00' }
+    },
+    history: [
+      { type: 'milestone', status: 'site_check', at: '2026-08-29T15:00', memo: '' },
+      { type: 'milestone', status: 'est_meeting', at: '2026-09-03T15:00', memo: '' }
+    ]
+  };
+
+  const events = Link.reconcileConsultations([], [consultation], '2026-08-31T00:00:00+09:00');
+  const meeting = events.find(event => event.eventType === 'estimate_meeting');
+
+  assert.equal(meeting.start, '2026-09-03');
+  assert.equal(meeting.startTime, '15:00');
+});
+
