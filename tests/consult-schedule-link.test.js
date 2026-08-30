@@ -113,7 +113,7 @@ test('cancelling removes future linked reservations but keeps completed past eve
   assert.equal(events[0].name, '홍길동 · 현장실측');
 });
 
-test('advancing a stage drops an unfinished future prior reservation but preserves a past one', () => {
+test('advancing a stage preserves prior calendar reservations regardless of date', () => {
   const futurePrevious = {
     id: 'future-consult', status: 'site_check', schedDate: '2026-09-10', schedTime: '09:00',
     scheduleReservations: { siteMeasurement: { date: '2026-09-10', time: '09:00' } }
@@ -128,7 +128,10 @@ test('advancing a stage drops an unfinished future prior reservation but preserv
   const pastNext = Object.assign({}, pastPrevious, { status: 'est_meeting', schedDate: '2026-09-20', schedTime: '11:00' });
   const pastReservations = Link.updateReservations(pastPrevious, pastNext, '2026-09-01T00:00:00+09:00');
 
-  assert.deepEqual(futureReservations, { estimateMeeting: { date: '2026-09-20', time: '11:00' } });
+  assert.deepEqual(futureReservations, {
+    siteMeasurement: { date: '2026-09-10', time: '09:00' },
+    estimateMeeting: { date: '2026-09-20', time: '11:00' }
+  });
   assert.deepEqual(pastReservations, {
     siteMeasurement: { date: '2026-08-20', time: '09:00' },
     estimateMeeting: { date: '2026-09-20', time: '11:00' }
@@ -247,11 +250,33 @@ test('current milestone repairs an already stored stale estimate meeting reserva
   assert.equal(meeting.startTime, '15:00');
 });
 
+test('calendar reconciliation restores every scheduled milestone from consultation history', () => {
+  const consultation = {
+    id: 'consult-1',
+    status: 'est_meeting',
+    name: '홍길동',
+    scheduleReservations: {
+      estimateMeeting: { date: '2026-09-03', time: '15:00' }
+    },
+    history: [
+      { type: 'milestone', status: 'site_check', at: '2026-09-01T17:30', memo: '' },
+      { type: 'milestone', status: 'est_meeting', at: '2026-09-03T15:00', memo: '' }
+    ]
+  };
+
+  const events = Link.reconcileConsultations([], [consultation], '2026-08-31T00:00:00+09:00');
+
+  assert.deepEqual(events.map(event => [event.eventType, event.start, event.startTime]), [
+    ['site_measurement', '2026-09-01', '17:30'],
+    ['estimate_meeting', '2026-09-03', '15:00']
+  ]);
+});
+
 test('consultation and schedule pages load the same cache-busted linking script', () => {
   const root = path.join(__dirname, '..');
   const consult = fs.readFileSync(path.join(root, 'consult.html'), 'utf8');
   const schedule = fs.readFileSync(path.join(root, 'schedule.html'), 'utf8');
-  const pattern = /consult-schedule-link\.js\?v=20260831-1/;
+  const pattern = /consult-schedule-link\.js\?v=20260831-2/;
 
   assert.match(consult, pattern);
   assert.match(schedule, pattern);
