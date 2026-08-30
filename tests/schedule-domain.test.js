@@ -155,4 +155,16 @@ test('construction bar label omits the site address while retaining phase and wo
   assert.equal(D.constructionDisplayName({projName:'푸르지오캐슬 c단지 303동 1306호',name:'철거'}),'철거');
 });
 
+test('site progress counts schedules ending today or earlier', () => {
+  const tasks=[
+    {start:'2026-08-01',end:'2026-08-29'},
+    {start:'2026-08-31',end:'2026-08-31'},
+    {start:'2026-09-01',end:'2026-09-02'}
+  ];
+  assert.equal(D.scheduleProgress(tasks,'2026-08-31'),67);
+  assert.equal(D.scheduleProgress(tasks,'2026-07-31'),0);
+  assert.equal(D.scheduleProgress(tasks,'2026-09-02'),100);
+  assert.equal(D.scheduleProgress([],'2026-08-31'),0);
+});
+
 
