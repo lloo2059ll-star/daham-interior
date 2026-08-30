@@ -9,8 +9,8 @@ const q = (...keys) => Object.fromEntries(keys.map(key => [key, '1']));
 
 test('contract projects use stable project id and never duplicate linked sites', () => {
   const estimates = [
-    {id:'p1', status:'contracted', client:{'cl-name':'A'}},
-    {id:'p2', contracted:true, client:{'cl-name':'B'}},
+    {id:'p1', status:'contracted', client:{'cl-name':'A','cl-addr':'서울시 강남구 101호'}},
+    {id:'p2', contracted:true, client:{'cl-name':'B','cl-addr':'서울시 송파구 202호'}},
     {id:'p3', status:'estimate'},
     {id:'p4', status:'completed', contracted:true}
   ];
@@ -18,9 +18,17 @@ test('contract projects use stable project id and never duplicate linked sites',
   const result = D.reconcileContractSites(sites, estimates, ()=>'new-id', ['#111']);
   assert.equal(result.sites.length, 2);
   assert.equal(result.sites.filter(x=>x.estimateId==='p1').length, 1);
-  assert.equal(result.sites.find(x=>x.estimateId==='p1').info.name, 'A');
+  assert.equal(result.sites.find(x=>x.estimateId==='p1').info.name, '서울시 강남구 101호');
+  assert.equal(result.sites.find(x=>x.estimateId==='p1').info.customerName, 'A');
+  assert.equal(result.sites.find(x=>x.estimateId==='p2').info.name, '서울시 송파구 202호');
   assert.equal(result.sites.find(x=>x.estimateId==='p2').estimateId, 'p2');
   assert.equal(result.sites.some(x=>x.estimateId==='p3'||x.estimateId==='p4'), false);
+});
+
+test('contract site name is blank instead of falling back to customer when construction address is missing', () => {
+  const result=D.reconcileContractSites([], [{id:'p',status:'contracted',client:{'cl-name':'고객명'}}], ()=>'site', ['#111']);
+  assert.equal(result.sites[0].info.name, '');
+  assert.equal(result.sites[0].info.customerName, '고객명');
 });
 
 test('legacy sites and schedules are normalized without deletion or id changes', () => {
@@ -39,10 +47,15 @@ test('legacy index estimate keys map through the fixed catalog', () => {
   for(const expected of ['전기/조명 1차','전기/조명 2차','에어컨 1차','에어컨 2차','마루 철거','마루 시공','타일작업','욕실 천장작업','도기세팅']) assert.ok(names.includes(expected),expected);
 });
 
-test('reconcile does not erase populated schedule fields with blank estimate values', () => {
+test('reconcile preserves populated schedule fields but clears a customer-derived name when address is blank', () => {
   const sites=[{id:'s',estimateId:'p',info:{name:'기존명',tel:'010',addr:'기존주소',start:'2026-01-01',end:'2026-02-01',status:'contracted'},tasks:[]}];
   const result=D.reconcileContractSites(sites,[{id:'p',status:'contracted',client:{}}],()=>'',[]);
-  assert.equal(result.updated,0);assert.deepEqual(result.sites[0].info,sites[0].info);
+  assert.equal(result.updated,1);
+  assert.equal(result.sites[0].info.name,'');
+  assert.equal(result.sites[0].info.tel,'010');
+  assert.equal(result.sites[0].info.addr,'기존주소');
+  assert.equal(result.sites[0].info.start,'2026-01-01');
+  assert.equal(result.sites[0].info.end,'2026-02-01');
 });
 
 test('electric and air conditioner create first and second phases', () => {
@@ -136,4 +149,5 @@ test('general events use a separate backward compatible sync key', () => {
   const migrate=html.match(/function migrate\(\)\{([\s\S]*?)\n\}/)?.[1]||'';
   assert.doesNotMatch(migrate,/\.filter\(/);
 });
+
 
