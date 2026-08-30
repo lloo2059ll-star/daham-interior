@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
 let Link = {};
 try { Link = require('../consult-schedule-link.js'); } catch (_) {}
@@ -243,5 +245,15 @@ test('current milestone repairs an already stored stale estimate meeting reserva
 
   assert.equal(meeting.start, '2026-09-03');
   assert.equal(meeting.startTime, '15:00');
+});
+
+test('consultation and schedule pages load the same cache-busted linking script', () => {
+  const root = path.join(__dirname, '..');
+  const consult = fs.readFileSync(path.join(root, 'consult.html'), 'utf8');
+  const schedule = fs.readFileSync(path.join(root, 'schedule.html'), 'utf8');
+  const pattern = /consult-schedule-link\.js\?v=20260831-1/;
+
+  assert.match(consult, pattern);
+  assert.match(schedule, pattern);
 });
 
