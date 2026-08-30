@@ -249,7 +249,7 @@ select.mf-inp{cursor:pointer}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
-<script src="schedule-domain.js?v=20260831-bars"></script>
+<script src="schedule-domain.js?v=20260831-progress"></script>
 <script src="consult-schedule-link.js?v=20260831-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
@@ -949,7 +949,7 @@ function renderSiteCards(){
   var host=document.getElementById('site-cards');if(!host)return;
   var sites=allProjects.filter(function(p){return !!p.estimateId;});
   host.innerHTML=sites.map(function(p){
-    var tasks=p.tasks||[],done=tasks.filter(function(t){return t.status==='done';}).length,progress=tasks.length?Math.round(done/tasks.length*100):0;
+    var tasks=p.tasks||[],progress=DAHAM_SCHEDULE_DOMAIN.scheduleProgress(tasks,todayStr());
     var info=p.info||{},status={contracted:'계약완료',construction:'시공중'}[info.status]||info.status||'계약완료';
     var selected=p.id===currentId;
     return '<article class="site-card'+(selected?' selected':'')+'" data-project-id="'+esc(p.id)+'" data-action="select-project" style="--site-color:'+esc(p.color||COLORS[0])+'" onclick="openProject(\''+p.id+'\')">'
