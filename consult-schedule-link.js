@@ -4,8 +4,8 @@
   if (root) root.DAHAM_CONSULT_SCHEDULE = api;
 })(typeof window !== 'undefined' ? window : globalThis, function () {
   var STATUS_CONFIG = {
-    site_check: { key: 'siteMeasurement', eventType: 'site_measurement', generalType: 'survey', label: '현장실측' },
-    est_meeting: { key: 'estimateMeeting', eventType: 'estimate_meeting', generalType: 'consult', label: '견적미팅' }
+    site_check: { status: 'site_check', key: 'siteMeasurement', eventType: 'site_measurement', generalType: 'survey', label: '현장실측' },
+    est_meeting: { status: 'est_meeting', key: 'estimateMeeting', eventType: 'estimate_meeting', generalType: 'consult', label: '견적미팅' }
   };
   var STATUS_ORDER = { inquiry: 0, site_check: 1, est_meeting: 2, est_done: 3, contracted: 4, cancelled: 5 };
   var CONFIGS = [STATUS_CONFIG.site_check, STATUS_CONFIG.est_meeting];
@@ -36,14 +36,6 @@
       });
       return reservations;
     }
-
-    var nextOrder = STATUS_ORDER[draft && draft.status];
-    CONFIGS.forEach(function (config, index) {
-      var stageOrder = index + 1;
-      if (nextOrder > stageOrder && reservations[config.key] && !isPast(reservations[config.key], now)) {
-        delete reservations[config.key];
-      }
-    });
 
     var config = STATUS_CONFIG[draft && draft.status];
     if (config && draft.schedDate && draft.schedTime) {
@@ -132,7 +124,7 @@
     var history = Array.isArray(consultation && consultation.history) ? consultation.history : [];
     for (var index = history.length - 1; index >= 0; index -= 1) {
       var item = history[index];
-      if (!item || item.type !== 'milestone' || item.status !== consultation.status || !item.at) continue;
+      if (!item || item.type !== 'milestone' || item.status !== config.status || !item.at) continue;
       var parts = String(item.at).split('T');
       if (parts[0] && parts[1]) return { date: parts[0], time: parts[1].slice(0, 5) };
     }
@@ -144,10 +136,11 @@
     var config = STATUS_CONFIG[copy.status];
     if (!config) return copy;
     var reservations = Object.assign({}, copy.scheduleReservations || {});
-    var milestoneReservation = reservationFromMilestone(copy, config);
-    if (milestoneReservation) {
-      reservations[config.key] = milestoneReservation;
-    } else if (!reservations[config.key]) {
+    CONFIGS.forEach(function (item) {
+      var milestoneReservation = reservationFromMilestone(copy, item);
+      if (milestoneReservation) reservations[item.key] = milestoneReservation;
+    });
+    if (!reservations[config.key]) {
       var fallback = copy.schedDate && copy.schedTime
         ? { date: copy.schedDate, time: copy.schedTime }
         : null;
