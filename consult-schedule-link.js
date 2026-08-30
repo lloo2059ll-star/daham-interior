@@ -145,9 +145,9 @@
     if (!config) return copy;
     var reservations = Object.assign({}, copy.scheduleReservations || {});
     if (!reservations[config.key]) {
-      var fallback = copy.schedDate && copy.schedTime
+      var fallback = reservationFromMilestone(copy, config) || (copy.schedDate && copy.schedTime
         ? { date: copy.schedDate, time: copy.schedTime }
-        : reservationFromMilestone(copy, config);
+        : null);
       if (fallback) reservations[config.key] = fallback;
     }
     copy.scheduleReservations = reservations;
