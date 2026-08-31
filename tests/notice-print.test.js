@@ -13,3 +13,10 @@ test('printed greeting and construction details remain legible on A4', () => {
   assert.match(printCss, /\.info-table th,\.info-table td\s*\{[^}]*padding\s*:\s*8px 12px/s);
 });
 
+test('printed construction table uses strong fills borders and text contrast', () => {
+  assert.match(printCss, /\.info-table\s*\{[^}]*border\s*:\s*2px solid #9CA3AF/s);
+  assert.match(printCss, /\.info-table th\s*\{[^}]*background\s*:\s*#4B5563\s*!important[^}]*color\s*:\s*#fff[^}]*border-color\s*:\s*#4B5563/s);
+  assert.match(printCss, /\.info-table td\s*\{[^}]*background\s*:\s*#ECEFF3\s*!important[^}]*color\s*:\s*#111[^}]*border-color\s*:\s*#9CA3AF/s);
+  assert.match(printCss, /\.info-table tr:nth-child\(odd\) td\s*\{[^}]*background\s*:\s*#E5E7EB\s*!important/s);
+});
+
