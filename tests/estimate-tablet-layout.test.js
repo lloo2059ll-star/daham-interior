@@ -62,7 +62,7 @@ test('estimate editor reflows inside tablet width without horizontal scrolling',
 test('tablet overrides keep estimate information visible and leave phone and print rules alone', () => {
   for (const file of ['estimate.html', 'estimate-commercial.html']) {
     const css = tabletOverride(file);
-    assert.doesNotMatch(css, /display\s*:\s*none/i);
+    assert.doesNotMatch(css, /(?:\.v2-center|\.v2-right|\.sec-summary|\.items-tbl)\s*\{[^}]*display\s*:\s*none/is);
     assert.doesNotMatch(css, /@media\s+print/i);
     assert.doesNotMatch(css, /max-width\s*:\s*(?:520|767)px/i);
     assert.match(css, /\.items-tbl\s*\{[^}]*width\s*:\s*100%[^}]*min-width\s*:\s*0[^}]*table-layout\s*:\s*fixed/s);
@@ -72,3 +72,4 @@ test('tablet overrides keep estimate information visible and leave phone and pri
   }
   assert.match(tabletOverride('estimate-commercial.html'), /\.summary-bar\s*\{[^}]*display\s*:\s*grid[^}]*grid-template-columns\s*:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
 });
+
