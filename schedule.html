@@ -286,6 +286,8 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
   .schedule-print-grid .cal-trow{min-height:4.3mm}.schedule-print-grid .cal-week-group{break-inside:avoid}
   .schedule-print-compact{border:1px solid #9ea4b0;break-inside:avoid;page-break-inside:avoid}
   .schedule-print-compact h2{margin:0;padding:2mm 2.5mm;background:#252b3c!important;color:#fff!important;font-size:9pt}
+  .schedule-print-compact-weekdays{display:grid;grid-template-columns:repeat(7,1fr);background:#fff!important;border-bottom:1px solid #c9ced8}
+  .schedule-print-compact-weekdays span{padding:1mm 0;text-align:center;font-size:5.5pt;font-weight:800;color:#4b5563}.schedule-print-compact-weekdays span:first-child{color:#c62828}.schedule-print-compact-weekdays span:last-child{color:#1559a6}
   .schedule-print-compact-days{display:grid;background:#f1f3f6!important;border-bottom:1px solid #c9ced8}
   .schedule-print-compact-day{padding:1.5mm 1mm;text-align:center;font-size:7pt;font-weight:800;border-right:1px solid #c9ced8}.schedule-print-compact-day:last-child{border-right:0}
   .schedule-print-compact-bars{padding:1.5mm 0;background:#fff!important}
@@ -1137,12 +1139,13 @@ function printCalendar(){
 }
 function renderCompactPrintMonth(section){
   var timeline=DAHAM_SCHEDULE_DOMAIN.compactPrintMonthTimeline(section),columns='repeat('+timeline.days.length+',minmax(0,1fr))';
+  var weekdays=['일','월','화','수','목','금','토'].map(function(day){return '<span>'+day+'</span>';}).join('');
   var days=timeline.days.map(function(day){return '<span class="schedule-print-compact-day">'+esc(day.label)+'</span>';}).join('');
   var bars=timeline.bars.map(function(bar){
     var label=(bar.name||'공정명 미입력')+(bar.worker?' · '+bar.worker:'');
     return '<div class="schedule-print-compact-bar-row" style="grid-template-columns:'+columns+'"><span class="schedule-print-compact-bar" style="grid-column:'+bar.start+'/'+bar.end+'">'+esc(label)+'</span></div>';
   }).join('');
-  return '<section class="schedule-print-compact"><h2>'+section.year+'년 '+(section.month+1)+'월</h2><div class="schedule-print-compact-days" style="grid-template-columns:'+columns+'">'+days+'</div><div class="schedule-print-compact-bars">'+bars+'</div></section>';
+  return '<section class="schedule-print-compact"><h2>'+section.year+'년 '+(section.month+1)+'월</h2><div class="schedule-print-compact-weekdays">'+weekdays+'</div><div class="schedule-print-compact-days" style="grid-template-columns:'+columns+'">'+days+'</div><div class="schedule-print-compact-bars">'+bars+'</div></section>';
 }
 function printSelectedProject(){
   var project=getProj();
