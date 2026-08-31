@@ -129,6 +129,18 @@ test('mobile agenda expands multi-day events across month boundaries', () => {
   assert.deepEqual(rows.map(x=>x.date),['2026-09-01','2026-09-02']);
 });
 
+test('selected site print plan spans every construction month and excludes other schedules', () => {
+  const site={id:'samgu',info:{name:'옥계 삼구트리니엔 103동 1001호'},tasks:[
+    {id:'demolition',name:'철거',start:'2026-07-30',end:'2026-08-05',status:'done'},
+    {id:'cleaning',name:'입주청소',start:'2026-09-09',end:'2026-09-09',status:'planned'}
+  ]};
+  const plan=D.buildProjectPrintPlan(site);
+  assert.deepEqual(plan.months,[{year:2026,month:6},{year:2026,month:7},{year:2026,month:8}]);
+  assert.deepEqual(plan.tasks.map(task=>task.id),['demolition','cleaning']);
+  assert.equal(plan.title,'옥계 삼구트리니엔 103동 1001호');
+  assert.equal(plan.period,'2026-07-30 ~ 2026-09-09');
+});
+
 test('force save permission follows existing active owner role', () => {
   assert.equal(D.canForceConflict({role:'owner',isActive:true}),true);
   assert.equal(D.canForceConflict({role:'admin',isActive:true}),false);
@@ -166,5 +178,6 @@ test('site progress counts schedules ending today or earlier', () => {
   assert.equal(D.scheduleProgress(tasks,'2026-09-02'),100);
   assert.equal(D.scheduleProgress([],'2026-08-31'),0);
 });
+
 
 

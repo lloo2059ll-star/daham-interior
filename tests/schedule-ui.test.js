@@ -21,6 +21,13 @@ test('schedule header exposes every primary action in the approved order', () =>
   assert.ok(general > -1 && phases > general && today > phases && prev > today && next > prev);
 });
 
+test('selected-site print action is exposed and owns an A4 landscape single-page surface', () => {
+  assert.match(html, /id="tb-print-btn"[^>]*onclick="printSelectedProject\(\)"/);
+  assert.match(html, /id="schedule-print-sheet"/);
+  assert.match(html, /@page\s*\{[^}]*size:\s*A4 landscape[^}]*margin:/s);
+  assert.match(html, /function printSelectedProject\(\)/);
+});
+
 test('project cards and editor use separate compact and editing surfaces', () => {
   assert.match(html, /id="site-card-viewport"/);
   assert.match(html, /id="site-cards"[^>]*class="[^"]*site-cards/);
@@ -90,5 +97,6 @@ test('responsive UI provides real sizing rather than clipping page overflow', ()
   assert.match(html, /@media[^\{]*\(max-width:\s*600px\)[\s\S]*?\.schedule-drawer \.drawer-panel\s*\{[^}]*inset:\s*0[^}]*width:\s*auto[^}]*max-width:\s*none/);
   assert.doesNotMatch(html, /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/i);
 });
+
 
 

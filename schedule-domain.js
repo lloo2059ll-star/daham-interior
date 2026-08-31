@@ -149,6 +149,18 @@
       while(cur<=stop){out.push(Object.assign({},e,{date:cur}));var d=new Date(cur+'T00:00:00');d.setDate(d.getDate()+1);cur=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
     });return out;
   }
+  function buildProjectPrintPlan(site){
+    var tasks=(site&&Array.isArray(site.tasks)?site.tasks:[]).filter(function(task){return task&&task.start;}).map(function(task){return Object.assign({},task);});
+    var starts=tasks.map(function(task){return task.start;}).sort();
+    var ends=tasks.map(function(task){return task.end||task.start;}).sort();
+    var first=starts[0]||'',last=ends[ends.length-1]||first,months=[];
+    if(first&&last){
+      var cursor=new Date(first.slice(0,7)+'-01T00:00:00');
+      var stop=new Date(last.slice(0,7)+'-01T00:00:00');
+      while(cursor<=stop){months.push({year:cursor.getFullYear(),month:cursor.getMonth()});cursor.setMonth(cursor.getMonth()+1);}
+    }
+    return {title:String(site&&site.info&&site.info.name||'현장명 미입력'),period:first&&last?first+' ~ '+last:'일정 없음',months:months,tasks:tasks};
+  }
   function constructionDisplayName(bar){
     bar=bar||{};
     return String(bar.name||'')+(bar.worker?' · '+bar.worker:'');
@@ -166,7 +178,8 @@
   return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,
     materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
-    constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress};
+    constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress,buildProjectPrintPlan:buildProjectPrintPlan};
 });
+
 
 

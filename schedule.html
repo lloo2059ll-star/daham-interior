@@ -268,7 +268,23 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
 .schedule-workspace{min-width:0}
 @media screen and (min-width:768px) and (max-width:1024px){.schedule-shell{grid-template-columns:74px minmax(0,1fr)}.app-logo{justify-content:center;padding:0;font-size:14px}.app-logo small,.nav-label,.user-copy{display:none}.app-nav{padding:12px 8px}.nav-item{justify-content:center;padding:0}.nav-icon{font-size:18px}.sidebar-user{justify-content:center;padding:14px 8px}.schedule-workspace{width:100%;max-width:100%;padding:20px 16px}.schedule-head{gap:14px;margin-bottom:18px}.schedule-title h1{font-size:24px}.schedule-actions{max-width:100%;min-width:0}.site-cards{grid-auto-columns:minmax(225px,calc((100vw - 126px)/2))}.calendar-toolbar{grid-template-columns:1fr auto}.calendar-toolbar-right{grid-column:1/-1;justify-content:flex-end}.cal-day{padding:7px;min-height:68px}.cbar.schedule-bar{font-size:9px}.toggle-label,.calendar-select,.calendar-toolbar .btn,.schedule-actions .btn{min-height:44px}.calendar-legend{gap:17px;padding:14px 16px}}
 @media screen and (max-width:600px){.schedule-shell{display:block}.schedule-shell #app-sidebar{display:none}.schedule-workspace{padding:16px 12px 80px}.schedule-head{display:block;margin-bottom:16px}.schedule-title h1{font-size:23px}.schedule-title p{font-size:12px}.schedule-actions{justify-content:flex-start;margin-top:14px}.schedule-actions .btn{flex:1 1 calc(50% - 4px)}.schedule-actions .icon-btn{flex:0 0 44px}.site-cards{grid-auto-columns:minmax(244px,82vw)}.site-card{min-height:182px}.calendar-toolbar{display:flex;flex-wrap:wrap;justify-content:center}.calendar-toolbar-left,.calendar-toolbar-right{width:100%;justify-content:center;flex-wrap:wrap}.calendar-title{order:-1;width:100%}.cal-months{display:none}.agenda{display:block;padding-top:12px}.calendar-legend{margin-top:12px;gap:12px;padding:12px}.schedule-drawer .drawer-panel{inset:0;width:auto;max-width:none;height:100%;max-height:none;margin:0}.drawer-body{grid-template-columns:1fr}.drawer-body .field.span2,.drawer-body .field.span4{grid-column:span 1}}
-@media print{#app-sidebar,.schedule-head,.site-card-viewport,.calendar-toolbar,.calendar-legend,.schedule-drawer{display:none!important}.schedule-shell{display:block}.schedule-workspace{padding:0}.cal-months{display:block!important}}
+@page{size:A4 landscape;margin:7mm}
+#schedule-print-sheet{display:none}
+@media print{
+  body.printing-selected-project{background:#fff}
+  body.printing-selected-project .schedule-shell,body.printing-selected-project>.modal-bg,body.printing-selected-project>.toast{display:none!important}
+  body.printing-selected-project #schedule-print-sheet{display:block!important;width:100%;color:#151827}
+  .schedule-print-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid #151827;padding:0 0 3mm;margin-bottom:3mm}
+  .schedule-print-head h1{font-size:16pt;line-height:1.1;margin:0}.schedule-print-head p{font-size:8pt;color:#596174;margin:1.5mm 0 0}.schedule-print-brand{font-size:9pt;font-weight:800;letter-spacing:.12em;color:#6840dc}
+  .schedule-print-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.5mm;align-items:start}
+  .schedule-print-grid .cal-month{margin:0;border:1px solid #9ea4b0;break-inside:avoid;page-break-inside:avoid}
+  .schedule-print-grid .cal-mhd{display:block;background:#252b3c!important;padding:2mm 2.5mm;font-size:9pt}
+  .schedule-print-grid .cal-wdhd{height:auto;padding:1mm 0;font-size:5.5pt}
+  .schedule-print-grid .cal-day{min-height:8mm;padding:.8mm 1mm;font-size:6pt}
+  .schedule-print-grid .cal-dn{font-size:6pt;width:auto;height:auto;justify-content:flex-start}
+  .schedule-print-grid .cal-holi{font-size:4.5pt}.schedule-print-grid .cbar{height:4.3mm!important;padding:0 1mm!important;font-size:4.8pt!important;border-radius:1.8mm!important}
+  .schedule-print-grid .cal-trow{min-height:4.3mm}.schedule-print-grid .cal-week-group{break-inside:avoid}
+}
 </style>
 </head>
 <body class="operations-ui operations-admin operations-schedule">
@@ -297,6 +313,7 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
         <span id="save-dot" class="save-dot"></span><span id="sync-dot" title="클라우드 동기화" style="font-size:14px;opacity:.35">☁</span>
         <button class="btn accent" id="tb-general-btn" onclick="openGeneralModal(null,null)">＋ 일반 일정 추가</button>
         <button class="btn primary" id="tb-phase-btn" onclick="openPhaseCandidates()">견적에서 공정 불러오기</button>
+        <button class="btn" id="tb-print-btn" onclick="printSelectedProject()">일정 인쇄</button>
         <button class="btn" id="cal-today-btn" onclick="goToday()">오늘</button>
         <button class="btn icon-btn" id="cal-prev-btn" aria-label="이전 달" onclick="shiftCal(-1)">‹</button>
         <button class="btn icon-btn" id="cal-next-btn" aria-label="다음 달" onclick="shiftCal(1)">›</button>
@@ -316,6 +333,7 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
     <div id="schedule-legend" class="calendar-legend"></div>
   </main>
 </div>
+<section id="schedule-print-sheet" aria-label="선택 현장 인쇄용 일정표"></section>
 
 <div id="project-drawer" class="schedule-drawer" aria-hidden="true">
   <div class="drawer-backdrop" onclick="closeProjectDrawer()"></div><section class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="project-drawer-title">
@@ -1110,6 +1128,21 @@ function printCalendar(){
   window.print();
   _doRenderCalendar(1);
 }
+function printSelectedProject(){
+  var project=getProj();
+  if(!project){showToast('인쇄할 현장 카드를 먼저 선택해 주세요');return;}
+  var plan=DAHAM_SCHEDULE_DOMAIN.buildProjectPrintPlan(project);
+  if(!plan.tasks.length){showToast('선택한 현장에 인쇄할 공사일정이 없습니다');return;}
+  var color=project.color||COLORS[0],today=todayStr();
+  var tasks=plan.tasks.map(function(task){return Object.assign({},task,{end:task.end||task.start,color:color,projId:project.id,projName:plan.title});});
+  var months=plan.months.map(function(month){return renderMonth(month.year,month.month,tasks,today,true);}).join('');
+  var sheet=document.getElementById('schedule-print-sheet');
+  sheet.innerHTML='<header class="schedule-print-head"><div><h1>'+esc(plan.title)+'</h1><p>전체 공사일정 · '+esc(plan.period)+'</p></div><div class="schedule-print-brand">DAHAM INTERIOR</div></header><div class="schedule-print-grid">'+months+'</div>';
+  document.body.classList.add('printing-selected-project');
+  var cleanup=function(){document.body.classList.remove('printing-selected-project');sheet.innerHTML='';window.removeEventListener('afterprint',cleanup);};
+  window.addEventListener('afterprint',cleanup);
+  window.print();
+}
 function _doRenderCalendar(numMonths){
   var container=document.getElementById('cal-area');
   if(!container) return;
@@ -1535,5 +1568,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProject
 
 </body>
 </html>
+
 
 
