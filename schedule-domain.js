@@ -174,12 +174,33 @@
     }).length;
     return Math.round(completed/tasks.length*100);
   }
+  function generalTypeMeta(type){
+    return {
+      contract:{label:'계약',color:'#f08a24'},
+      consult:{label:'상담',color:'#a98057'},survey:{label:'실측',color:'#a98057'},
+      as:{label:'AS',color:'#61ad78'},personal:{label:'개인',color:'#3e78d6'},other:{label:'기타',color:'#687182'}
+    }[type]||{label:'기타',color:'#687182'};
+  }
+  function moveSiteTaskToGeneral(sites,generalEvents,siteId,taskId,generalType){
+    var nextSites=normalizeSites(sites), nextGeneral=(Array.isArray(generalEvents)?generalEvents:[]).map(function(event){return Object.assign({},event);});
+    var site=nextSites.find(function(item){return item.id===siteId;}), task;
+    if(!site) return {sites:nextSites,generalEvents:nextGeneral,moved:false};
+    if(nextGeneral.some(function(event){return event.id===taskId;})) return {sites:nextSites,generalEvents:nextGeneral,moved:false};
+    site.tasks=site.tasks.filter(function(item){if(item.id===taskId){task=item;return false;}return true;});
+    if(!task) return {sites:nextSites,generalEvents:nextGeneral,moved:false};
+    var event={id:task.id,kind:'general',generalType:generalType||'other',name:task.name||'',start:task.start,end:task.end||task.start,status:task.status||'planned'};
+    if(task.memo) event.memo=task.memo;
+    nextGeneral.push(event);
+    return {sites:nextSites,generalEvents:nextGeneral,moved:true};
+  }
 
   return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,
     materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
-    constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress,buildProjectPrintPlan:buildProjectPrintPlan};
+    constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress,buildProjectPrintPlan:buildProjectPrintPlan,
+    generalTypeMeta:generalTypeMeta,moveSiteTaskToGeneral:moveSiteTaskToGeneral};
 });
+
 
 
 
