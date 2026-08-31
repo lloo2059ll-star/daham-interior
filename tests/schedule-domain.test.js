@@ -141,6 +141,23 @@ test('selected site print plan spans every construction month and excludes other
   assert.equal(plan.period,'2026-07-30 ~ 2026-09-09');
 });
 
+test('print plan compacts months with two or fewer phases and keeps busy months as calendars', () => {
+  const site={info:{name:'삼구트리니엔'},tasks:[
+    {id:'jul-1',name:'철거',start:'2026-07-30',end:'2026-07-31',worker:'김철거'},
+    {id:'jul-2',name:'설비 1차',start:'2026-07-31',end:'2026-08-01',worker:'박설비'},
+    {id:'aug-1',name:'목공',start:'2026-08-03'},
+    {id:'aug-2',name:'타일',start:'2026-08-10'},
+    {id:'aug-3',name:'도배',start:'2026-08-20'},
+    {id:'sep-1',name:'입주청소',start:'2026-09-09',worker:'최청소'}
+  ]};
+  const sections=D.buildProjectPrintPlan(site).sections;
+  assert.deepEqual(sections.map(section=>({key:section.key,layout:section.layout,count:section.tasks.length})),[
+    {key:'2026-07',layout:'compact',count:2},
+    {key:'2026-08',layout:'calendar',count:4},
+    {key:'2026-09',layout:'compact',count:1}
+  ]);
+});
+
 test('force save permission follows existing active owner role', () => {
   assert.equal(D.canForceConflict({role:'owner',isActive:true}),true);
   assert.equal(D.canForceConflict({role:'admin',isActive:true}),false);
