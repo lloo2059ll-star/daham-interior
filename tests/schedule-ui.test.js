@@ -48,6 +48,13 @@ test('monthly calendar has the approved toolbar, filters, and legend', () => {
   assert.match(html, /class="[^"]*general-chip/);
 });
 
+test('general schedules expose contract as a distinct color-coded type', () => {
+  assert.match(html, /id="m-general-type"[\s\S]*?<option value="contract">계약<\/option>/);
+  assert.match(html, /generalTypeMeta\(e\.generalType\)\.color/);
+  assert.match(html, /\['contract','consult','as','personal','other'\]/);
+  assert.match(html, /--event-bg:/);
+});
+
 test('existing modal and domain integration hooks remain available', () => {
   for (const id of ['task-modal', 'phase-modal', 'proj-pick-modal', 'agenda-area', 'sync-dot']) {
     assert.match(html, new RegExp(`id="${id}"`));
@@ -97,6 +104,7 @@ test('responsive UI provides real sizing rather than clipping page overflow', ()
   assert.match(html, /@media[^\{]*\(max-width:\s*600px\)[\s\S]*?\.schedule-drawer \.drawer-panel\s*\{[^}]*inset:\s*0[^}]*width:\s*auto[^}]*max-width:\s*none/);
   assert.doesNotMatch(html, /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/i);
 });
+
 
 
 
