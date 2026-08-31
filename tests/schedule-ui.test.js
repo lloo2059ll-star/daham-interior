@@ -21,10 +21,11 @@ test('schedule header exposes every primary action in the approved order', () =>
   assert.ok(general > -1 && phases > general && today > phases && prev > today && next > prev);
 });
 
-test('selected-site print action is exposed and owns an A4 landscape single-page surface', () => {
+test('selected-site print action is exposed and owns an A4 portrait single-page surface', () => {
   assert.match(html, /id="tb-print-btn"[^>]*onclick="printSelectedProject\(\)"/);
   assert.match(html, /id="schedule-print-sheet"/);
-  assert.match(html, /@page\s*\{[^}]*size:\s*A4 landscape[^}]*margin:/s);
+  assert.match(html, /@page\s*\{size:\s*A4 portrait;?\s*margin:\s*7mm\}/s);
+  assert.match(html, /\.schedule-print-grid\s*\{[^}]*grid-template-columns:\s*1fr/s);
   assert.match(html, /function printSelectedProject\(\)/);
 });
 
