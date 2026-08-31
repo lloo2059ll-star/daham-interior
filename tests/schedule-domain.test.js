@@ -162,6 +162,33 @@ test('general events use a separate backward compatible sync key', () => {
   assert.doesNotMatch(migrate,/\.filter\(/);
 });
 
+test('contract general schedules have a dedicated label and color', () => {
+  assert.deepEqual(D.generalTypeMeta('contract'), {label:'계약',color:'#f08a24'});
+  assert.deepEqual(D.generalTypeMeta('as'), {label:'AS',color:'#61ad78'});
+});
+
+test('a misplaced site task moves to a contract schedule without losing its details', () => {
+  const sites=[{id:'site-old',info:{name:'옥계 e편한세상'},tasks:[
+    {id:'task-contract',kind:'construction',name:'우미린 계약',start:'2026-09-01',end:'2026-09-01',status:'planned',memo:'계약서 준비'},
+    {id:'task-work',kind:'construction',name:'철거',start:'2026-09-02',end:'2026-09-03'}
+  ]}];
+  const moved=D.moveSiteTaskToGeneral(sites,[], 'site-old','task-contract','contract');
+  assert.deepEqual(moved.sites[0].tasks.map(task=>task.id),['task-work']);
+  assert.deepEqual(moved.generalEvents,[{
+    id:'task-contract',kind:'general',generalType:'contract',name:'우미린 계약',
+    start:'2026-09-01',end:'2026-09-01',status:'planned',memo:'계약서 준비'
+  }]);
+});
+
+test('a site task is not removed when its id already exists in general schedules', () => {
+  const sites=[{id:'site-old',tasks:[{id:'same-id',name:'우미린 계약',start:'2026-09-01'}]}];
+  const general=[{id:'same-id',kind:'general',generalType:'contract',name:'기존 계약',start:'2026-08-01'}];
+  const moved=D.moveSiteTaskToGeneral(sites,general,'site-old','same-id','contract');
+  assert.equal(moved.moved,false);
+  assert.deepEqual(moved.sites[0].tasks,sites[0].tasks);
+  assert.deepEqual(moved.generalEvents,general);
+});
+
 test('construction bar label omits the site address while retaining phase and worker', () => {
   assert.equal(D.constructionDisplayName({projName:'옥계 삼구트리니엔 103동 1001호',name:'도배',worker:'석호성'}),'도배 · 석호성');
   assert.equal(D.constructionDisplayName({projName:'푸르지오캐슬 c단지 303동 1306호',name:'철거'}),'철거');
@@ -178,6 +205,7 @@ test('site progress counts schedules ending today or earlier', () => {
   assert.equal(D.scheduleProgress(tasks,'2026-09-02'),100);
   assert.equal(D.scheduleProgress([],'2026-08-31'),0);
 });
+
 
 
 
