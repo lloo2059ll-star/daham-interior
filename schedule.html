@@ -274,16 +274,19 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
   body.printing-selected-project{background:#fff}
   body.printing-selected-project .schedule-shell,body.printing-selected-project>.modal-bg,body.printing-selected-project>.toast{display:none!important}
   body.printing-selected-project #schedule-print-sheet{display:block!important;width:100%;color:#151827}
-  .schedule-print-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid #151827;padding:0 0 3mm;margin-bottom:3mm}
-  .schedule-print-head h1{font-size:16pt;line-height:1.1;margin:0}.schedule-print-head p{font-size:8pt;color:#596174;margin:1.5mm 0 0}.schedule-print-brand{font-size:9pt;font-weight:800;letter-spacing:.12em;color:#6840dc}
-  .schedule-print-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.5mm;align-items:start}
-  .schedule-print-grid .cal-month{margin:0;border:1px solid #9ea4b0;break-inside:avoid;page-break-inside:avoid}
-  .schedule-print-grid .cal-mhd{display:block;background:#252b3c!important;padding:2mm 2.5mm;font-size:9pt}
-  .schedule-print-grid .cal-wdhd{height:auto;padding:1mm 0;font-size:5.5pt}
-  .schedule-print-grid .cal-day{min-height:8mm;padding:.8mm 1mm;font-size:6pt}
-  .schedule-print-grid .cal-dn{font-size:6pt;width:auto;height:auto;justify-content:flex-start}
-  .schedule-print-grid .cal-holi{font-size:4.5pt}.schedule-print-grid .cbar{height:4.3mm!important;padding:0 1mm!important;font-size:4.8pt!important;border-radius:1.8mm!important}
-  .schedule-print-grid .cal-trow{min-height:4.3mm}.schedule-print-grid .cal-week-group{break-inside:avoid}
+  .schedule-print-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:3px solid #e65100;padding:0 0 3mm;margin-bottom:2mm}
+  .schedule-print-head h1{font-size:18pt;line-height:1.1;margin:0}.schedule-print-head p{font-size:9pt;color:#374151;margin:1.5mm 0 0;font-weight:700}.schedule-print-brand{font-size:10pt;font-weight:800;letter-spacing:.12em;color:#c2410c}
+  .schedule-print-summary{display:flex;gap:2mm;margin-bottom:2.5mm;font-size:8pt;font-weight:800;color:#1f2937}
+  .schedule-print-summary span{padding:1.2mm 2.4mm;background:#fff1e9!important;border-left:1.2mm solid #e65100}
+  .schedule-print-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3mm;align-items:start}
+  .schedule-print-grid .cal-month{margin:0;border:1.5px solid #6b7280;break-inside:avoid;page-break-inside:avoid}
+  .schedule-print-grid .cal-mhd{display:block;background:#273244!important;color:#fff!important;padding:2.2mm 2.5mm;font-size:12pt;font-weight:800;text-align:center}
+  .schedule-print-grid .cal-wdhd{height:auto;padding:1.2mm 0;font-size:7pt;font-weight:800;color:#253047;background:#e5e7eb!important}
+  .schedule-print-grid .cal-day{min-height:9mm;padding:1mm 1.2mm;font-size:8pt;background:#fff!important}
+  .schedule-print-grid .cal-day.holiday{background:#fff1f1!important}.schedule-print-grid .cal-day.sun{color:#c62828}.schedule-print-grid .cal-day.sat{color:#1559a6}
+  .schedule-print-grid .cal-dn{font-size:8pt;font-weight:800;width:auto;height:auto;justify-content:flex-start}
+  .schedule-print-grid .cal-holi{font-size:5.5pt;font-weight:700}.schedule-print-grid .cbar{height:5.2mm!important;padding:0 1.2mm!important;font-size:6.5pt!important;font-weight:800;border-radius:1mm!important;color:#fff!important}
+  .schedule-print-grid .cal-trow{min-height:5.2mm}.schedule-print-grid .cal-week-group{break-inside:avoid}
 }
 </style>
 </head>
@@ -1137,7 +1140,7 @@ function printSelectedProject(){
   var tasks=plan.tasks.map(function(task){return Object.assign({},task,{end:task.end||task.start,color:color,projId:project.id,projName:plan.title});});
   var months=plan.months.map(function(month){return renderMonth(month.year,month.month,tasks,today,true);}).join('');
   var sheet=document.getElementById('schedule-print-sheet');
-  sheet.innerHTML='<header class="schedule-print-head"><div><h1>'+esc(plan.title)+'</h1><p>전체 공사일정 · '+esc(plan.period)+'</p></div><div class="schedule-print-brand">DAHAM INTERIOR</div></header><div class="schedule-print-grid">'+months+'</div>';
+  sheet.innerHTML='<header class="schedule-print-head"><div><h1>'+esc(plan.title)+' 공사일정표</h1><p>'+esc(plan.period)+'</p></div><div class="schedule-print-brand">DAHAM INTERIOR</div></header><div class="schedule-print-summary"><span>전체 공정 '+plan.tasks.length+'건</span><span>'+plan.months.length+'개월 일정</span><span>A4 가로 한 장</span></div><div class="schedule-print-grid">'+months+'</div>';
   document.body.classList.add('printing-selected-project');
   var cleanup=function(){document.body.classList.remove('printing-selected-project');sheet.innerHTML='';window.removeEventListener('afterprint',cleanup);};
   window.addEventListener('afterprint',cleanup);

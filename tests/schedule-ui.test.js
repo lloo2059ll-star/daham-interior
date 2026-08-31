@@ -28,6 +28,15 @@ test('selected-site print action is exposed and owns an A4 landscape single-page
   assert.match(html, /function printSelectedProject\(\)/);
 });
 
+test('selected-site print calendar prioritizes legibility across three months', () => {
+  assert.match(html, /\.schedule-print-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3,minmax\(0,1fr\)\)[^}]*gap:\s*3mm/s);
+  assert.match(html, /\.schedule-print-grid \.cal-mhd\s*\{[^}]*font-size:\s*12pt/s);
+  assert.match(html, /\.schedule-print-grid \.cal-wdhd\s*\{[^}]*font-size:\s*7pt[^}]*font-weight:\s*800/s);
+  assert.match(html, /\.schedule-print-grid \.cal-dn\s*\{[^}]*font-size:\s*8pt[^}]*font-weight:\s*800/s);
+  assert.match(html, /\.schedule-print-grid \.cbar\s*\{[^}]*font-size:\s*6\.5pt\s*!important[^}]*font-weight:\s*800/s);
+  assert.match(html, /class="schedule-print-summary"/);
+});
+
 test('project cards and editor use separate compact and editing surfaces', () => {
   assert.match(html, /id="site-card-viewport"/);
   assert.match(html, /id="site-cards"[^>]*class="[^"]*site-cards/);
