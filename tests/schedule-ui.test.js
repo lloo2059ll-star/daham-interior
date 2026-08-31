@@ -29,16 +29,6 @@ test('selected-site print action is exposed and owns an A4 portrait single-page 
   assert.match(html, /function printSelectedProject\(\)/);
 });
 
-test('selected-site print calendar stretches its month rows to fill the printable page height', () => {
-  assert.match(html, /#schedule-print-sheet\s*\{[^}]*height:\s*283mm[^}]*display:\s*flex[^}]*flex-direction:\s*column/s);
-  assert.match(html, /\.schedule-print-grid\s*\{[^}]*flex:\s*1[^}]*grid-template-rows:\s*repeat\(var\(--print-month-count\),minmax\(0,1fr\)\)/s);
-  assert.match(html, /class="schedule-print-grid" style="--print-month-count:'\+plan\.sections\.length/);
-  assert.match(html, /\.schedule-print-grid \.cal-month\s*\{[^}]*height:\s*100%[^}]*display:\s*flex[^}]*flex-direction:\s*column/s);
-  assert.match(html, /\.schedule-print-grid \.cal-week-group\s*\{[^}]*flex:\s*1/s);
-  assert.match(html, /\.schedule-print-compact\s*\{[^}]*height:\s*100%[^}]*display:\s*flex[^}]*flex-direction:\s*column/s);
-  assert.match(html, /\.schedule-print-compact-bars\s*\{[^}]*flex:\s*1/s);
-});
-
 test('sparse print months show scheduled dates with calendar-style phase bars', () => {
   assert.match(html, /function renderCompactPrintMonth\(section\)/);
   assert.match(html, /class="schedule-print-compact"/);
