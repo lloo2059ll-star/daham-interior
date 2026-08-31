@@ -159,7 +159,13 @@
       var stop=new Date(last.slice(0,7)+'-01T00:00:00');
       while(cursor<=stop){months.push({year:cursor.getFullYear(),month:cursor.getMonth()});cursor.setMonth(cursor.getMonth()+1);}
     }
-    return {title:String(site&&site.info&&site.info.name||'현장명 미입력'),period:first&&last?first+' ~ '+last:'일정 없음',months:months,tasks:tasks};
+    var sections=months.map(function(month){
+      var key=month.year+'-'+String(month.month+1).padStart(2,'0');
+      var monthStart=key+'-01',monthEnd=key+'-'+String(new Date(month.year,month.month+1,0).getDate()).padStart(2,'0');
+      var monthTasks=tasks.filter(function(task){return task.start<=monthEnd&&(task.end||task.start)>=monthStart;});
+      return {key:key,year:month.year,month:month.month,layout:monthTasks.length<=2?'compact':'calendar',tasks:monthTasks};
+    }).filter(function(section){return section.tasks.length;});
+    return {title:String(site&&site.info&&site.info.name||'현장명 미입력'),period:first&&last?first+' ~ '+last:'일정 없음',months:months,tasks:tasks,sections:sections};
   }
   function constructionDisplayName(bar){
     bar=bar||{};
