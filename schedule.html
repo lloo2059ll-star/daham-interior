@@ -268,7 +268,7 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
 .schedule-workspace{min-width:0}
 @media screen and (min-width:768px) and (max-width:1024px){.schedule-shell{grid-template-columns:74px minmax(0,1fr)}.app-logo{justify-content:center;padding:0;font-size:14px}.app-logo small,.nav-label,.user-copy{display:none}.app-nav{padding:12px 8px}.nav-item{justify-content:center;padding:0}.nav-icon{font-size:18px}.sidebar-user{justify-content:center;padding:14px 8px}.schedule-workspace{width:100%;max-width:100%;padding:20px 16px}.schedule-head{gap:14px;margin-bottom:18px}.schedule-title h1{font-size:24px}.schedule-actions{max-width:100%;min-width:0}.site-cards{grid-auto-columns:minmax(225px,calc((100vw - 126px)/2))}.calendar-toolbar{grid-template-columns:1fr auto}.calendar-toolbar-right{grid-column:1/-1;justify-content:flex-end}.cal-day{padding:7px;min-height:68px}.cbar.schedule-bar{font-size:9px}.toggle-label,.calendar-select,.calendar-toolbar .btn,.schedule-actions .btn{min-height:44px}.calendar-legend{gap:17px;padding:14px 16px}}
 @media screen and (max-width:600px){.schedule-shell{display:block}.schedule-shell #app-sidebar{display:none}.schedule-workspace{padding:16px 12px 80px}.schedule-head{display:block;margin-bottom:16px}.schedule-title h1{font-size:23px}.schedule-title p{font-size:12px}.schedule-actions{justify-content:flex-start;margin-top:14px}.schedule-actions .btn{flex:1 1 calc(50% - 4px)}.schedule-actions .icon-btn{flex:0 0 44px}.site-cards{grid-auto-columns:minmax(244px,82vw)}.site-card{min-height:182px}.calendar-toolbar{display:flex;flex-wrap:wrap;justify-content:center}.calendar-toolbar-left,.calendar-toolbar-right{width:100%;justify-content:center;flex-wrap:wrap}.calendar-title{order:-1;width:100%}.cal-months{display:none}.agenda{display:block;padding-top:12px}.calendar-legend{margin-top:12px;gap:12px;padding:12px}.schedule-drawer .drawer-panel{inset:0;width:auto;max-width:none;height:100%;max-height:none;margin:0}.drawer-body{grid-template-columns:1fr}.drawer-body .field.span2,.drawer-body .field.span4{grid-column:span 1}}
-@page{size:A4 landscape;margin:7mm}
+@page{size:A4 portrait;margin:7mm}
 #schedule-print-sheet{display:none}
 @media print{
   body.printing-selected-project{background:#fff}
@@ -276,7 +276,7 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
   body.printing-selected-project #schedule-print-sheet{display:block!important;width:100%;color:#151827}
   .schedule-print-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid #151827;padding:0 0 3mm;margin-bottom:3mm}
   .schedule-print-head h1{font-size:16pt;line-height:1.1;margin:0}.schedule-print-head p{font-size:8pt;color:#596174;margin:1.5mm 0 0}.schedule-print-brand{font-size:9pt;font-weight:800;letter-spacing:.12em;color:#6840dc}
-  .schedule-print-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2.5mm;align-items:start}
+  .schedule-print-grid{display:grid;grid-template-columns:1fr;gap:2mm;align-items:start}
   .schedule-print-grid .cal-month{margin:0;border:1px solid #9ea4b0;break-inside:avoid;page-break-inside:avoid}
   .schedule-print-grid .cal-mhd{display:block;background:#252b3c!important;padding:2mm 2.5mm;font-size:9pt}
   .schedule-print-grid .cal-wdhd{height:auto;padding:1mm 0;font-size:5.5pt}
