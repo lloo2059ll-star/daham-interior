@@ -158,6 +158,18 @@ test('print plan compacts months with two or fewer phases and keeps busy months 
   ]);
 });
 
+test('compact print month clips phase bars to scheduled dates inside that month', () => {
+  const section={year:2026,month:6,tasks:[
+    {id:'a',name:'철거',start:'2026-07-30',end:'2026-08-05'},
+    {id:'b',name:'설비',start:'2026-07-31',end:'2026-08-01'}
+  ]};
+  const timeline=D.compactPrintMonthTimeline(section);
+  assert.deepEqual(timeline.days.map(day=>day.label),['7월 30일 목요일','7월 31일 금요일']);
+  assert.deepEqual(timeline.bars.map(bar=>({id:bar.id,start:bar.start,end:bar.end})),[
+    {id:'a',start:1,end:3},{id:'b',start:2,end:3}
+  ]);
+});
+
 test('force save permission follows existing active owner role', () => {
   assert.equal(D.canForceConflict({role:'owner',isActive:true}),true);
   assert.equal(D.canForceConflict({role:'admin',isActive:true}),false);
