@@ -172,7 +172,11 @@
     var key=section.year+'-'+String(Number(section.month)+1).padStart(2,'0');
     var monthStart=key+'-01',monthEnd=key+'-'+String(new Date(section.year,Number(section.month)+1,0).getDate()).padStart(2,'0');
     var clipped=(section.tasks||[]).map(function(task){return {task:task,start:task.start<monthStart?monthStart:task.start,end:(task.end||task.start)>monthEnd?monthEnd:(task.end||task.start)};});
-    var first=clipped.map(function(item){return item.start;}).sort()[0],last=clipped.map(function(item){return item.end;}).sort().pop(),days=[],cursor=first;
+    var first=clipped.map(function(item){return item.start;}).sort()[0],last=clipped.map(function(item){return item.end;}).sort().pop(),days=[];
+    var firstDate=first?new Date(first+'T12:00:00'):null,lastDate=last?new Date(last+'T12:00:00'):null;
+    if(firstDate){firstDate.setDate(firstDate.getDate()-firstDate.getDay());first=firstDate.getFullYear()+'-'+String(firstDate.getMonth()+1).padStart(2,'0')+'-'+String(firstDate.getDate()).padStart(2,'0');}
+    if(lastDate){lastDate.setDate(lastDate.getDate()+(6-lastDate.getDay()));last=lastDate.getFullYear()+'-'+String(lastDate.getMonth()+1).padStart(2,'0')+'-'+String(lastDate.getDate()).padStart(2,'0');}
+    var cursor=first;
     var weekday=['일','월','화','수','목','금','토'];
     while(cursor&&cursor<=last){var d=new Date(cursor+'T12:00:00');days.push({date:cursor,label:(d.getMonth()+1)+'월 '+d.getDate()+'일 '+weekday[d.getDay()]+'요일'});d.setDate(d.getDate()+1);cursor=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
     var bars=clipped.map(function(item){return Object.assign({},item.task,{start:days.findIndex(function(day){return day.date===item.start;})+1,end:days.findIndex(function(day){return day.date===item.end;})+2});});

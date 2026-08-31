@@ -33,6 +33,7 @@ test('sparse print months show scheduled dates with calendar-style phase bars', 
   assert.match(html, /function renderCompactPrintMonth\(section\)/);
   assert.match(html, /class="schedule-print-compact"/);
   assert.match(html, /compactPrintMonthTimeline\(section\)/);
+  assert.match(html, /class="schedule-print-compact-weekdays"/);
   assert.match(html, /class="schedule-print-compact-days"/);
   assert.match(html, /class="schedule-print-compact-bar"/);
   assert.match(html, /grid-column:'\+bar\.start\+'\/'\+bar\.end/);

@@ -164,9 +164,9 @@ test('compact print month clips phase bars to scheduled dates inside that month'
     {id:'b',name:'설비',start:'2026-07-31',end:'2026-08-01'}
   ]};
   const timeline=D.compactPrintMonthTimeline(section);
-  assert.deepEqual(timeline.days.map(day=>day.label),['7월 30일 목요일','7월 31일 금요일']);
+  assert.deepEqual(timeline.days.map(day=>day.label),['7월 26일 일요일','7월 27일 월요일','7월 28일 화요일','7월 29일 수요일','7월 30일 목요일','7월 31일 금요일','8월 1일 토요일']);
   assert.deepEqual(timeline.bars.map(bar=>({id:bar.id,start:bar.start,end:bar.end})),[
-    {id:'a',start:1,end:3},{id:'b',start:2,end:3}
+    {id:'a',start:5,end:7},{id:'b',start:6,end:7}
   ]);
 });
 
