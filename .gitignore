@@ -1,1 +1,3 @@
 .worktrees/
+.npm-cache/
+supabase/.temp/
