@@ -250,7 +250,7 @@ select.mf-inp{cursor:pointer}
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
 <script src="schedule-domain.js?v=20260831-progress"></script>
-<script src="consult-schedule-link.js?v=20260901-1"></script>
+<script src="consult-schedule-link.js?v=20260901-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
 :root{--sch-navy:#14213b;--sch-navy-2:#1b2b4b;--sch-purple:#7047e8;--sch-purple-soft:#f1edff;--sch-canvas:#f6f7fb;--sch-text:#172033;--sch-muted:#788196;--sch-border:#e1e5ee}
@@ -1190,7 +1190,7 @@ function _doRenderCalendar(numMonths){
       return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,
               worker:t.worker||'',status:t.status||'planned',color:pc,isCurrent:true,projId:p.id,projName:(p.info&&p.info.name)||''};
     }):[];
-    allGeneralEvents.forEach(function(e){tasks.push({id:e.id,name:e.name,start:e.start,end:e.end||e.start,worker:'',status:e.status||'planned',color:DAHAM_SCHEDULE_DOMAIN.generalTypeMeta(e.generalType).color,general:true,generalType:e.generalType,source:e.source||''});});
+    allGeneralEvents.forEach(function(e){tasks.push({id:e.id,name:e.name,start:e.start,end:e.end||e.start,startTime:e.startTime||'',worker:'',status:e.status||'planned',color:DAHAM_SCHEDULE_DOMAIN.generalTypeMeta(e.generalType).color,general:true,generalType:e.generalType,source:e.source||''});});
     for(var mi=0;mi<numMonths;mi++){
       var mo=base.month+mi, yr=base.year;
       while(mo>11){ mo-=12; yr++; }
@@ -1227,7 +1227,7 @@ function _doRenderCalendar(numMonths){
           projName:(p.info&&p.info.name)||'현장명 미입력',projId:p.id});
       });
     });
-    allGeneralEvents.forEach(function(e){allTasks.push({id:e.id,name:e.name||'',start:e.start,end:e.end||e.start,color:DAHAM_SCHEDULE_DOMAIN.generalTypeMeta(e.generalType).color,status:e.status||'planned',general:true,generalType:e.generalType,source:e.source||''});});
+    allGeneralEvents.forEach(function(e){allTasks.push({id:e.id,name:e.name||'',start:e.start,end:e.end||e.start,startTime:e.startTime||'',color:DAHAM_SCHEDULE_DOMAIN.generalTypeMeta(e.generalType).color,status:e.status||'planned',general:true,generalType:e.generalType,source:e.source||''});});
     for(var mi=0;mi<numMonths;mi++){
       var mo=base.month+mi, yr=base.year;
       while(mo>11){ mo-=12; yr++; }
@@ -1267,7 +1267,7 @@ function renderMonth(year, month, tasks, today, isProject){
       var sc=bsD.getDay();
       var ec=beD.getDay();
       bars.push({id:t.id,name:t.name,color:t.color||COLORS[0],
-        worker:t.worker||'',status:t.status,projName:t.projName||'',projId:t.projId||'',general:!!t.general,generalType:t.generalType||'',source:t.source||'',isCurrent:!!t.isCurrent,
+        worker:t.worker||'',status:t.status,projName:t.projName||'',projId:t.projId||'',general:!!t.general,generalType:t.generalType||'',source:t.source||'',startTime:t.startTime||'',isCurrent:!!t.isCurrent,
         startCol:sc,endCol:ec,isCont:ts<weekStart,isCont2:te>weekEnd});
     });
     bars.sort(function(a,b){ return a.startCol-b.startCol; });

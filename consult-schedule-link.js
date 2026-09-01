@@ -118,7 +118,10 @@
 
   function generalDisplayName(event, typeLabel) {
     var name = event && event.name || '';
-    return event && event.source === 'consultation' ? name : (typeLabel ? typeLabel + ' · ' + name : name);
+    if (event && event.source === 'consultation') {
+      return (event.startTime ? event.startTime + ' · ' : '') + name;
+    }
+    return typeLabel ? typeLabel + ' · ' + name : name;
   }
 
   function reservationFromMilestone(consultation, config) {

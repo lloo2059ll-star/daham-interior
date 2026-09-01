@@ -214,7 +214,8 @@ test('merging cloud and local general events preserves unique manual schedules',
 });
 
 test('linked schedule display keeps the consultation title exact', () => {
-  assert.equal(Link.generalDisplayName({ source: 'consultation', name: '다함아파트 · 현장실측' }, '실측'), '다함아파트 · 현장실측');
+  assert.equal(Link.generalDisplayName({ source: 'consultation', name: '다함아파트 · 현장실측', startTime: '14:30' }, '실측'), '14:30 · 다함아파트 · 현장실측');
+  assert.equal(Link.generalDisplayName({ source: 'consultation', name: '다함아파트 · 현장실측', startTime: '' }, '실측'), '다함아파트 · 현장실측');
   assert.equal(Link.generalDisplayName({ name: '고객 미팅' }, '상담'), '상담 · 고객 미팅');
 });
 
@@ -303,14 +304,15 @@ test('calendar reconciliation restores every scheduled milestone from consultati
   ]);
 });
 
-test('consultation and schedule pages load the inquiry-calendar linking script version', () => {
+test('consultation and schedule pages load the timed-calendar linking script version', () => {
   const root = path.join(__dirname, '..');
   const consult = fs.readFileSync(path.join(root, 'consult.html'), 'utf8');
   const schedule = fs.readFileSync(path.join(root, 'schedule.html'), 'utf8');
-  const pattern = /consult-schedule-link\.js\?v=20260901-1/;
+  const pattern = /consult-schedule-link\.js\?v=20260901-2/;
 
   assert.match(consult, pattern);
   assert.match(schedule, pattern);
+  assert.match(schedule, /startTime:e\.startTime\|\|''/);
 });
 
 
