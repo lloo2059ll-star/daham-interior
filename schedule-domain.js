@@ -201,8 +201,13 @@
     return (tasks||[]).filter(function(task){return task.source!=='estimate';}).concat(imported||[]);
   }
   function projectTasks(sites,projectId){
-    var site=(sites||[]).find(function(item){return item.id===projectId;});
-    return site&&Array.isArray(site.tasks)?site.tasks:[];
+    var out=[];
+    (sites||[]).forEach(function(site){
+      (Array.isArray(site.tasks)?site.tasks:[]).forEach(function(task){
+        out.push(Object.assign({},task,{projectId:site.id,projectColor:site.color,projectName:(site.info&&site.info.name)||'현장명 미입력',isSelectedProject:site.id===projectId}));
+      });
+    });
+    return out;
   }
   function agendaOccurrences(events,year,month){
     var first=year+'-'+String(month+1).padStart(2,'0')+'-01', lastDate=new Date(year,month+1,0).getDate(),last=year+'-'+String(month+1).padStart(2,'0')+'-'+String(lastDate).padStart(2,'0'),out=[];

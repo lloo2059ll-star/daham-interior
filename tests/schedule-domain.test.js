@@ -198,13 +198,18 @@ test('reimport replaces estimate schedules while preserving manual schedules', (
   assert.deepEqual(next.map(x => x.id), ['manual', 'new']);
 });
 
-test('selected calendar project excludes schedules from other sites', () => {
+test('calendar keeps schedules from every site visible while one site is selected', () => {
   const sites = [
-    {id:'selected', tasks:[{id:'mine'}]},
-    {id:'other', tasks:[{id:'theirs'}]}
+    {id:'selected', color:'#111', info:{name:'현장 A'}, tasks:[{id:'mine'}]},
+    {id:'other', color:'#222', info:{name:'현장 B'}, tasks:[{id:'theirs'}]}
   ];
 
-  assert.deepEqual(D.projectTasks(sites, 'selected').map(x => x.id), ['mine']);
+  const tasks = D.projectTasks(sites, 'selected');
+  assert.deepEqual(tasks.map(x => x.id), ['mine', 'theirs']);
+  assert.deepEqual(tasks.map(x => [x.projectId, x.projectColor, x.projectName]), [
+    ['selected', '#111', '현장 A'],
+    ['other', '#222', '현장 B']
+  ]);
 });
 
 test('floor demolition only appears with new wood floor', () => {

@@ -249,7 +249,7 @@ select.mf-inp{cursor:pointer}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
-<script src="schedule-domain.js?v=20260901-auto2"></script>
+<script src="schedule-domain.js?v=20260901-auto3"></script>
 <script src="consult-schedule-link.js?v=20260901-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
@@ -1184,7 +1184,7 @@ function _doRenderCalendar(numMonths){
     document.getElementById('proj-legend').innerHTML='';
     var p=getProj();
     var pc=p?p.color||COLORS[0]:COLORS[0];
-    var tasks=DAHAM_SCHEDULE_DOMAIN.projectTasks(allProjects,currentId).map(function(t){return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,worker:t.worker||'',status:t.status||'planned',color:pc,projName:(p.info&&p.info.name)||'현장명 미입력',projId:p.id,isCurrent:t.id===editTaskId};});
+    var tasks=DAHAM_SCHEDULE_DOMAIN.projectTasks(allProjects,currentId).map(function(t){return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,worker:t.worker||'',status:t.status||'planned',color:t.projectColor||COLORS[0],projName:t.projectName,projId:t.projectId,isCurrent:t.id===editTaskId};});
     /* compatibility fallback retained for empty site collection */
     if(!tasks.length) tasks=(p&&p.tasks)?p.tasks.map(function(t){
       return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,
