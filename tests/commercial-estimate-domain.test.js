@@ -50,6 +50,27 @@ test('tile package calculation preserves whole-box purchase amount', () => {
   assert.equal(result.labor, 0);
 });
 
+test('manual unit overrides take priority over automatic package calculations', () => {
+  const d = loadDomain();
+  const result = d.calculateLine({
+    id: 'tile-600x600-product', quantity: 10,
+    overrides: { laborUnit: 12000, materialUnit: 80000 }
+  });
+  assert.equal(result.labor, 120000);
+  assert.equal(result.material, 800000);
+  assert.equal(result.orderQuantity, 27);
+});
+
+test('manual unit overrides take priority over automatic carpentry calculations', () => {
+  const d = loadDomain();
+  const result = d.calculateLine({
+    id: 'carpentry-mdf-panel', quantity: 10,
+    overrides: { laborUnit: 400000, materialUnit: 180000 }
+  });
+  assert.equal(result.labor, 4000000);
+  assert.equal(result.material, 1800000);
+});
+
 test('manual carpenter day adds only the approved labor and 70 percent material', () => {
   const d = loadDomain();
   const result = d.calculateLine({ id: 'carpentry-wall-single', quantity: 10, extraDays: 1 });

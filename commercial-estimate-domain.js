@@ -78,6 +78,9 @@ function calculateLine(input){
   const mainMaterial=boardSheets*boardPrice+studBundles*Number(row.studBundlePrice||0);
   labor=workerDays*350000;material=money(mainMaterial*1.1);details={workerDays,boardSheets,studBundles};
  }
+ if(input.labor===undefined&&ov.laborUnit!==undefined)labor=money(q*lu);
+ if(input.material===undefined&&ov.materialUnit!==undefined)material=money(q*mu);
+ if(input.expense===undefined&&ov.expenseUnit!==undefined)expense=money(q*eu);
  const extraDays=Number(row.extraDays||0),extraLabor=money(extraDays*350000),extraMaterial=money(extraDays*245000); labor+=extraLabor;material+=extraMaterial;
  if(row.minimumTotal&&labor+material<row.minimumTotal){labor+=row.minimumTotal-labor-material;}
  return {id:row.id,categoryId:row.categoryId||input.categoryId,labor:money(labor),material:money(material),expense:money(expense),orderQuantity,extraLabor,extraMaterial,details,automatic:{laborUnit:Number(row.laborUnit||0),materialUnit:Number(row.materialUnit||0),expenseUnit:Number(row.expenseUnit||0)},applied:{laborUnit:lu,materialUnit:mu,expenseUnit:eu}};
