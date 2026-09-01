@@ -27,6 +27,13 @@ test('commercial estimate supports editable rates, autosave, and automatic resto
   assert.match(html, /profitMode/);
 });
 
+test('commercial estimates synchronize with the authenticated employee session', () => {
+  assert.match(html, /DAHAM_AUTH\.getSupabaseConfig\(\)/);
+  assert.match(html, /DAHAM_AUTH\.getAccessToken\(\)/);
+  assert.match(html, /from\(['"]sync_data['"]\)\.upsert/);
+  assert.match(html, /function\s+cloudPullCommercial/);
+});
+
 test('commercial estimate is responsive without clipping the application shell', () => {
   assert.match(html, /@media\s+screen\s+and\s*\(max-width:\s*1100px\)[\s\S]*?\.commercial-shell/);
   assert.match(html, /@media\s+screen\s+and\s*\(max-width:\s*767px\)[\s\S]*?\.commercial-line/);
