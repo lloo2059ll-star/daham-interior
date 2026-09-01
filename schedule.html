@@ -1025,7 +1025,8 @@ function openPhaseCandidates(){
   phaseCandidates=DAHAM_SCHEDULE_DOMAIN.buildPhaseCandidates(estimate.qtys||{}).filter(function(c){
     return !(p.tasks||[]).some(function(t){return t.sourceRuleId===c.ruleId;});
   }).map(function(c){return Object.assign({},c,{start:start,end:workDayEnd(start,c.duration||1)});});
-  renderPhaseCandidates(); document.getElementById('phase-modal').classList.add('open');
+  if(!phaseCandidates.length){showToast('견적 공정이 모두 생성되어 있습니다');return;}
+  savePhaseCandidates();
 }
 function renderPhaseCandidates(){
   var host=document.getElementById('phase-list');

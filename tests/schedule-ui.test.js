@@ -79,6 +79,16 @@ test('schedule loads the automatic contract schedule domain update with a cache-
   assert.match(html, /schedule-domain\.js\?v=20260901-auto/);
 });
 
+test('estimate phase import immediately creates missing phases without opening the candidate modal', () => {
+  const start = html.indexOf('function openPhaseCandidates()');
+  const end = html.indexOf('function renderPhaseCandidates()', start);
+  const source = html.slice(start, end);
+
+  assert.match(source, /if\(!phaseCandidates\.length\)\{showToast\('견적 공정이 모두 생성되어 있습니다'\);return;\}/);
+  assert.match(source, /savePhaseCandidates\(\);/);
+  assert.doesNotMatch(source, /phase-modal/);
+});
+
 test('static DOM ids are unique and every literal selector resolves', () => {
   const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map((match) => match[1]);
   const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
