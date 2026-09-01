@@ -86,14 +86,23 @@
     return true;
   })();
 
-  function loadPushClient(){
+  function loadScript(id,src){
+    return new Promise(resolve=>{
+      if(document.getElementById(id)){resolve();return;}
+      const script=document.createElement('script');script.id=id;script.src=src;script.onload=resolve;script.onerror=resolve;document.head.appendChild(script);
+    });
+  }
+
+  async function loadPushClient(){
     if(publicPages.includes(page)||!window.document)return;
     if(!document.querySelector("link[rel='manifest']")){
       const manifest=document.createElement('link');manifest.rel='manifest';manifest.href='manifest.json';document.head.appendChild(manifest);
     }
-    if(document.getElementById('daham-push-client'))return;
-    const script=document.createElement('script');script.id='daham-push-client';script.src='daham-push.js?v=20260902-1';
-    script.onload=()=>window.DAHAM_PUSH&&window.DAHAM_PUSH.init();document.head.appendChild(script);
+    await loadScript('daham-activity-domain','daham-activity-domain.js?v=20260902-1');
+    await loadScript('daham-activity-client','daham-activity.js?v=20260902-1');
+    if(window.DAHAM_ACTIVITY)window.DAHAM_ACTIVITY.init();
+    await loadScript('daham-push-client','daham-push.js?v=20260902-1');
+    if(window.DAHAM_PUSH)window.DAHAM_PUSH.init();
   }
 
   ready.then(ok=>{if(ok)loadPushClient()});
