@@ -6,6 +6,37 @@ const path = require('node:path');
 let Link = {};
 try { Link = require('../consult-schedule-link.js'); } catch (_) {}
 
+test('saving a dated consultation inquiry creates one linked calendar event', () => {
+  const consultation = {
+    id: 'inquiry-1',
+    status: 'inquiry',
+    name: '김다함',
+    siteName: '세양 청마루아파트',
+    manager: '최일성',
+    schedDate: '2026-09-02',
+    schedTime: '14:30'
+  };
+  consultation.scheduleReservations = Link.updateReservations(null, consultation, '2026-09-01T00:00:00+09:00');
+
+  const events = Link.reconcile([], consultation, 'save', '2026-09-01T00:00:00+09:00');
+
+  assert.deepEqual(events, [{
+    id: 'consult-inquiry-1-consultation_inquiry',
+    kind: 'general',
+    generalType: 'consult',
+    name: '세양 청마루아파트 · 상담문의',
+    start: '2026-09-02',
+    end: '2026-09-02',
+    startTime: '14:30',
+    status: 'planned',
+    memo: '',
+    consultationId: 'inquiry-1',
+    eventType: 'consultation_inquiry',
+    manager: '최일성',
+    source: 'consultation'
+  }]);
+});
+
 test('saving a dated site measurement creates one linked general event', () => {
   assert.equal(typeof Link.updateReservations, 'function');
   assert.equal(typeof Link.reconcile, 'function');
@@ -272,13 +303,14 @@ test('calendar reconciliation restores every scheduled milestone from consultati
   ]);
 });
 
-test('consultation and schedule pages load the same cache-busted linking script', () => {
+test('consultation and schedule pages load the inquiry-calendar linking script version', () => {
   const root = path.join(__dirname, '..');
   const consult = fs.readFileSync(path.join(root, 'consult.html'), 'utf8');
   const schedule = fs.readFileSync(path.join(root, 'schedule.html'), 'utf8');
-  const pattern = /consult-schedule-link\.js\?v=20260831-2/;
+  const pattern = /consult-schedule-link\.js\?v=20260901-1/;
 
   assert.match(consult, pattern);
   assert.match(schedule, pattern);
 });
+
 

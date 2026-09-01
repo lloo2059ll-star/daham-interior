@@ -4,11 +4,12 @@
   if (root) root.DAHAM_CONSULT_SCHEDULE = api;
 })(typeof window !== 'undefined' ? window : globalThis, function () {
   var STATUS_CONFIG = {
+    inquiry: { status: 'inquiry', key: 'consultationInquiry', eventType: 'consultation_inquiry', generalType: 'consult', label: '상담문의' },
     site_check: { status: 'site_check', key: 'siteMeasurement', eventType: 'site_measurement', generalType: 'survey', label: '현장실측' },
     est_meeting: { status: 'est_meeting', key: 'estimateMeeting', eventType: 'estimate_meeting', generalType: 'consult', label: '견적미팅' }
   };
   var STATUS_ORDER = { inquiry: 0, site_check: 1, est_meeting: 2, est_done: 3, contracted: 4, cancelled: 5 };
-  var CONFIGS = [STATUS_CONFIG.site_check, STATUS_CONFIG.est_meeting];
+  var CONFIGS = [STATUS_CONFIG.inquiry, STATUS_CONFIG.site_check, STATUS_CONFIG.est_meeting];
 
   function timestamp(date, time) {
     if (!date) return NaN;
@@ -165,4 +166,5 @@
     reconcileConsultations: reconcileConsultations
   };
 });
+
 
