@@ -146,10 +146,34 @@
     return finalSettings;
   }
 
+  function commercialIds(catalog) {
+    return new Set((catalog || []).flatMap(section => (section.items || []).map(item => item.id)));
+  }
+
+  function saveCommercialDefaults(options) {
+    const allowed = commercialIds(options.catalog);
+    const validated = {};
+    Object.entries(options.changes || {}).forEach(([id, value]) => {
+      if (!allowed.has(id)) throw new Error('존재하지 않는 상가 견적 품목입니다.');
+      const laborUnit = parseMoney(value && value.laborUnit);
+      const materialUnit = parseMoney(value && value.materialUnit);
+      if (laborUnit === null || materialUnit === null) throw new Error('올바른 금액을 입력하세요.');
+      validated[id] = { laborUnit, materialUnit };
+    });
+    return Object.assign({}, options.currentSettings || {}, { commercialEstimateDefaults: validated });
+  }
+
+  function loadCommercialDefaults(catalog, settings) {
+    const saved = settings && settings.commercialEstimateDefaults || {};
+    return (catalog || []).map(section => Object.assign({}, section, {
+      items: (section.items || []).map(item => Object.assign({}, item, saved[item.id] || {}))
+    }));
+  }
+
   return {
     itemKey, quantityKey, parseMoney, canManage, validateOverrides,
     snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice, applyDraftToProject, projectTotal,
-    saveOverrides, saveProjectOverrides,
+    saveOverrides, saveProjectOverrides, saveCommercialDefaults, loadCommercialDefaults,
   };
 });
 
