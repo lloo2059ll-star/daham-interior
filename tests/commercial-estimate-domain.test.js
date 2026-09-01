@@ -94,3 +94,20 @@ test('negative and non numeric values are rejected', () => {
   ]});
   assert.deepEqual(Array.from(errors, x => x.field), ['quantity', 'materialUnit']);
 });
+
+test('commercial totals support percentage and fixed profit modes', () => {
+  const d = loadDomain();
+  const percent = d.calculateCommercialTotals(
+    { labor: 1000000, material: 500000, expense: 100000 },
+    { managementRate: 5, profitMode: 'rate', profitRate: 10, vatRate: 10 }
+  );
+  assert.deepEqual(JSON.parse(JSON.stringify(percent)), {
+    labor:1000000, material:500000, expense:100000, subtotal:1600000,
+    management:80000, profit:168000, supplyTotal:1848000, vat:184800, grandTotal:2032800
+  });
+  const fixed = d.calculateCommercialTotals(
+    { labor: 1000000, material: 500000, expense: 100000 },
+    { managementRate: 5, profitMode: 'fixed', profitAmount: 250000, vatRate: 10 }
+  );
+  assert.equal(fixed.profit, 250000);
+});

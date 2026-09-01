@@ -219,6 +219,12 @@ function buildCategories(sections) {
   return cats;
 }
 
+function renderCommercialPrint(d) {
+  var labels={'temporary':'가설·보양','demolition':'철거·폐기물','plumbing':'설비','electrical':'전기·조명','hvac':'냉난방·환기','metal-glass':'금속·유리','carpentry':'목공','tile':'타일','paint':'도장','film':'필름','wallpaper':'도배','flooring':'바닥','door':'문·도어','fire':'소방','cleaning':'청소','site-cost':'기타·현장경비'};
+  var rows=Object.entries(d.customerCategoryTotals||{}).filter(function(x){return Number(x[1])>0}).map(function(x,i){return '<div class="scope-row"><span class="scope-num">'+String(i+1).padStart(2,'0')+'</span><span class="scope-name">'+(labels[x[0]]||x[0])+'</span><span class="scope-amount">'+comma(x[1])+' 원</span></div>'}).join('');
+  document.getElementById('doc-wrap').innerHTML='<div class="page"><div class="header"><div><div class="brand">DAHAM</div><div class="brand-sub">COMMERCIAL INTERIOR</div></div><div class="header-right">상가 견적서</div></div><div class="title-block"><div class="title-en">COMMERCIAL ESTIMATE</div><div class="title-ko">상가 공사 견적서</div></div><div class="info-grid"><div class="info-cell"><div class="info-label">현장명</div><div class="info-value">'+((d.client||{}).siteName||'-')+'</div></div><div class="info-cell"><div class="info-label">고객명</div><div class="info-value">'+((d.client||{}).clientName||'-')+'</div></div><div class="info-cell"><div class="info-label">공사면적</div><div class="info-value">'+(d.areaPyeong||0)+'평</div></div><div class="info-cell"><div class="info-label">견적 구분</div><div class="info-value">상가 인테리어</div></div></div><div class="section-title"><div class="section-bar"></div><div class="section-name">공종별 견적금액</div></div><div class="scope">'+rows+'</div><div class="total-block"><div class="breakdown"><span class="label">부가세</span><span class="amount">'+comma(d.vat||0)+' 원</span></div><div class="grand"><div class="grand-label">TOTAL ESTIMATE</div><div class="grand-amount"><span class="won">₩</span>'+comma(d.grandTotal||0)+'</div></div></div></div>';
+}
+
 function render(d) {
   var c = d.client || {};
   var sections = d.sections || [];
@@ -340,11 +346,11 @@ function render(d) {
 (function(){
   var d = null;
   try { d = JSON.parse(localStorage.getItem('daham_estimate_print') || 'null'); } catch(e){}
-  if (!d || !d.sections || !d.sections.length) {
+  if (!d || (d.estimateType !== 'commercial' && (!d.sections || !d.sections.length))) {
     document.getElementById('doc-wrap').innerHTML =
       '<div class="empty-state">견적 데이터를 불러올 수 없습니다.<br>견적서 페이지에서 <strong>견적 요약서</strong> 버튼을 눌러 다시 시도하세요.</div>';
   } else {
-    render(d);
+    if (d.estimateType === 'commercial') renderCommercialPrint(d); else render(d);
   }
 })();
 </script>
