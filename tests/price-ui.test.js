@@ -50,7 +50,7 @@ test('price modal can target one existing estimate and persists its updated pric
 });
 
 test('price editor exposes commercial defaults through manager authorization', () => {
-  const html = fs.readFileSync(path.join(root, 'price-editor.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'price-commercial.html'), 'utf8');
   assert.match(html, /상가 견적 기본단가/);
   assert.match(html, /commercialEstimateDefaults/);
   assert.match(html, /DAHAM_PRICES\.canManage/);

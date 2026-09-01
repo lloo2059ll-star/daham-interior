@@ -4,10 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>DAHAM V2 · 단가 조정표</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="auth.js"></script>
-<script src="price-management.js"></script>
-<script src="commercial-estimate-domain.js"></script>
 <style>
 :root{
   --nav:#101828;--nav2:#182230;--bg:#f6f7fb;--card:#fff;--text:#202939;--muted:#697586;
@@ -120,14 +116,6 @@ tbody tr:hover{background:#fafaff}
         <tbody id="tbody"></tbody>
       </table>
     </div>
-
-    <section id="commercial-price-panel" data-settings-key="commercialEstimateDefaults" class="table-wrap" style="margin-top:22px">
-      <div style="padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center">
-        <div><h2 style="margin:0 0 4px">상가 견적 기본단가</h2><div class="desc">새 상가 견적서에 적용할 인건비와 자재비 기본값입니다.</div></div>
-        <button id="commercialSaveBtn" class="btn primary">상가 기본단가 저장</button>
-      </div>
-      <table><thead><tr><th>공종</th><th>항목</th><th>단위</th><th class="money">인건비</th><th class="money">자재비</th></tr></thead><tbody id="commercialPriceBody"></tbody></table>
-    </section>
 
     <div class="note">
       ※ 새 단가를 입력하지 않은 항목은 기존 단가를 유지합니다.<br>
@@ -256,12 +244,7 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
 });
 [search,sectionFilter,changedOnly].forEach(el=>el.addEventListener(el===search?'input':'change',render));
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
-const commercialSettings=JSON.parse(localStorage.getItem('daham_settings_v1')||localStorage.getItem('daham_settings')||'{}');
-const commercialCatalog=DAHAM_PRICES.loadCommercialDefaults(DAHAM_COMMERCIAL_ESTIMATE.CATALOG,commercialSettings);
-function renderCommercialPrices(){document.getElementById('commercialPriceBody').innerHTML=commercialCatalog.flatMap(section=>section.items.map(item=>`<tr data-commercial-id="${item.id}"><td>${section.name}</td><td>${item.name}</td><td>${item.unit}</td><td><input class="edit commercial-labor" inputmode="numeric" value="${Number(item.laborUnit||0).toLocaleString('ko-KR')}"></td><td><input class="edit commercial-material" inputmode="numeric" value="${Number(item.materialUnit||0).toLocaleString('ko-KR')}"></td></tr>`)).join('')}
-async function writeCommercialSettings(next){const cfg=DAHAM_AUTH.getSupabaseConfig(),token=DAHAM_AUTH.getAccessToken(),client=window.supabase.createClient(cfg.url,cfg.key,{global:{headers:{Authorization:'Bearer '+token}},auth:{persistSession:false,autoRefreshToken:false}});const result=await client.from('sync_data').upsert({key:'daham_settings_v1',value:JSON.stringify(next),updated_at:new Date().toISOString()});if(result.error)throw result.error}
-document.getElementById('commercialSaveBtn').addEventListener('click',async()=>{const user=DAHAM_AUTH.currentUser();if(!DAHAM_PRICES.canManage(user)){toast('상가 기본단가를 저장할 권한이 없습니다.');return}const changes={};document.querySelectorAll('[data-commercial-id]').forEach(row=>{changes[row.dataset.commercialId]={laborUnit:row.querySelector('.commercial-labor').value,materialUnit:row.querySelector('.commercial-material').value}});try{const next=DAHAM_PRICES.saveCommercialDefaults({catalog:DAHAM_COMMERCIAL_ESTIMATE.CATALOG,currentSettings:commercialSettings,changes});await writeCommercialSettings(next);localStorage.setItem('daham_settings_v1',JSON.stringify(next));toast('상가 기본단가를 저장했습니다.')}catch(e){toast(e.message)}});
-render(); updateStats(); renderCommercialPrices();
+render(); updateStats();
 </script>
 </body>
 </html>
