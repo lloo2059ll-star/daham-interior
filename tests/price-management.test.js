@@ -120,6 +120,25 @@ test('project-specific overrides take priority without changing another estimate
   assert.deepEqual(prices.priceForProject(other, section, item, {}, scoped), { labor: 12000, material: 130000 });
 });
 
+test('commercial defaults validate stable ids and remain namespaced', () => {
+  const catalog = [{ id:'tile', items:[{ id:'tile-floor-pressure' }] }];
+  const saved = prices.saveCommercialDefaults({
+    catalog,
+    currentSettings:{ priceOverrides:{ residential:'kept' } },
+    changes:{ 'tile-floor-pressure':{ laborUnit:'90,000', materialUnit:'35,000' } }
+  });
+  assert.deepEqual(saved.commercialEstimateDefaults['tile-floor-pressure'], { laborUnit:90000, materialUnit:35000 });
+  assert.deepEqual(saved.priceOverrides, { residential:'kept' });
+  assert.throws(() => prices.saveCommercialDefaults({ catalog, currentSettings:{}, changes:{ missing:{ laborUnit:1, materialUnit:2 } } }), /존재하지 않는/);
+});
+
+test('commercial default loader merges approved organization values only', () => {
+  const catalog = [{ id:'tile', items:[{ id:'tile-floor-pressure', laborUnit:90000, materialUnit:35000 }] }];
+  const result = prices.loadCommercialDefaults(catalog, { commercialEstimateDefaults:{ 'tile-floor-pressure':{ laborUnit:95000, materialUnit:40000 } } });
+  assert.equal(result[0].items[0].laborUnit, 95000);
+  assert.equal(result[0].items[0].materialUnit, 40000);
+});
+
 test('project price save uses protected settings and keeps only items used by that estimate', async () => {
   const section = catalog[0], used = section.items[0], unused = section.items[1];
   const usedKey = prices.itemKey(section, used), unusedKey = prices.itemKey(section, unused);
