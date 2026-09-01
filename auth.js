@@ -86,6 +86,18 @@
     return true;
   })();
 
+  function loadPushClient(){
+    if(publicPages.includes(page)||!window.document)return;
+    if(!document.querySelector("link[rel='manifest']")){
+      const manifest=document.createElement('link');manifest.rel='manifest';manifest.href='manifest.json';document.head.appendChild(manifest);
+    }
+    if(document.getElementById('daham-push-client'))return;
+    const script=document.createElement('script');script.id='daham-push-client';script.src='daham-push.js?v=20260902-1';
+    script.onload=()=>window.DAHAM_PUSH&&window.DAHAM_PUSH.init();document.head.appendChild(script);
+  }
+
+  ready.then(ok=>{if(ok)loadPushClient()});
+
   function requireOwner(){
     const profile=readJSON(PROFILE_KEY);
     if(profile?.role!=='owner'||profile?.is_active!==true) throw new Error('직원 관리는 대표만 사용할 수 있습니다.');
