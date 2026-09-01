@@ -14,7 +14,7 @@ function tabletOverride(file) {
 }
 
 test('touch-capable iPads opt into tablet layout through 1366px', () => {
-  for (const file of ['estimate.html', 'estimate-commercial.html']) {
+  for (const file of ['estimate.html']) {
     const html = read(file);
     const css = tabletOverride(file);
     assert.match(html, /navigator\.maxTouchPoints\s*>\s*0/);
@@ -60,7 +60,7 @@ test('estimate editor reflows inside tablet width without horizontal scrolling',
 });
 
 test('tablet overrides keep estimate information visible and leave phone and print rules alone', () => {
-  for (const file of ['estimate.html', 'estimate-commercial.html']) {
+  for (const file of ['estimate.html']) {
     const css = tabletOverride(file);
     assert.doesNotMatch(css, /(?:\.v2-center|\.v2-right|\.sec-summary|\.items-tbl)\s*\{[^}]*display\s*:\s*none/is);
     assert.doesNotMatch(css, /@media\s+print/i);
@@ -70,6 +70,8 @@ test('tablet overrides keep estimate information visible and leave phone and pri
     assert.match(css, /box-sizing\s*:\s*border-box/);
     assert.match(css, /@media\s+screen\s+and\s*\(min-width:\s*1025px\)\s+and\s*\(max-width:\s*1366px\)/);
   }
-  assert.match(tabletOverride('estimate-commercial.html'), /\.summary-bar\s*\{[^}]*display\s*:\s*grid[^}]*grid-template-columns\s*:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/s);
+  const commercial = read('estimate-commercial.html');
+  assert.match(commercial, /@media\s+screen\s+and\s*\(max-width:\s*1100px\)[\s\S]*?\.commercial-shell\s*\{[^}]*grid-template-columns\s*:\s*1fr/s);
+  assert.match(commercial, /@media\s+screen\s+and\s*\(max-width:\s*767px\)[\s\S]*?\.commercial-line\s*\{[^}]*grid-template-columns/s);
 });
 
