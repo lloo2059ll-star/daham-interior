@@ -75,8 +75,8 @@ test('existing modal and domain integration hooks remain available', () => {
   assert.match(html, /schedule-holidays\.js/);
 });
 
-test('schedule loads the address-name domain update with a cache-busted asset', () => {
-  assert.match(html, /schedule-domain\.js\?v=20260831-progress/);
+test('schedule loads the automatic contract schedule domain update with a cache-busted asset', () => {
+  assert.match(html, /schedule-domain\.js\?v=20260901-auto/);
 });
 
 test('static DOM ids are unique and every literal selector resolves', () => {
@@ -116,6 +116,7 @@ test('responsive UI provides real sizing rather than clipping page overflow', ()
   assert.match(html, /@media[^\{]*\(max-width:\s*600px\)[\s\S]*?\.schedule-drawer \.drawer-panel\s*\{[^}]*inset:\s*0[^}]*width:\s*auto[^}]*max-width:\s*none/);
   assert.doesNotMatch(html, /(?:html|body)\s*\{[^}]*overflow-x\s*:\s*hidden/i);
 });
+
 
 
 

@@ -249,7 +249,7 @@ select.mf-inp{cursor:pointer}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
-<script src="schedule-domain.js?v=20260831-progress"></script>
+<script src="schedule-domain.js?v=20260901-auto"></script>
 <script src="consult-schedule-link.js?v=20260901-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
@@ -1511,7 +1511,7 @@ function syncContractedProjects(){
   var estProjects;
   try{ estProjects=JSON.parse(localStorage.getItem('daham_detail_v2')||'[]'); }catch(e){ return; }
 
-  var result=DAHAM_SCHEDULE_DOMAIN.reconcileContractSites(allProjects,estProjects,uid,COLORS);
+  var result=DAHAM_SCHEDULE_DOMAIN.reconcileContractSites(allProjects,estProjects,uid,COLORS,holidayMap);
   allProjects=result.sites;
   if(result.added>0||result.updated>0) saveDB();
   if(result.added>0) showToast('✓ 계약완료 현장 '+result.added+'건이 일정표에 등록됐습니다');

@@ -68,6 +68,79 @@ test('electric and air conditioner create first and second phases', () => {
   ]);
 });
 
+test('automatic contract phases follow the approved order and durations', () => {
+  const candidates = D.buildPhaseCandidates(q(
+    '설비|수도배관|',
+    '전기/조명|거실등|[1]파인3등(380*710)',
+    '시스템에어컨|2대|',
+    '목작업|목공|',
+    '필름|문틀필름|',
+    '거실욕실|벽타일 300-600|',
+    '도배|실크벽지|'
+  ), '34평');
+
+  assert.deepEqual(candidates.map(x => [x.name, x.duration]), [
+    ['설비', 1],
+    ['전기/조명 1차', 1],
+    ['에어컨 1차', 1],
+    ['목공', 4],
+    ['필름', 3],
+    ['타일작업', 5],
+    ['도배', 3],
+    ['전기/조명 2차', 1],
+    ['에어컨 2차', 1]
+  ]);
+
+  const large = D.buildPhaseCandidates(q('도배|실크벽지|'), '40평');
+  assert.equal(large[0].duration, 5);
+});
+
+test('automatic contract schedule is sequential and skips weekends and holidays', () => {
+  let id = 0;
+  const tasks = D.buildAutomaticContractTasks(q(
+    '전기/조명|거실등|[1]파인3등(380*710)',
+    '시스템에어컨|2대|',
+    '목작업|목공|',
+    '필름|문틀필름|'
+  ), '2026-09-04', '34평', {'2026-09-07':'임시공휴일'}, () => 'task-'+(++id));
+
+  assert.deepEqual(tasks.map(x => [x.name, x.start, x.end]), [
+    ['전기/조명 1차', '2026-09-04', '2026-09-04'],
+    ['에어컨 1차', '2026-09-08', '2026-09-08'],
+    ['목공', '2026-09-09', '2026-09-14'],
+    ['필름', '2026-09-15', '2026-09-17'],
+    ['전기/조명 2차', '2026-09-18', '2026-09-18'],
+    ['에어컨 2차', '2026-09-21', '2026-09-21']
+  ]);
+});
+
+test('contract reconciliation auto-creates one schedule and never duplicates it', () => {
+  let id = 0;
+  const project = {id:'p-auto',status:'contracted',client:{'cl-name':'A','cl-addr':'서울','cl-area':'40평','cl-start':'2026-09-04'},qtys:q('타일류|현관 바닥타일 600-600|','도배|실크벽지|')};
+  const first = D.reconcileContractSites([], [project], () => 'id-'+(++id), ['#111'], {'2026-09-07':'임시공휴일'});
+  const site = first.sites[0];
+
+  assert.deepEqual(site.tasks.map(x => [x.name, x.start, x.end]), [
+    ['타일작업', '2026-09-04', '2026-09-11'],
+    ['도배', '2026-09-14', '2026-09-18']
+  ]);
+  assert.equal(site.autoScheduleInitialized, true);
+
+  const second = D.reconcileContractSites(first.sites, [project], () => 'unexpected', ['#111'], {'2026-09-07':'임시공휴일'});
+  assert.equal(second.sites[0].tasks.length, 2);
+});
+
+test('an existing empty contract site reports its backfilled schedule as an update', () => {
+  const sites = [{id:'site-existing',estimateId:'p-existing',info:{name:'서울',customerName:'',tel:'',addr:'서울',area:'',start:'2026-09-04',end:'',status:'contracted'},tasks:[]}];
+  const project = {id:'p-existing',status:'contracted',client:{'cl-addr':'서울','cl-start':'2026-09-04'},qtys:q('필름|문틀필름|')};
+
+  const result = D.reconcileContractSites(sites, [project], () => 'task', ['#111'], {});
+
+  assert.equal(result.updated, 1);
+  assert.equal(result.sites[0].tasks.length, 1);
+  assert.equal(result.sites[0].tasks[0].name, '필름');
+});
+
 test('floor demolition only appears with new wood floor', () => {
   const removal='철거|바닥철거|강마루 철거';
   const newFloor='바닥|강마루 구정(94-800 7.5T)|';
@@ -234,6 +307,7 @@ test('site progress counts schedules ending today or earlier', () => {
   assert.equal(D.scheduleProgress(tasks,'2026-09-02'),100);
   assert.equal(D.scheduleProgress([],'2026-08-31'),0);
 });
+
 
 
 

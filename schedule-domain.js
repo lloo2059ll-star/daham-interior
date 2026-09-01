@@ -53,16 +53,22 @@
   function candidate(ruleId,name,order,dur){
     return {ruleId:ruleId,name:name,order:order,duration:dur||1,selected:true,worker:'',memo:''};
   }
-  function buildPhaseCandidates(qtys){
+  function sectionDuration(section,area){
+    if(section==='목작업') return 4;
+    if(section==='필름') return 3;
+    if(section==='도배') return (parseFloat(String(area||'').replace(/,/g,''))||0)>=40?5:3;
+    return 1;
+  }
+  function buildPhaseCandidates(qtys,area){
     var items=selectedItems(qtys), out=[];
     GENERIC_SECTION_RULES.forEach(function(r){
-      if(has(items,function(x){return x.section===r[0];})) out.push(candidate('section:'+r[0],r[1],r[2],1));
+      if(has(items,function(x){return x.section===r[0];})) out.push(candidate('section:'+r[0],r[1],r[2],sectionDuration(r[0],area)));
     });
     if(has(items,function(x){return x.section===ELECTRIC_SECTION;})){
-      out.push(candidate('electric:first','전기/조명 1차',70,1),candidate('electric:second','전기/조명 2차',120,1));
+      out.push(candidate('electric:first','전기/조명 1차',45,1),candidate('electric:second','전기/조명 2차',120,1));
     }
     if(has(items,function(x){return x.section===AC_SECTION;})){
-      out.push(candidate('aircon:first','에어컨 1차',80,1),candidate('aircon:second','에어컨 2차',125,1));
+      out.push(candidate('aircon:first','에어컨 1차',46,1),candidate('aircon:second','에어컨 2차',125,1));
     }
     var hasNewMaru=has(items,function(x){return x.section==='바닥'&&NEW_MARU_SUBS.has(x.sub);});
     var hasRemoveMaru=has(items,function(x){return x.section==='철거'&&x.sub==='바닥철거'&&REMOVE_MARU_DETAILS.has(x.detail);});
@@ -73,7 +79,7 @@
     });
     var hasCeiling=has(items,function(x){return BATH_SECTIONS.has(x.section)&&x.sub==='욕실천장'&&x.detail==='욕실천장';});
     var hasSanitary=has(items,function(x){return BATH_SECTIONS.has(x.section)&&SANITARY_SUBS.has(x.sub);});
-    if(hasTile) out.push(candidate('bath:tile','타일작업',90,4));
+    if(hasTile) out.push(candidate('bath:tile','타일작업',90,5));
     if(hasCeiling) out.push(candidate('bath:ceiling','욕실 천장작업',91,1));
     if(hasSanitary) out.push(candidate('bath:sanitary','도기세팅',92,1));
     return out.sort(function(a,b){return a.order-b.order;});
@@ -81,6 +87,32 @@
   function materializeCandidates(rows){
     return (rows||[]).filter(function(x){return x.selected!==false&&String(x.name||'').trim();})
       .map(function(x){return Object.assign({},x,{name:String(x.name).trim()});});
+  }
+  function dateString(date){return date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');}
+  function isNonWorkDay(date,holidays){return date.getDay()===0||date.getDay()===6||!!(holidays&&holidays[dateString(date)]);}
+  function toWorkDay(value,holidays){
+    var date=new Date(value+'T00:00:00');
+    while(isNonWorkDay(date,holidays)) date.setDate(date.getDate()+1);
+    return dateString(date);
+  }
+  function workDayEnd(value,duration,holidays){
+    var date=new Date(value+'T00:00:00'), worked=1;
+    while(worked<(duration||1)){date.setDate(date.getDate()+1);if(!isNonWorkDay(date,holidays))worked++;}
+    return dateString(date);
+  }
+  function nextWorkDay(value,holidays){
+    var date=new Date(value+'T00:00:00');date.setDate(date.getDate()+1);
+    while(isNonWorkDay(date,holidays))date.setDate(date.getDate()+1);
+    return dateString(date);
+  }
+  function buildAutomaticContractTasks(qtys,startDate,area,holidays,uid){
+    if(!startDate)return [];
+    var cursor=toWorkDay(startDate,holidays);
+    return buildPhaseCandidates(qtys,area).map(function(row){
+      var start=cursor,end=workDayEnd(start,row.duration||1,holidays);
+      cursor=nextWorkDay(end,holidays);
+      return {id:uid(),name:row.name,start:start,end:end,worker:'',memo:'',status:'planned',kind:'construction',source:'estimate',sourceRuleId:row.ruleId};
+    });
   }
   function normalizeSites(sites,colors){
     return (Array.isArray(sites)?sites:[]).map(function(site,index){
@@ -98,15 +130,15 @@
     if(p&&p.contracted) return 'contracted';
     return 'estimate';
   }
-  function reconcileContractSites(sites,projects,uid,colors){
+  function reconcileContractSites(sites,projects,uid,colors,holidays){
     var out=normalizeSites(sites,colors), byId={};
     out.forEach(function(s){if(s.estimateId&&!byId[s.estimateId]) byId[s.estimateId]=s;});
     var added=0,updated=0;
     (projects||[]).forEach(function(p,index){
       var status=projectStatus(p);
       if(status!=='contracted'&&status!=='construction') return;
-      var client=p.client||{}, site=byId[p.id];
-      var info={name:client['cl-addr']||'',customerName:client['cl-name']||'',tel:client['cl-tel']||'',addr:client['cl-addr']||'',start:client['cl-start']||'',end:client['cl-end']||''};
+      var client=p.client||{}, site=byId[p.id], wasNew=!site;
+      var info={name:client['cl-addr']||'',customerName:client['cl-name']||'',tel:client['cl-tel']||'',addr:client['cl-addr']||'',area:client['cl-area']||'',start:client['cl-start']||'',end:client['cl-end']||''};
       if(site){
         var changed=false,nextInfo=Object.assign({},site.info||{});
         Object.keys(info).forEach(function(k){
@@ -118,6 +150,12 @@
       }else{
         site={id:uid(),estimateId:p.id,sourceType:'contract',color:(colors&&colors[index%colors.length])||'#E65100',info:Object.assign({manager:'',memo:''},info,{status:status}),tasks:[]};
         out.push(site); byId[p.id]=site; added++;
+      }
+      if((site.tasks||[]).length&&!site.autoScheduleInitialized){site.autoScheduleInitialized=true;if(!wasNew)updated++;}
+      if(info.start&&!(site.tasks||[]).length&&!site.autoScheduleInitialized){
+        site.tasks=buildAutomaticContractTasks(p.qtys||{},info.start,info.area,holidays,uid);
+        site.autoScheduleInitialized=true;
+        if(!wasNew)updated++;
       }
     });
     return {sites:out,added:added,updated:updated};
@@ -215,12 +253,13 @@
     return {sites:nextSites,generalEvents:nextGeneral,moved:true};
   }
 
-  return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,
+  return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,buildAutomaticContractTasks:buildAutomaticContractTasks,
     materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
     constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress,buildProjectPrintPlan:buildProjectPrintPlan,
     generalTypeMeta:generalTypeMeta,moveSiteTaskToGeneral:moveSiteTaskToGeneral,compactPrintMonthTimeline:compactPrintMonthTimeline};
 });
+
 
 
 
