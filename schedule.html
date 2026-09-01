@@ -249,7 +249,7 @@ select.mf-inp{cursor:pointer}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
-<script src="schedule-domain.js?v=20260901-auto"></script>
+<script src="schedule-domain.js?v=20260901-auto2"></script>
 <script src="consult-schedule-link.js?v=20260901-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
@@ -1020,13 +1020,13 @@ function getLinkedEstimate(p){
 function openPhaseCandidates(){
   var p=getProj(); if(!p||!p.estimateId){showToast('계약 견적과 연결된 현장에서만 사용할 수 있습니다');return;}
   var estimate=getLinkedEstimate(p); if(!estimate){showToast('연결된 현재 견적을 찾을 수 없습니다');return;}
-  forcePhaseConflict=false;
-  var start=(p.info&&p.info.start)||todayStr();
-  phaseCandidates=DAHAM_SCHEDULE_DOMAIN.buildPhaseCandidates(estimate.qtys||{}).filter(function(c){
-    return !(p.tasks||[]).some(function(t){return t.sourceRuleId===c.ruleId;});
-  }).map(function(c){return Object.assign({},c,{start:start,end:workDayEnd(start,c.duration||1)});});
-  if(!phaseCandidates.length){showToast('견적 공정이 모두 생성되어 있습니다');return;}
-  savePhaseCandidates();
+  var start=(p.info&&p.info.start)||'';
+  if(!start){showToast('착공일을 먼저 입력해주세요');return;}
+  var area=(p.info&&p.info.area)||(estimate.client&&estimate.client['cl-area'])||'';
+  var imported=DAHAM_SCHEDULE_DOMAIN.buildAutomaticContractTasks(estimate.qtys||{},start,area,holidayMap,uid,estimate.sectionTotals,estimate.floorType);
+  if(!imported.length){p.autoScheduleInitialized=false;saveDB();showToast('견적에서 생성할 공정을 찾을 수 없습니다');return;}
+  p.tasks=DAHAM_SCHEDULE_DOMAIN.replaceEstimateTasks(p.tasks,imported);
+  p.autoScheduleInitialized=true;p.updatedAt=nowISO();saveDB();renderAll();showToast('✓ 견적 공정 '+imported.length+'개를 자동 작성했습니다');
 }
 function renderPhaseCandidates(){
   var host=document.getElementById('phase-list');
@@ -1184,8 +1184,7 @@ function _doRenderCalendar(numMonths){
     document.getElementById('proj-legend').innerHTML='';
     var p=getProj();
     var pc=p?p.color||COLORS[0]:COLORS[0];
-    var tasks=[];
-    allProjects.forEach(function(site){(site.tasks||[]).forEach(function(t){tasks.push({id:t.id,name:t.name,start:t.start,end:t.end||t.start,worker:t.worker||'',status:t.status||'planned',color:site.color||COLORS[0],projName:(site.info&&site.info.name)||'현장명 미입력',projId:site.id,isCurrent:t.id===editTaskId});});});
+    var tasks=DAHAM_SCHEDULE_DOMAIN.projectTasks(allProjects,currentId).map(function(t){return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,worker:t.worker||'',status:t.status||'planned',color:pc,projName:(p.info&&p.info.name)||'현장명 미입력',projId:p.id,isCurrent:t.id===editTaskId};});
     /* compatibility fallback retained for empty site collection */
     if(!tasks.length) tasks=(p&&p.tasks)?p.tasks.map(function(t){
       return {id:t.id,name:t.name,start:t.start,end:t.end||t.start,

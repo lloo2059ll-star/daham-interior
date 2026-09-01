@@ -84,6 +84,19 @@
     if(hasSanitary) out.push(candidate('bath:sanitary','도기세팅',92,1));
     return out.sort(function(a,b){return a.order-b.order;});
   }
+  function buildSectionTotalCandidates(sectionTotals,area,floorType){
+    var active=new Set((sectionTotals||[]).filter(function(x){return Number(x&&x.sub)>0;}).map(function(x){return x.name;})),out=[];
+    GENERIC_SECTION_RULES.forEach(function(r){
+      if(active.has(r[0])) out.push(candidate('section:'+r[0],r[1],r[2],sectionDuration(r[0],area)));
+    });
+    if(active.has(ELECTRIC_SECTION)) out.push(candidate('electric:first','전기/조명 1차',45,1),candidate('electric:second','전기/조명 2차',120,1));
+    if(active.has(AC_SECTION)) out.push(candidate('aircon:first','에어컨 1차',46,1),candidate('aircon:second','에어컨 2차',125,1));
+    if(active.has('바닥')) out.push(candidate('floor:install',floorType==='장판'?'장판 시공':'마루 시공',129,1));
+    if(active.has('거실욕실')||active.has('안방욕실')){
+      out.push(candidate('bath:tile','타일작업',90,5),candidate('bath:ceiling','욕실 천장작업',91,1),candidate('bath:sanitary','도기세팅',92,1));
+    }
+    return out.sort(function(a,b){return a.order-b.order;});
+  }
   function materializeCandidates(rows){
     return (rows||[]).filter(function(x){return x.selected!==false&&String(x.name||'').trim();})
       .map(function(x){return Object.assign({},x,{name:String(x.name).trim()});});
@@ -105,10 +118,14 @@
     while(isNonWorkDay(date,holidays))date.setDate(date.getDate()+1);
     return dateString(date);
   }
-  function buildAutomaticContractTasks(qtys,startDate,area,holidays,uid){
+  function buildAutomaticContractTasks(qtys,startDate,area,holidays,uid,sectionTotals,floorType){
     if(!startDate)return [];
     var cursor=toWorkDay(startDate,holidays);
-    return buildPhaseCandidates(qtys,area).map(function(row){
+    var candidates=buildPhaseCandidates(qtys,area);
+    var known=new Set(candidates.map(function(row){return row.ruleId;}));
+    buildSectionTotalCandidates(sectionTotals,area,floorType).forEach(function(row){if(!known.has(row.ruleId))candidates.push(row);});
+    candidates.sort(function(a,b){return a.order-b.order;});
+    return candidates.map(function(row){
       var start=cursor,end=workDayEnd(start,row.duration||1,holidays);
       cursor=nextWorkDay(end,holidays);
       return {id:uid(),name:row.name,start:start,end:end,worker:'',memo:'',status:'planned',kind:'construction',source:'estimate',sourceRuleId:row.ruleId};
@@ -153,9 +170,8 @@
       }
       if((site.tasks||[]).length&&!site.autoScheduleInitialized){site.autoScheduleInitialized=true;if(!wasNew)updated++;}
       if(info.start&&!(site.tasks||[]).length&&!site.autoScheduleInitialized){
-        site.tasks=buildAutomaticContractTasks(p.qtys||{},info.start,info.area,holidays,uid);
-        site.autoScheduleInitialized=true;
-        if(!wasNew)updated++;
+        site.tasks=buildAutomaticContractTasks(p.qtys||{},info.start,info.area,holidays,uid,p.sectionTotals,p.floorType);
+        if(site.tasks.length){site.autoScheduleInitialized=true;if(!wasNew)updated++;}
       }
     });
     return {sites:out,added:added,updated:updated};
@@ -180,6 +196,13 @@
       var draft={id:'__candidate_'+index,name:row.name,worker:row.worker,start:row.start,end:row.end||row.start};
       hits=hits.concat(findWorkerConflicts(draft,temp));batch.tasks.push(draft);
     });return hits;
+  }
+  function replaceEstimateTasks(tasks,imported){
+    return (tasks||[]).filter(function(task){return task.source!=='estimate';}).concat(imported||[]);
+  }
+  function projectTasks(sites,projectId){
+    var site=(sites||[]).find(function(item){return item.id===projectId;});
+    return site&&Array.isArray(site.tasks)?site.tasks:[];
   }
   function agendaOccurrences(events,year,month){
     var first=year+'-'+String(month+1).padStart(2,'0')+'-01', lastDate=new Date(year,month+1,0).getDate(),last=year+'-'+String(month+1).padStart(2,'0')+'-'+String(lastDate).padStart(2,'0'),out=[];
@@ -253,7 +276,7 @@
     return {sites:nextSites,generalEvents:nextGeneral,moved:true};
   }
 
-  return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,buildAutomaticContractTasks:buildAutomaticContractTasks,
+  return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,buildAutomaticContractTasks:buildAutomaticContractTasks,replaceEstimateTasks:replaceEstimateTasks,projectTasks:projectTasks,
     materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
     constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress,buildProjectPrintPlan:buildProjectPrintPlan,

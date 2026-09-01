@@ -141,6 +141,72 @@ test('an existing empty contract site reports its backfilled schedule as an upda
   assert.equal(result.sites[0].tasks[0].name, '필름');
 });
 
+test('section totals backfill an automatic schedule when estimate quantities are unavailable', () => {
+  let id = 0;
+  const tasks = D.buildAutomaticContractTasks(
+    {},
+    '2026-09-04',
+    '34평',
+    {'2026-09-07':'임시공휴일'},
+    () => 'task-'+(++id),
+    [
+      {name:'전기/조명', sub:100},
+      {name:'목작업', sub:200},
+      {name:'도배', sub:300}
+    ]
+  );
+
+  assert.deepEqual(tasks.map(x => [x.name, x.start, x.end]), [
+    ['전기/조명 1차', '2026-09-04', '2026-09-04'],
+    ['목공', '2026-09-08', '2026-09-11'],
+    ['도배', '2026-09-14', '2026-09-16'],
+    ['전기/조명 2차', '2026-09-17', '2026-09-17']
+  ]);
+});
+
+test('section totals supplement trades missing from partial estimate quantities', () => {
+  let id = 0;
+  const tasks = D.buildAutomaticContractTasks(
+    q('전기/조명|거실등|[1]파인3등(380*710)'),
+    '2026-09-01',
+    '34평',
+    {},
+    () => 'task-'+(++id),
+    [{name:'전기/조명', sub:100},{name:'목작업', sub:200}]
+  );
+
+  assert.deepEqual(tasks.map(x => x.name), ['전기/조명 1차', '목공', '전기/조명 2차']);
+});
+
+test('empty automatic generation stays retryable instead of being marked complete', () => {
+  const project = {id:'p-empty',status:'contracted',client:{'cl-addr':'서울','cl-start':'2026-09-04'},qtys:{},sectionTotals:[]};
+  const result = D.reconcileContractSites([], [project], () => 'site', ['#111'], {});
+
+  assert.deepEqual(result.sites[0].tasks, []);
+  assert.notEqual(result.sites[0].autoScheduleInitialized, true);
+});
+
+test('reimport replaces estimate schedules while preserving manual schedules', () => {
+  const site = {tasks:[
+    {id:'manual', name:'현장 확인', source:'manual'},
+    {id:'old', name:'잘못된 견적 공정', source:'estimate'}
+  ]};
+  const imported = [{id:'new', name:'목공', source:'estimate'}];
+
+  const next = D.replaceEstimateTasks(site.tasks, imported);
+
+  assert.deepEqual(next.map(x => x.id), ['manual', 'new']);
+});
+
+test('selected calendar project excludes schedules from other sites', () => {
+  const sites = [
+    {id:'selected', tasks:[{id:'mine'}]},
+    {id:'other', tasks:[{id:'theirs'}]}
+  ];
+
+  assert.deepEqual(D.projectTasks(sites, 'selected').map(x => x.id), ['mine']);
+});
+
 test('floor demolition only appears with new wood floor', () => {
   const removal='철거|바닥철거|강마루 철거';
   const newFloor='바닥|강마루 구정(94-800 7.5T)|';

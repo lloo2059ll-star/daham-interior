@@ -76,16 +76,16 @@ test('existing modal and domain integration hooks remain available', () => {
 });
 
 test('schedule loads the automatic contract schedule domain update with a cache-busted asset', () => {
-  assert.match(html, /schedule-domain\.js\?v=20260901-auto/);
+  assert.match(html, /schedule-domain\.js\?v=20260901-auto2/);
 });
 
-test('estimate phase import immediately creates missing phases without opening the candidate modal', () => {
+test('estimate phase import rebuilds a sequential schedule without opening the candidate modal', () => {
   const start = html.indexOf('function openPhaseCandidates()');
   const end = html.indexOf('function renderPhaseCandidates()', start);
   const source = html.slice(start, end);
 
-  assert.match(source, /if\(!phaseCandidates\.length\)\{showToast\('견적 공정이 모두 생성되어 있습니다'\);return;\}/);
-  assert.match(source, /savePhaseCandidates\(\);/);
+  assert.match(source, /buildAutomaticContractTasks\(/);
+  assert.match(source, /replaceEstimateTasks\(/);
   assert.doesNotMatch(source, /phase-modal/);
 });
 
