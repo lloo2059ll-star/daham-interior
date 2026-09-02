@@ -81,6 +81,37 @@ test('protected page refreshes the profile and redirects a newly suspended emplo
   assert.equal(h.values.has(SESSION_KEY), false);
 });
 
+test('public schedule view works without a login and does not initialize notifications', async () => {
+  const h = createHarness({ page: 'schedule-view.html' });
+
+  assert.equal(await h.auth.ready, true);
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.deepEqual(h.redirects, []);
+  assert.deepEqual(h.requests, []);
+  assert.equal(h.appendedElements.some(element => element.src === 'daham-push.js?v=20260902-1'), false);
+  assert.equal(h.appendedElements.some(element => element.rel === 'manifest'), false);
+});
+
+test('authenticated admin pages continue to initialize the notification client', async () => {
+  const fixture = session(true, 'admin');
+  const savedSession = { ...fixture.auth, expires_at: Math.floor(Date.now() / 1000) + 3000 };
+  const h = createHarness({
+    page: 'schedule.html',
+    initial: {
+      [SESSION_KEY]: JSON.stringify(savedSession),
+      [PROFILE_KEY]: JSON.stringify(fixture.profile)
+    },
+    routes: { '/rest/v1/profiles': { data: [fixture.profile] } }
+  });
+
+  assert.equal(await h.auth.ready, true);
+  await new Promise(resolve => setImmediate(resolve));
+
+  assert.equal(h.appendedElements.some(element => element.src === 'daham-push.js?v=20260902-1'), true);
+  assert.equal(h.appendedElements.some(element => element.rel === 'manifest'), true);
+});
+
 test('owner employee API lists profiles and limits updates to safe role and active fields', async () => {
   const fixture = session(true, 'owner');
   const savedSession = { ...fixture.auth, expires_at: Math.floor(Date.now() / 1000) + 3000 };

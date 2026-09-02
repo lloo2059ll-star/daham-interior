@@ -14,6 +14,7 @@ function createHarness({ page = 'login.html', initial = {}, routes = {} } = {}) 
   const values = new Map(Object.entries(initial));
   const requests = [];
   const redirects = [];
+  const appendedElements = [];
   const localStorage = {
     getItem(key) { return values.has(key) ? values.get(key) : null; },
     setItem(key, value) { values.set(key, String(value)); },
@@ -27,6 +28,35 @@ function createHarness({ page = 'login.html', initial = {}, routes = {} } = {}) 
     href: `https://lloo2059ll-star.github.io/daham-interior/${page}`,
     replace(value) { redirects.push(value); this.href = value; }
   };
+  const head = {
+    appendChild(element) {
+      appendedElements.push(element);
+      if (typeof element.onload === 'function') element.onload();
+      return element;
+    }
+  };
+  const document = {
+    head,
+    documentElement: head,
+    createElement(tagName) {
+      return {
+        tagName: String(tagName).toUpperCase(),
+        remove() {
+          const index = appendedElements.indexOf(this);
+          if (index >= 0) appendedElements.splice(index, 1);
+        }
+      };
+    },
+    getElementById(id) {
+      return appendedElements.find(element => element.id === id) || null;
+    },
+    querySelector(selector) {
+      if (selector === "link[rel='manifest']") {
+        return appendedElements.find(element => element.tagName === 'LINK' && element.rel === 'manifest') || null;
+      }
+      return null;
+    }
+  };
   const context = {
     console,
     URL,
@@ -35,6 +65,7 @@ function createHarness({ page = 'login.html', initial = {}, routes = {} } = {}) 
     clearTimeout,
     localStorage,
     location,
+    document,
     fetch: async (url, options = {}) => {
       const request = { url: String(url), options };
       requests.push(request);
@@ -48,7 +79,7 @@ function createHarness({ page = 'login.html', initial = {}, routes = {} } = {}) 
   vm.createContext(context);
   const source = fs.readFileSync(path.join(__dirname, '..', '..', 'auth.js'), 'utf8');
   vm.runInContext(source, context, { filename: 'auth.js' });
-  return { auth: context.DAHAM_AUTH, requests, redirects, values, location };
+  return { auth: context.DAHAM_AUTH, requests, redirects, values, location, appendedElements };
 }
 
 module.exports = { createHarness };
