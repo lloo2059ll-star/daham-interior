@@ -43,11 +43,13 @@
         id: String(item.id), date: String(item.start).slice(0, 10),
         time: cleanTime(item.startTime || item.time) || undefined,
         title: String(item.name || item.title || '일반 일정'),
-        targetUrl: 'schedule.html?id=' + encodeURIComponent(item.id)
+        targetUrl: 'schedule.html?id=' + encodeURIComponent(item.id),
+        source: item.source === 'consultation' ? 'consultation' : undefined
       });
     });
     return events.map(function (event) {
       if (!event.time) delete event.time;
+      if (!event.source) delete event.source;
       return event;
     });
   }
@@ -69,6 +71,12 @@
         companyId: input.companyId, title: '[일정 알림] ' + event.title,
         targetUrl: event.targetUrl || 'schedule.html', sendAfter: now.toISOString(), status: 'pending'
       };
+      if (event.source === 'consultation' && event.time && event.date === local.date && local.hour === 7 && local.minute <= 5) {
+        return [Object.assign(base, {
+          kind: 'all_day_morning', body: '오늘 ' + event.time + ' ' + event.title + ' 일정이 있습니다.',
+          dedupeKey: 'schedule:' + event.id + ':consult-morning:' + event.date
+        })];
+      }
       if (event.time) {
         var startsAt = new Date(event.date + 'T' + cleanTime(event.time) + ':00+09:00');
         var minutes = (startsAt.getTime() - now.getTime()) / 60000;

@@ -70,6 +70,7 @@
   async function init(){
     if(!root.document||!root.DAHAM_AUTH||!await root.DAHAM_AUTH.ready)return false;
     if(!root.navigator||!('serviceWorker' in root.navigator)||!root.Notification)return false;
+    if(!root.document.body)await new Promise(function(resolve){root.document.addEventListener('DOMContentLoaded',resolve,{once:true});});
     if(status()==='enabled'){
       try{var sub=await currentSubscription();if(sub){await rpc('register_push_subscription',subscriptionPayload(sub));return true;}}catch(e){}
     }

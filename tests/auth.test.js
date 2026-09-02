@@ -89,7 +89,7 @@ test('public schedule view works without a login and does not initialize notific
 
   assert.deepEqual(h.redirects, []);
   assert.deepEqual(h.requests, []);
-  assert.equal(h.appendedElements.some(element => element.src === 'daham-push.js?v=20260902-1'), false);
+  assert.equal(h.appendedElements.some(element => element.src === 'daham-push.js?v=20260902-2'), false);
   assert.equal(h.appendedElements.some(element => element.rel === 'manifest'), false);
 });
 
@@ -108,7 +108,7 @@ test('authenticated admin pages continue to initialize the notification client',
   assert.equal(await h.auth.ready, true);
   await new Promise(resolve => setImmediate(resolve));
 
-  assert.equal(h.appendedElements.some(element => element.src === 'daham-push.js?v=20260902-1'), true);
+  assert.equal(h.appendedElements.some(element => element.src === 'daham-push.js?v=20260902-2'), true);
   assert.equal(h.appendedElements.some(element => element.rel === 'manifest'), true);
 });
 

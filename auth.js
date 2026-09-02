@@ -101,7 +101,7 @@
     await loadScript('daham-activity-domain','daham-activity-domain.js?v=20260902-1');
     await loadScript('daham-activity-client','daham-activity.js?v=20260902-1');
     if(window.DAHAM_ACTIVITY)window.DAHAM_ACTIVITY.init();
-    await loadScript('daham-push-client','daham-push.js?v=20260902-1');
+    await loadScript('daham-push-client','daham-push.js?v=20260902-2');
     if(window.DAHAM_PUSH)window.DAHAM_PUSH.init();
   }
 

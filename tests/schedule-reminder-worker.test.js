@@ -13,13 +13,35 @@ test('reminder worker extracts timed consultation and construction schedules', (
       { id: 'task-1', name: '도배', start: '2026-09-03', startTime: '14:30', status: 'planned' }
     ] }],
     general: [
-      { id: 'consult-1', name: '상담문의', start: '2026-09-03', startTime: '15:00', status: 'planned' }
+      { id: 'consult-1', name: '상담문의', start: '2026-09-03', startTime: '15:00', status: 'planned', source: 'consultation' }
     ]
   });
 
   assert.deepEqual(events, [
     { id: 'task-1', date: '2026-09-03', time: '14:30', title: '옥계 현장 · 도배', targetUrl: 'schedule.html?id=task-1' },
-    { id: 'consult-1', date: '2026-09-03', time: '15:00', title: '상담문의', targetUrl: 'schedule.html?id=consult-1' }
+    { id: 'consult-1', date: '2026-09-03', time: '15:00', title: '상담문의', targetUrl: 'schedule.html?id=consult-1', source: 'consultation' }
+  ]);
+});
+
+test('timed consultation schedules notify at 7 AM and one hour before', () => {
+  const reminders = require(domainPath);
+  const event = {
+    id: 'consult-1', date: '2026-09-03', time: '15:00', title: '견적미팅',
+    targetUrl: 'schedule.html?id=consult-1', source: 'consultation'
+  };
+
+  const morning = reminders.buildReminderRows({
+    now: '2026-09-03T07:03:00+09:00', events: [event], companyId: 'company-1'
+  });
+  assert.deepEqual(morning.map(row => ({ kind: row.kind, dedupeKey: row.dedupeKey })), [
+    { kind: 'all_day_morning', dedupeKey: 'schedule:consult-1:consult-morning:2026-09-03' }
+  ]);
+
+  const oneHour = reminders.buildReminderRows({
+    now: '2026-09-03T14:00:00+09:00', events: [event], companyId: 'company-1'
+  });
+  assert.deepEqual(oneHour.map(row => ({ kind: row.kind, dedupeKey: row.dedupeKey })), [
+    { kind: 'schedule_one_hour', dedupeKey: 'schedule:consult-1:one-hour:2026-09-03:15:00' }
   ]);
 });
 

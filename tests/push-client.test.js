@@ -59,3 +59,33 @@ test('subscription registration uses authenticated DAHAM headers', () => {
   assert.doesNotMatch(source, /service[_-]?role/i);
 });
 
+test('push initialization waits until document body exists', async () => {
+  const source = read('daham-push.js');
+  let domReady;
+  const document = {
+    body: null,
+    addEventListener(type, listener) {
+      if (type === 'DOMContentLoaded') domReady = listener;
+    },
+    getElementById() { return null; },
+    createElement() {
+      return { style: {}, setAttribute() {}, querySelector() { return { onclick: null }; } };
+    }
+  };
+  const sandbox = {
+    module: { exports: {} }, exports: {}, document,
+    navigator: { serviceWorker: {} }, Notification: { permission: 'default' },
+    DAHAM_AUTH: { ready: Promise.resolve(true) }, Uint8Array,
+    setTimeout() {}, atob: value => Buffer.from(value, 'base64').toString('binary')
+  };
+  vm.runInNewContext(source, sandbox);
+
+  const initialized = sandbox.module.exports.init();
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(typeof domReady, 'function');
+  document.body = { appendChild() {} };
+  domReady();
+
+  assert.equal(await initialized, true);
+});
+
