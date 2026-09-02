@@ -9,11 +9,6 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 Deno.serve(async (request) => {
   if (request.method !== "POST") return json({ error: "method_not_allowed" }, 405);
 
-  const cronSecret = Deno.env.get("PUSH_CRON_SECRET") ?? "";
-  if (!cronSecret || request.headers.get("authorization") !== `Bearer ${cronSecret}`) {
-    return json({ error: "unauthorized" }, 401);
-  }
-
   const url = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const publicKey = Deno.env.get("VAPID_PUBLIC_KEY")!;
@@ -23,8 +18,16 @@ Deno.serve(async (request) => {
     return json({ error: "missing_configuration" }, 500);
   }
 
-  webpush.setVapidDetails(subject, publicKey, privateKey);
   const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
+  const requestSecret = request.headers.get("x-cron-secret") ?? "";
+  const legacySecret = Deno.env.get("PUSH_CRON_SECRET") ?? "";
+  const legacyAllowed = !!legacySecret && request.headers.get("authorization") === `Bearer ${legacySecret}`;
+  const { data: rpcAllowed } = requestSecret
+    ? await supabase.rpc("verify_push_cron_secret", { p_token: requestSecret })
+    : { data: false };
+  if (!legacyAllowed && rpcAllowed !== true) return json({ error: "unauthorized" }, 401);
+
+  webpush.setVapidDetails(subject, publicKey, privateKey);
   const { data: jobs, error: jobsError } = await supabase
     .from("notification_outbox")
     .select("id,company_id,title,body,target_url,attempt_count")
@@ -57,7 +60,7 @@ Deno.serve(async (request) => {
 
     let delivered = 0;
     const errors: string[] = [];
-    const payload = JSON.stringify({ title: job.title, body: job.body, url: job.target_url, tag: job.id });
+    const payload = JSON.stringify({ title: job.title, body: job.body, target: job.target_url, tag: job.id });
     for (const subscription of subscriptions ?? []) {
       try {
         await webpush.sendNotification({
