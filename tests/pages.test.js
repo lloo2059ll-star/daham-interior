@@ -40,3 +40,8 @@ test('dashboard employee link starts hidden and is revealed only for owner', () 
   assert.match(html, /u\.role===['"]owner['"]/);
   assert.match(html, /employeesLink\.hidden=false/);
 });
+
+test('dashboard navigation exposes the commercial estimate workspace', () => {
+  const html = read('index.html');
+  assert.match(html, /<a href="estimate-commercial\.html"><span class="ico">[^<]+<\/span>상가 견적<\/a>/);
+});
