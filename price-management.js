@@ -170,10 +170,24 @@
     }));
   }
 
+  async function loadCommercialSettings(options) {
+    const local = options.readLocal() || {};
+    try {
+      const remote = await options.readRemote();
+      if (remote && typeof remote === 'object') {
+        options.writeLocal(remote);
+        return remote;
+      }
+    } catch (error) {
+      return local;
+    }
+    return local;
+  }
+
   return {
     itemKey, quantityKey, parseMoney, canManage, validateOverrides,
     snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice, applyDraftToProject, projectTotal,
-    saveOverrides, saveProjectOverrides, saveCommercialDefaults, loadCommercialDefaults,
+    saveOverrides, saveProjectOverrides, saveCommercialDefaults, loadCommercialDefaults, loadCommercialSettings,
   };
 });
 

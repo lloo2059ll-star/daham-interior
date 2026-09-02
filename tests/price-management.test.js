@@ -139,6 +139,37 @@ test('commercial default loader merges approved organization values only', () =>
   assert.equal(result[0].items[0].materialUnit, 40000);
 });
 
+test('commercial settings restore server prices before using stale local values', async () => {
+  let restored = null;
+  const result = await prices.loadCommercialSettings({
+    readLocal: () => ({ commercialEstimateDefaults: {
+      'temp-wall-single': { laborUnit: 0, materialUnit: 0 }
+    }}),
+    readRemote: async () => ({ commercialEstimateDefaults: {
+      'temp-wall-single': { laborUnit: 45000, materialUnit: 28000 }
+    }}),
+    writeLocal: value => { restored = value; }
+  });
+
+  assert.deepEqual(result.commercialEstimateDefaults['temp-wall-single'], {
+    laborUnit: 45000, materialUnit: 28000
+  });
+  assert.deepEqual(restored, result);
+});
+
+test('commercial settings fall back to local prices when the server is unavailable', async () => {
+  const local = { commercialEstimateDefaults: {
+    'temp-wall-single': { laborUnit: 45000, materialUnit: 28000 }
+  }};
+  const result = await prices.loadCommercialSettings({
+    readLocal: () => local,
+    readRemote: async () => { throw new Error('offline'); },
+    writeLocal: () => { throw new Error('must not overwrite local fallback'); }
+  });
+
+  assert.equal(result, local);
+});
+
 test('project price save uses protected settings and keeps only items used by that estimate', async () => {
   const section = catalog[0], used = section.items[0], unused = section.items[1];
   const usedKey = prices.itemKey(section, used), unusedKey = prices.itemKey(section, unused);

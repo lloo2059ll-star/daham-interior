@@ -32,6 +32,8 @@ test('commercial estimates synchronize with the authenticated employee session',
   assert.match(html, /DAHAM_AUTH\.getAccessToken\(\)/);
   assert.match(html, /from\(['"]sync_data['"]\)\.upsert/);
   assert.match(html, /function\s+cloudPullCommercial/);
+  assert.match(html, /loadCommercialSettings/);
+  assert.match(html, /function\s+readCommercialSettingsFromCloud/);
 });
 
 test('commercial estimate is responsive without clipping the application shell', () => {
