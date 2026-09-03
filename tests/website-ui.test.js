@@ -62,6 +62,15 @@ test('instagram controls open the official DAHAM account in a new tab', () => {
   assert.match(src, /인스타그램/);
 });
 
+test('kakao consultation opens the official DAHAM Kakao channel in a new tab', () => {
+  const src = html();
+  assert.match(src, /https:\/\/pf\.kakao\.com\/_xnvxgTX/);
+  assert.match(src, /class="kakao-btn"/);
+  assert.match(src, /target="_blank"/);
+  assert.match(src, /rel="noopener noreferrer"/);
+  assert.doesNotMatch(src, /class="kakao-btn"[^>]*data-open-inquiry/);
+});
+
 test('public homepage talks only to public website tables', () => {
   const src = source();
   assert.match(src, /website-public-domain\.js/);
