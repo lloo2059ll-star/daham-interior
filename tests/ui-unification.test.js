@@ -76,7 +76,7 @@ test('only approved production pages consume the operations visual layer', () =>
   for (const [kind, files] of Object.entries(targets)) {
     for (const file of files) {
       const html = read(file);
-      assert.match(html, /<link\s+rel=["']stylesheet["']\s+href=["']operations-ui\.css["']\s*\/?>/i, `${file} must load operations-ui.css`);
+      assert.match(html, /<link\s+rel=["']stylesheet["']\s+href=["']operations-ui\.css(?:\?[^"']+)?["']\s*\/?>/i, `${file} must load operations-ui.css`);
       const body = html.match(/<body\b([^>]*)>/i);
       assert.ok(body, `${file} must contain body`);
       assert.match(body[1], /\boperations-ui\b/, `${file} must scope operations styles`);
