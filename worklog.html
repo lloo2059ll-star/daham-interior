@@ -434,21 +434,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <!-- 준공자료 생성 및 열람 -->
 <div class="modal-bg archive-modal" id="archive-modal" style="display:none" onclick="archiveBgClick(event)">
   <div class="modal archive-shell" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="archive-title">
-    <div class="modal-hd"><div><div class="modal-title" id="archive-title">준공자료 저장</div><div class="archive-project" id="archive-project"></div></div><button class="modal-close" onclick="closeArchiveModal()">✕</button></div>
-    <div class="modal-body">
-      <div class="archive-summary"><div><b id="archive-journals">0</b><span>현장일지</span></div><div><b id="archive-photos">0</b><span>원본 사진</span></div><div><b id="archive-size">0 MB</b><span>예상 용량</span></div></div>
-      <div class="archive-safety">✓ 원본 사진은 삭제되지 않습니다. DB에는 파일 정보만 저장되고 원본은 비공개 Storage에 유지됩니다.</div>
-      <ol class="archive-steps" id="archive-steps"><li>자료 확인</li><li>원본 검증</li><li>PDF 생성</li><li>ZIP 묶기</li></ol>
-      <div class="archive-status" id="archive-status">준공 시점의 현장일지와 사진을 하나의 자료로 보관합니다.</div>
-      <div class="archive-integrity" id="archive-integrity" hidden>✓ 무결성 확인 완료 <code id="archive-hash"></code></div>
-      <section class="archive-viewer" id="archive-viewer" hidden>
-        <div class="archive-viewer-tools"><input id="archive-search" class="search-input" placeholder="준공자료 검색" oninput="filterArchiveJournals()"><button class="tb-btn" onclick="showArchiveJournalList()">현장일지 보기</button></div>
-        <div id="archive-journal-list" class="archive-journal-list"></div>
-        <div class="archive-preview" id="archive-preview">PDF 미리보기는 ‘PDF 보기’에서 안전한 임시 링크로 열립니다.</div>
+    <div class="modal-hd archive-head"><div class="archive-head-icon">⇩</div><div><div class="modal-title" id="archive-title">준공자료 저장</div><div class="archive-project" id="archive-project"></div></div><button class="modal-close" onclick="closeArchiveModal()">✕</button></div>
+    <div class="modal-body archive-body">
+      <section id="archive-build-view">
+        <ol class="archive-steps" id="archive-steps"><li><b>1. 현장일지 확인</b><span>현장일지 검토 완료</span></li><li><b>2. 원본 사진 정리</b><span>사진 분류 및 정리 완료</span></li><li><b>3. PDF 보고서 생성</b><span>현장일지 PDF 생성 완료</span></li><li><b>4. ZIP 보관 완료</b><span>보관 파일 생성 준비 완료</span></li></ol>
+        <div class="archive-panel-title">보관 요약</div>
+        <div class="archive-summary-table"><div><span>▤ 현장일지</span><b><i id="archive-journals">0</i>건</b></div><div><span>▧ 원본 사진</span><b><i id="archive-photos">0</i>장</b></div><div><span>▱ 예상 용량</span><b id="archive-size">0 MB</b></div><div><span>▱ 보관 파일</span><b id="archive-filename">준공자료.zip</b></div></div>
+        <div class="archive-panel-title">포함 항목</div>
+        <div class="archive-includes"><div><strong>✓　현장일지 PDF 포함</strong><small>현장일지를 PDF로 변환하여 포함합니다.</small></div><div><strong>✓　원본 사진 날짜·공종별 정리</strong><small>사진을 날짜 및 공종별 폴더로 정리합니다.</small></div><div><strong>✓　복구용 데이터(JSON) 포함</strong><small>시스템 복구를 위한 메타데이터를 포함합니다.</small></div><div><strong>✓　파일 무결성 검사</strong><small>생성된 파일의 무결성 검사를 실시합니다.</small></div></div>
+        <div class="archive-safety">ⓘ　생성 완료 전 원본은 삭제되지 않습니다.</div>
+        <div class="archive-status" id="archive-status">준공 시점의 현장일지와 사진을 하나의 자료로 보관합니다.</div>
+        <div class="archive-health"><button class="tb-btn" onclick="runStorageHealthCheck()">저장소 안전 점검</button><span id="archive-health-result">필요할 때만 실행됩니다.</span></div>
       </section>
-      <div class="archive-health"><button class="tb-btn" onclick="runStorageHealthCheck()">저장소 안전 점검</button><span id="archive-health-result">필요할 때만 실행됩니다.</span></div>
+      <section class="archive-viewer" id="archive-viewer" hidden>
+        <div class="archive-ready-bar"><div><span>▦ 준공일</span><b id="archive-completed-date">-</b></div><div><span>▤ 현장일지</span><b id="archive-ready-journals">0건</b></div><div><span>▧ 원본 사진</span><b id="archive-ready-photos">0장</b></div><div><span>▱ 보관 용량</span><b id="archive-ready-size">0 MB</b></div><div class="archive-integrity" id="archive-integrity"><span>♢ 무결성 확인 완료</span><small id="archive-completed-at"></small><code id="archive-hash"></code></div></div>
+        <div class="archive-browser">
+          <aside class="archive-folders"><h3>준공자료</h3><button class="active" onclick="showArchiveJournalList()">▱　현장일지 PDF</button><button>▱　날짜별 기록</button><button>▱　공종별 사진</button><button>▱　원본 사진</button><button>▱　복구용 데이터</button><div class="archive-capacity"><small>보관 용량</small><b id="archive-capacity-text">0 MB / 5 GB</b><i><em id="archive-capacity-bar"></em></i><span id="archive-capacity-percent">0%</span></div></aside>
+          <main class="archive-document"><div class="archive-viewer-tools"><b>현장일지 미리보기</b><input id="archive-search" class="search-input" placeholder="일지 내용 또는 공종 검색" oninput="filterArchiveJournals()"></div><div class="archive-paper"><h2 id="archive-paper-title">현장 현장일지</h2><div class="archive-paper-rule"></div><div id="archive-journal-list" class="archive-journal-list"></div></div><div class="archive-pagination">‹‹　‹　<b>1</b>　2　3　4　5　…　›　›› <span>1 / 1 페이지　　100%</span></div></main>
+        </div>
+      </section>
     </div>
-    <div class="modal-ft"><button onclick="closeArchiveModal()">닫기</button><button id="archive-retry" onclick="createCompletionArchive()" style="display:none">다시 시도</button><button id="archive-pdf" disabled onclick="downloadArchive('pdf')">PDF 보기</button><button id="archive-zip" disabled class="save" onclick="downloadArchive('zip')">ZIP 다운로드</button><button id="archive-create" class="save" onclick="createCompletionArchive()">준공자료 생성</button></div>
+    <div class="modal-ft archive-actions"><button onclick="closeArchiveModal()">취소</button><button id="archive-retry" onclick="createCompletionArchive()" style="display:none">다시 시도</button><button id="archive-pdf" disabled onclick="downloadArchive('pdf')">▤ PDF 보기</button><button id="archive-zip" disabled onclick="downloadArchive('zip')">⇩ ZIP 다운로드</button><button id="archive-create" class="save" onclick="createCompletionArchive()">준공자료 생성</button></div>
   </div>
 </div>
 
@@ -1225,26 +1231,30 @@ function deleteRecord(){
 
 function archiveProject(){return schedProjects.find(function(p){return p.id===activeProjId;});}
 function archiveSize(bytes){bytes=Number(bytes)||0;return bytes<1048576?Math.ceil(bytes/1024)+' KB':(bytes/1048576).toFixed(1)+' MB';}
+function archiveDate(value){if(!value)return '-';var d=new Date(value);return isNaN(d)?String(value).slice(0,10):d.getFullYear()+'.'+pad(d.getMonth()+1)+'.'+pad(d.getDate());}
 function setArchiveState(archive){
   currentArchive=archive||null;
   var state=archive&&archive.status||'idle', ready=state==='ready', failed=state==='failed';
   var labels={idle:'준공 시점의 현장일지와 사진을 하나의 자료로 보관합니다.',queued:'자료 확인 중입니다.',processing:'원본을 검증하고 PDF·ZIP을 생성하고 있습니다.',ready:'준공자료 저장이 완료되었습니다.',failed:'생성 중 문제가 발생했습니다. 원본은 그대로 보관되어 있습니다.'};
   document.getElementById('archive-status').textContent=labels[state]||labels.idle;
+  document.getElementById('archive-title').textContent=ready?'준공자료':'준공자료 저장';
+  document.getElementById('archive-build-view').hidden=ready;
   document.getElementById('archive-create').style.display=state==='idle'?'inline-flex':'none';
   document.getElementById('archive-retry').style.display=failed?'inline-flex':'none';
   document.getElementById('archive-pdf').disabled=!ready;document.getElementById('archive-zip').disabled=!ready;
-  document.getElementById('archive-viewer').hidden=!ready;document.getElementById('archive-integrity').hidden=!ready;
+  document.getElementById('archive-viewer').hidden=!ready;
   document.getElementById('archive-hash').textContent=ready&&archive.zip_sha256?archive.zip_sha256.slice(0,16)+'…':'';
-  if(archive){document.getElementById('archive-journals').textContent=archive.journal_count||0;document.getElementById('archive-photos').textContent=archive.photo_count||0;document.getElementById('archive-size').textContent=archiveSize(archive.source_bytes);}
-  document.querySelectorAll('#archive-steps li').forEach(function(el,i){var n=state==='ready'?4:state==='processing'?Math.min(3,Number(archive&&archive.checkpointStep)||2):state==='queued'?1:0;el.classList.toggle('done',i<n);el.classList.toggle('active',i===n&&n<4);});
+  if(archive){var size=archiveSize(archive.source_bytes);document.getElementById('archive-journals').textContent=archive.journal_count||0;document.getElementById('archive-photos').textContent=archive.photo_count||0;document.getElementById('archive-size').textContent=size;document.getElementById('archive-ready-journals').textContent=(archive.journal_count||0)+'건';document.getElementById('archive-ready-photos').textContent=(archive.photo_count||0)+'장';document.getElementById('archive-ready-size').textContent=size;document.getElementById('archive-completed-date').textContent=archiveDate(archive.completed_at);document.getElementById('archive-completed-at').textContent=archive.completed_at?archiveDate(archive.completed_at)+' 완료':'';var percent=Math.min(100,Math.round((Number(archive.source_bytes)||0)/5368709120*100));document.getElementById('archive-capacity-text').textContent=size+' / 5 GB';document.getElementById('archive-capacity-percent').textContent=percent+'%';document.getElementById('archive-capacity-bar').style.width=percent+'%';}
+  document.querySelectorAll('#archive-steps li').forEach(function(el,i){var checkpoint=archive&&archive.checkpoint&&archive.checkpoint.stage||'',map={snapshot:1,artifacts:3,complete:4},n=state==='ready'?4:state==='processing'?(map[checkpoint]||2):state==='queued'?1:0;el.classList.toggle('done',i<n);el.classList.toggle('active',i===n&&n<4);});
   if(ready)showArchiveJournalList();
 }
 async function openArchiveModal(){
   if(!activeProjId){showToast('준공자료를 만들 현장을 먼저 선택해주세요');return;}
-  var p=archiveProject(),logs=records.filter(function(r){return r.projId===activeProjId;});
+  var p=archiveProject(),logs=records.filter(function(r){return resolvedProjectId(r)===activeProjId;});
   document.getElementById('archive-project').textContent=p&&p.info?(p.info.name||p.info.addr||activeProjId):activeProjId;
   document.getElementById('archive-journals').textContent=logs.length;
   document.getElementById('archive-photos').textContent=logs.reduce(function(n,r){return n+(r.photos&&r.photos.length||0);},0);
+  var safeName=p&&p.info&&(p.info.name||p.info.addr)||'현장';document.getElementById('archive-filename').textContent=safeName.replace(/\s+/g,'_')+'_준공자료_'+todayStr()+'.zip';document.getElementById('archive-paper-title').textContent=safeName+' 현장일지';
   document.getElementById('archive-size').textContent='계산 중';document.getElementById('archive-modal').style.display='flex';setArchiveState(null);
   try{setArchiveState(await archiveClient.get(activeProjId));}catch(e){document.getElementById('archive-status').textContent='저장된 준공자료를 확인하지 못했습니다. 새로 생성할 수 있습니다.';}
 }
@@ -1262,8 +1272,8 @@ async function downloadArchive(type){
   try{var signed=await archiveClient.createSignedDownload(currentArchive,type);window.open(signed,'_blank','noopener');}catch(e){showToast(e.message||'파일을 열 수 없습니다');}
 }
 function showArchiveJournalList(){
-  var rows=records.filter(function(r){return r.projId===activeProjId;}),q=(document.getElementById('archive-search').value||'').toLowerCase();
-  document.getElementById('archive-journal-list').innerHTML=rows.filter(function(r){return !q||[r.date,r.worker,r.content].join(' ').toLowerCase().indexOf(q)>=0;}).slice(0,100).map(function(r){return '<article><b>'+esc(r.date)+'</b><span>'+esc(r.worker||'기타')+'</span><p>'+esc(r.content||'사진 기록')+'</p></article>';}).join('')||'<p class="archive-empty">조건에 맞는 현장일지가 없습니다.</p>';
+  var rows=records.filter(function(r){return resolvedProjectId(r)===activeProjId;}),q=(document.getElementById('archive-search').value||'').toLowerCase();
+  document.getElementById('archive-journal-list').innerHTML=rows.filter(function(r){return !q||[r.date,r.worker,r.content].join(' ').toLowerCase().indexOf(q)>=0;}).slice(0,12).map(function(r){return '<article><div><b>'+esc(fmtDateFull(r.date))+'</b><span>♙ 작성자　'+esc(r.worker||'기타')+'</span><span>작업 내용</span></div><p>'+esc(r.content||'사진 기록')+'</p></article>';}).join('')||'<p class="archive-empty">조건에 맞는 현장일지가 없습니다.</p>';
 }
 function filterArchiveJournals(){showArchiveJournalList();}
 async function runStorageHealthCheck(){
