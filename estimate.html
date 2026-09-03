@@ -220,6 +220,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .gt-total{display:flex;flex-direction:column;align-items:flex-end;gap:4px;padding-left:24px;border-left:2px solid var(--orange)}
 .gt-total-lbl{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
 .gt-total-val{font-family:var(--sans);font-size:26px;font-weight:800;color:var(--orange)}
+.print-summary-kicker,.print-margin-rate{display:none}
 
 /* DONUT CHART */
 .donut-wrap{display:flex;align-items:center;gap:16px;padding-right:28px;margin-right:12px;
@@ -371,24 +372,34 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
   body{background:#fff;font-size:10px}
   .toolbar,.summary-bar,.btn,.sec-hd .sec-toggle,.sec-body.closed{display:none!important}
   .client-panel{display:none!important}
-  .doc-hd{box-shadow:none;margin-bottom:6px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc-hd{box-shadow:none;margin-bottom:7px;border:1px solid #e8eaf2;border-radius:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .doc-hd-stripe{height:6px;background:linear-gradient(90deg,#18223b 0 66%,#735ce9 66% 100%)!important}
+  .doc-hd-logo{color:#18223b!important}.doc-hd-type{color:#18223b!important}.doc-hd-footer{background:#18223b!important}
   .doc-hd-stripe,.doc-hd-footer{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .doc-hd-watermark{display:none}
-  .sec-wrap{box-shadow:none;margin-bottom:4px}
-  .sec-hd{padding:6px 8px}
+  .sec-wrap{box-shadow:none;margin-bottom:5px;border:1px solid #e7e9f1;border-radius:8px;overflow:hidden}
+  .sec-hd{padding:7px 9px;background:#f7f6ff!important;border-left-color:#735ce9!important}
+  .sec-name{color:#18223b!important}.sec-sum-val.t{color:#735ce9!important}
   .sec-body.closed{display:block!important}
   .chips-row{display:none!important}
   .sub-hd-row{display:none!important}
   .sub-hd-row.has-active{display:table-row!important}
-  .sub-hd-row.has-active td{background:#efefef!important;font-weight:700;font-size:9px;padding:3px 6px!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sub-hd-row.has-active td{background:#f1efff!important;color:#18223b!important;font-weight:700;font-size:9px;padding:3px 6px!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .sub-hd-row.has-active .sub-cnt{display:none}
   .items-tbl tbody tr{display:none!important}
   .items-tbl tbody tr.active{display:table-row!important}
   .items-tbl th,.items-tbl td{padding:3px 5px;font-size:8px}
-  .grand-total-box{display:flex!important;padding:10px 14px;margin-bottom:10px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .grand-total-box{display:block!important;padding:10px 12px 11px;margin-bottom:9px;border:1px solid #e2dfff;border-top:0;border-radius:11px;background:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .grand-total-box *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .gt-total-val{font-size:20px}
-  .donut-wrap{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .print-summary-kicker{display:block!important;color:#735ce9;font-size:8px;font-weight:900;letter-spacing:.16em;margin:0 0 6px 2px}
+  .donut-wrap{display:none!important}
+  .gt-row{display:flex!important;align-items:stretch!important;gap:0!important;flex-wrap:wrap}
+  .gt-total{order:-1;flex:0 0 100%;align-items:flex-start!important;padding:10px 14px!important;border:0!important;border-radius:9px;background:linear-gradient(135deg,#18223b,#735ce9)!important;margin-bottom:7px}
+  .gt-total-lbl{color:#d9d5ff!important;font-size:8px!important}.gt-total-val{color:#fff!important;font-size:22px!important}
+  .gt-item{flex:1;align-items:flex-start!important;padding:6px 9px!important;border-right:1px solid #e9eaf0}.gt-item .gt-lbl{color:#9299aa!important}.gt-item .gt-val{color:#293246!important;font-size:12px!important}
+  .gt-sep{display:none!important}
+  .print-margin-rate{display:flex!important;flex:1.15;align-items:center;justify-content:space-between;padding:6px 9px;background:#f4f1ff!important;border:1px solid #ded8ff;border-radius:7px;margin-left:7px;color:#5d5680;font-weight:700}
+  .print-margin-rate-value{color:#735ce9;font-size:13px;font-weight:900}.print-margin-rate small{display:block;margin-top:2px;color:#9992b6;font-size:6.5px;font-weight:500}
   #donut-labor,#donut-material{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .no-print{display:none!important}
   .toast{display:none!important}
@@ -1234,6 +1245,7 @@ body{background:#eef1f6!important}
 
 <!-- GRAND TOTAL -->
 <div class="grand-total-box">
+  <div class="print-summary-kicker">TOTAL ESTIMATE</div>
   <!-- Donut Chart -->
   <div class="donut-wrap">
     <svg width="108" height="108" viewBox="0 0 108 108">
@@ -1277,6 +1289,10 @@ body{background:#eef1f6!important}
     <div class="gt-total">
       <div class="gt-total-lbl">최종 견적 금액</div>
       <div class="gt-total-val" id="gt-total">—</div>
+    </div>
+    <div class="print-margin-rate">
+      <div>프로젝트 관리비율<small>현재 프로젝트에 적용된 비율입니다.</small></div>
+      <div><span class="print-margin-rate-value" id="print-margin-rate-value">15</span>%</div>
     </div>
   </div>
 </div>
@@ -1524,6 +1540,8 @@ function recalcGrand(){
   const t=total>0?'₩ '+total.toLocaleString('ko-KR'):'—';
   document.getElementById('sb-total').textContent=t;
   document.getElementById('gt-total').textContent=t;
+  const printRate=document.getElementById('print-margin-rate-value');
+  if(printRate) printRate.textContent=Math.round(profitRate*100);
 
   updateDonut(totalL,totalMSell,sub);
 }

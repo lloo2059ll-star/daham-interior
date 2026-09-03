@@ -36,6 +36,7 @@ function printedDisplay(css, element) {
       const selectorsByElement = {
         'summary-bar': ['.summary-bar', '#edit-view>.summary-bar'],
         'client-panel': ['.client-panel', '#edit-view>.client-panel'],
+        'print-margin-rate': ['.print-margin-rate'],
       };
       const matches = selectorsByElement[element] && selectorsByElement[element].includes(selector);
       if (!matches) continue;
@@ -81,6 +82,11 @@ test('estimate print moves rendered sections into the printable container and re
 
 test('estimate page loads the print layout bridge', () => {
   assert.match(html, /<script src="estimate-print\.js"><\/script>/);
+});
+
+test('estimate print includes the project management rate in the top summary', () => {
+  assert.match(html, /class="print-margin-rate"[\s\S]*id="print-margin-rate-value"/);
+  assert.equal(printedDisplay(printCss(html), 'print-margin-rate'), 'flex');
 });
 
 function fakeNode(id) {
