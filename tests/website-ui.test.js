@@ -3,8 +3,10 @@ const path = require('node:path');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const htmlPath = path.join(__dirname, '..', 'website.html');
-function html(){ return fs.readFileSync(htmlPath, 'utf8'); }
+const root = path.join(__dirname, '..');
+function read(name){ return fs.readFileSync(path.join(root, name), 'utf8'); }
+function html(){ return read('website.html'); }
+function source(){ return [read('website.html'), read('website-final.css'), read('website-final.js')].join('\n'); }
 
 test('public homepage keeps the approved DAHAM sections and copy', () => {
   const src = html();
@@ -22,7 +24,7 @@ test('public homepage keeps the approved DAHAM sections and copy', () => {
 });
 
 test('approved desktop mockup structure replaces the old generic homepage styling', () => {
-  const src = html();
+  const src = source();
   assert.match(src, /class="reference-home"/);
   assert.match(src, /--page-width:940px/);
   assert.match(src, /--header-height:78px/);
@@ -37,7 +39,7 @@ test('approved desktop mockup structure replaces the old generic homepage stylin
 });
 
 test('homepage uses repository image assets rather than emoji process icons', () => {
-  const src = html();
+  const src = source();
   assert.match(src, /website-assets\/hero\.jpg/);
   assert.match(src, /website-assets\/portfolio-cards\.jpg/);
   assert.match(src, /website-assets\/trust-icons\.png/);
@@ -50,7 +52,7 @@ test('homepage uses repository image assets rather than emoji process icons', ()
 });
 
 test('public homepage talks only to public website tables', () => {
-  const src = html();
+  const src = source();
   assert.match(src, /website-public-domain\.js/);
   assert.match(src, /from\('website_portfolio'\)/);
   assert.match(src, /from\('website_inquiries'\)/);
@@ -60,7 +62,7 @@ test('public homepage talks only to public website tables', () => {
 });
 
 test('public inquiry stays on the website and shows in-place result state', () => {
-  const src = html();
+  const src = source();
   assert.match(src, /id="inquiry-form"/);
   assert.match(src, /id="inquiry-result"/);
   assert.match(src, /문의가 접수되었습니다/);
