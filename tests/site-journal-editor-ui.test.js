@@ -46,3 +46,14 @@ test('approved project journal detail uses summary cards, timeline, trade and ph
   assert.match(html,/cnt\.photo\+=r\.photos\.length/);
   assert.match(html,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
 });
+
+test('every visible worklog sidebar item navigates to a real page',()=>{
+  const navs=[...html.matchAll(/<(?:aside)[^>]+class="(?:worklog-app-nav|journal-editor-nav)"[\s\S]*?<nav>([\s\S]*?)<\/nav>/g)].map(match=>match[1]);
+  assert.equal(navs.length,2);
+  for(const nav of navs){
+    assert.doesNotMatch(nav,/<(?:span|small|b)(?:\s|>)/,'visible sidebar labels must not be inert');
+    for(const target of ['index.html','estimate.html','contract.html','schedule.html','worklog.html','photos.html','order.html','consult.html','contacts.html']){
+      assert.match(nav,new RegExp('href="'+target.replace('.','\\.')+'"'));
+    }
+  }
+});

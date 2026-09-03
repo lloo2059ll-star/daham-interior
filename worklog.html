@@ -296,9 +296,9 @@ body.operations-worklog #modal-bg .visit-toggle label,body.operations-worklog #m
 <aside class="worklog-app-nav">
   <div class="worklog-app-logo">◈ DAHAM INTERIOR</div>
   <nav>
-    <a href="index.html">⌂　대시보드</a><span>▦　프로젝트 관리　⌄</span><span>▤　견적 관리　⌄</span><span>□　계약 관리　⌄</span><span>◉　공정 관리　⌄</span>
-    <b>▧　현장관리　⌃</b><small>현장 목록</small><small class="active">현장일지</small><small>현장 사진</small><small>자재 관리</small><small>안전 점검</small>
-    <span>♙　고객 관리</span><span>♧　협력업체 관리</span><span>▤　보고서</span><span>⚙　설정</span>
+    <a href="index.html">⌂　대시보드</a><a href="estimate.html">▦　프로젝트 관리　⌄</a><a href="estimate.html">▤　견적 관리　⌄</a><a href="contract.html">□　계약 관리　⌄</a><a href="schedule.html">◉　공정 관리　⌄</a>
+    <a href="worklog.html" class="nav-group">▧　현장관리　⌃</a><a href="worklog.html" class="nav-child">현장 목록</a><a href="worklog.html" class="nav-child active" aria-current="page">현장일지</a><a href="photos.html" class="nav-child">현장 사진</a><a href="order.html" class="nav-child">자재 관리</a>
+    <a href="consult.html">♙　고객 관리</a><a href="contacts.html">♧　협력업체 관리</a>
   </nav>
   <div class="worklog-app-user">●　DAHAM<small>현장관리</small></div>
 </aside>
@@ -402,7 +402,7 @@ body.operations-worklog #modal-bg .visit-toggle label,body.operations-worklog #m
 <!-- MODAL -->
 <div class="modal-bg journal-editor-modal" id="modal-bg" style="display:none" onclick="onBgClick(event)">
   <div class="modal journal-editor-shell" onclick="event.stopPropagation()">
-    <aside class="journal-editor-nav"><div class="journal-editor-logo">◈ DAHAM INTERIOR</div><nav><span>⌂　대시보드</span><span>▦　프로젝트 관리　⌄</span><span>▤　견적 관리　⌄</span><span>□　계약 관리　⌄</span><span>◉　공정 관리　⌄</span><b>▧　현장관리　⌃</b><small>현장 목록</small><small class="active">현장일지</small><small>현장 사진</small><small>자재 관리</small><small>안전 점검</small><span>♙　고객 관리</span><span>♧　협력업체 관리</span><span>▤　보고서</span><span>⚙　설정</span></nav><div class="journal-editor-user">●　<span id="editor-user-name">작성자</span><small>현장관리 담당</small></div></aside>
+    <aside class="journal-editor-nav"><div class="journal-editor-logo">◈ DAHAM INTERIOR</div><nav><a href="index.html">⌂　대시보드</a><a href="estimate.html">▦　프로젝트 관리　⌄</a><a href="estimate.html">▤　견적 관리　⌄</a><a href="contract.html">□　계약 관리　⌄</a><a href="schedule.html">◉　공정 관리　⌄</a><a href="worklog.html" class="nav-group">▧　현장관리　⌃</a><a href="worklog.html" class="nav-child">현장 목록</a><a href="worklog.html" class="nav-child active" aria-current="page">현장일지</a><a href="photos.html" class="nav-child">현장 사진</a><a href="order.html" class="nav-child">자재 관리</a><a href="consult.html">♙　고객 관리</a><a href="contacts.html">♧　협력업체 관리</a></nav><div class="journal-editor-user">●　<span id="editor-user-name">작성자</span><small>현장관리 담당</small></div></aside>
     <main class="journal-editor-main">
       <div class="journal-editor-crumb">프로젝트　›　현장관리　›　현장일지　›　<b>작성</b></div>
       <header><div><h1 id="modal-title">현장일지 작성</h1><strong id="editor-project-title">현장을 선택해주세요</strong></div><button class="modal-close" onclick="closeModal()">✕</button></header>
