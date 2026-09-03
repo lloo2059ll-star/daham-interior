@@ -22,3 +22,10 @@ test('site journal editor has desktop and mobile layouts scoped to worklog',()=>
   assert.match(css,/grid-template-columns:220px 1fr/);
   assert.match(css,/@media\(max-width:720px\)[\s\S]*journal-editor-nav\{display:none\}/);
 });
+
+test('site journal index only exposes schedule sites linked to an existing estimate',()=>{
+  assert.match(html,/function activeEstimateSites\(value\)/);
+  assert.match(html,/project&&project\.estimateId/);
+  assert.match(html,/schedProjects=activeEstimateSites\(parsed\)/);
+  assert.match(css,/\.operations-worklog \.worklog-app-nav/);
+});

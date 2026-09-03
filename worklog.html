@@ -270,9 +270,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <link rel="stylesheet" href="v2-theme.css">
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
-<link rel="stylesheet" href="operations-ui.css?v=20260904-journal-editor-2">
+<link rel="stylesheet" href="operations-ui.css?v=20260904-journal-index-1">
 </head>
 <body class="operations-ui operations-admin operations-worklog">
+
+<aside class="worklog-app-nav">
+  <div class="worklog-app-logo">◈ DAHAM INTERIOR</div>
+  <nav>
+    <a href="index.html">⌂　대시보드</a><span>▦　프로젝트 관리　⌄</span><span>▤　견적 관리　⌄</span><span>□　계약 관리　⌄</span><span>◉　공정 관리　⌄</span>
+    <b>▧　현장관리　⌃</b><small>현장 목록</small><small class="active">현장일지</small><small>현장 사진</small><small>자재 관리</small><small>안전 점검</small>
+    <span>♙　고객 관리</span><span>♧　협력업체 관리</span><span>▤　보고서</span><span>⚙　설정</span>
+  </nav>
+  <div class="worklog-app-user">●　DAHAM<small>현장관리</small></div>
+</aside>
 
 <!-- TOOLBAR -->
 <div class="toolbar">
@@ -472,6 +482,9 @@ var visitFilter   = 'all';
 var statFilter    = 'all';
 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function activeEstimateSites(value){
+  return (Array.isArray(value)?value:[]).filter(function(project){return project&&project.estimateId;});
+}
 function pad(n){ return n<10?'0'+n:String(n); }
 function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
@@ -635,7 +648,7 @@ function cloudPull(onDone){
         try{
           var parsed=JSON.parse(row.value);
           if(row.key===LOG_KEY){ legacyRecords=parsed; refreshJournalReads(); updated=true; }
-          else if(row.key===SCHED_KEY){ schedProjects=parsed; }
+          else if(row.key===SCHED_KEY){ schedProjects=activeEstimateSites(parsed); }
           localStorage.setItem(row.key, row.value);
           localStorage.setItem(row.key+'_ts', row.updated_at);
         }catch(e){}
@@ -650,7 +663,7 @@ function scheduleSave(){
   _saveTimer=setTimeout(cloudPush, 800);
 }
 function manualSync(){
-  try{ schedProjects=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+  try{ schedProjects=activeEstimateSites(JSON.parse(localStorage.getItem(SCHED_KEY)||'[]')); }catch(e){ schedProjects=[]; }
   var inLogView=document.getElementById('log-view').style.display!=='none';
   cloudPull(function(){
     loadNormalizedRecords().then(function(){
@@ -662,7 +675,7 @@ function manualSync(){
 
 function load(){
   try{ legacyRecords=JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }catch(e){ legacyRecords=[]; }
-  try{ schedProjects=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+  try{ schedProjects=activeEstimateSites(JSON.parse(localStorage.getItem(SCHED_KEY)||'[]')); }catch(e){ schedProjects=[]; }
   refreshJournalReads();
 }
 function save(){
