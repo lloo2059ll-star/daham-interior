@@ -239,3 +239,11 @@ test('worklog wires a separate migration state panel and leaves the legacy key a
   assert.match(html, /var LOG_KEY\s*=\s*'daham_worklog_v1'/);
 });
 
+test('worklog resolves stale legacy project ids through an exact current project name', () => {
+  const html = fs.readFileSync(path.join(__dirname, '..', 'worklog.html'), 'utf8');
+  assert.match(html, /function resolvedProjectId\(record\)/);
+  assert.match(html, /rowLabel===projectLabel\(project\.info&&project\.info\.name\)/);
+  assert.match(html, /resolvedProjectId\(r\)===p\.id/);
+  assert.match(html, /resolvedProjectId\(r\)===activeProjId/);
+});
+

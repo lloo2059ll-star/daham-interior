@@ -699,9 +699,33 @@ function save(){
 }
 
 function getProjName(r){ return r.projName||r.proj||''; }
+function projectLabel(value){
+  return String(value||'').replace(/\s+/g,'').toLowerCase();
+}
+function resolvedProjectId(record){
+  if(!record) return '';
+  var rawId=record.projId||record.project_id||'';
+  if(rawId&&schedProjects.some(function(project){return project.id===rawId;})) return rawId;
+
+  var candidates={};
+  legacyRecords.forEach(function(row){
+    if((row.projId||'')!==rawId) return;
+    var rowLabel=projectLabel(getProjName(row));
+    schedProjects.forEach(function(project){
+      if(rowLabel&&rowLabel===projectLabel(project.info&&project.info.name)) candidates[project.id]=true;
+    });
+  });
+  var ids=Object.keys(candidates);
+  if(ids.length===1) return ids[0];
+
+  var label=projectLabel(getProjName(record));
+  var matches=schedProjects.filter(function(project){return label&&label===projectLabel(project.info&&project.info.name);});
+  return matches.length===1?matches[0].id:rawId;
+}
 function getProjColor(r){
-  if(r.projId){
-    var p=schedProjects.find(function(x){ return x.id===r.projId; });
+  var projectId=resolvedProjectId(r);
+  if(projectId){
+    var p=schedProjects.find(function(x){ return x.id===projectId; });
     if(p) return p.color||'#E65100';
   }
   return '#E65100';
@@ -789,7 +813,7 @@ function renderCardGrid(){
     var client=(p.info&&p.info.client)||'';
     var tasks=p.tasks||[];
     var done=tasks.filter(function(t){ return t.status==='done'; }).length;
-    var logs=records.filter(function(r){ return r.projId===p.id; });
+    var logs=records.filter(function(r){ return resolvedProjectId(r)===p.id; });
     var lastLog=logs.length?logs.slice().sort(function(a,b){ return (b.createdAt||'')>(a.createdAt||'')?1:-1; })[0]:null;
 
     // 공사 기간
@@ -830,7 +854,7 @@ function renderProjHd(){
   var starts=tasks.map(function(t){ return t.start; }).filter(Boolean).sort();
   var ends=tasks.map(function(t){ return t.end||t.start; }).filter(Boolean).sort();
   var rangeStr=starts.length&&ends.length?fmtDateShort(starts[0])+' ~ '+fmtDateShort(ends[ends.length-1]):'';
-  var logCnt=records.filter(function(r){ return r.projId===p.id; }).length;
+  var logCnt=records.filter(function(r){ return resolvedProjectId(r)===p.id; }).length;
 
   hdWrap.style.display='block';
   document.getElementById('phd-name').textContent=name;
@@ -863,7 +887,7 @@ function updateStats(){
 }
 function getBase(){
   return records.filter(function(r){
-    return activeProjId===null || r.projId===activeProjId;
+    return activeProjId===null || resolvedProjectId(r)===activeProjId;
   });
 }
 function setStatFilter(f){
