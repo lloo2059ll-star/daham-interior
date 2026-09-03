@@ -13,7 +13,31 @@ test('public homepage keeps the approved DAHAM sections', () => {
   assert.match(src, /OUR PROCESS/);
   assert.match(src, /id="inquiry-modal"/);
   assert.match(src, /견적 문의하기/);
-  assert.match(src, /신뢰/);
+  assert.match(src, /ABOUT DAHAM/);
+  assert.match(src, /CUSTOMER CENTER/);
+  assert.match(src, /INSTAGRAM/);
+  assert.match(src, /QUICK MENU/);
+});
+
+test('first mockup geometry is pinned to the 1024px reference', () => {
+  const src = html();
+  assert.match(src, /--reference-width:\s*1024px/);
+  assert.match(src, /\.site-frame\s*\{[^}]*max-width:\s*var\(--reference-width\)/s);
+  assert.match(src, /\.site-header\s*\{[^}]*height:\s*78px/s);
+  assert.match(src, /\.hero\s*\{[^}]*height:\s*484px/s);
+  assert.match(src, /\.trust-strip\s*\{[^}]*height:\s*80px/s);
+  assert.match(src, /\.portfolio-grid\s*\{[^}]*grid-template-columns:\s*repeat\(4,1fr\)/s);
+  assert.match(src, /\.process-grid\s*\{[^}]*grid-template-columns:\s*repeat\(6,1fr\)/s);
+  assert.match(src, /\.footer-panels\s*\{[^}]*grid-template-columns:\s*repeat\(4,1fr\)/s);
+});
+
+test('reference visual assets include the four exact portfolio crops and line icon sets', () => {
+  const src = html();
+  assert.match(src, /data-ref-asset="hero"/);
+  assert.equal((src.match(/data-ref-asset="portfolio"/g) || []).length, 4);
+  assert.equal((src.match(/data-ref-asset="trust-icon"/g) || []).length, 4);
+  assert.equal((src.match(/data-ref-asset="process-icon"/g) || []).length, 6);
+  assert.equal((src.match(/data-ref-asset="instagram"/g) || []).length, 6);
 });
 
 test('public homepage talks only to public website tables', () => {
