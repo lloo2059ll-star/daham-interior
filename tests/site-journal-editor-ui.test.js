@@ -21,6 +21,7 @@ test('site journal editor has desktop and mobile layouts scoped to worklog',()=>
   assert.match(css,/\.operations-worklog \.journal-editor-shell/);
   assert.match(css,/grid-template-columns:220px 1fr/);
   assert.match(css,/@media\(max-width:720px\)[\s\S]*journal-editor-nav\{display:none\}/);
+  assert.match(css,/#modal-bg \.journal-editor-shell[\s\S]*flex:\s*0 0 100vw !important/);
 });
 
 test('site journal index only exposes schedule sites linked to an existing estimate',()=>{

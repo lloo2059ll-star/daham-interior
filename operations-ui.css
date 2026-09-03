@@ -620,6 +620,35 @@
   .operations-ui .btn:active { transform: scale(.98); }
 }
 
+/* Worklog editor geometry guard: keep global tablet modal rules from shrinking it. */
+@media screen {
+  .operations-worklog #modal-bg.journal-editor-modal {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+  .operations-worklog #modal-bg .journal-editor-shell {
+    flex: 0 0 100vw !important;
+    width: 100vw !important;
+    min-width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+  .operations-worklog #modal-bg .journal-editor-main {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+}
+
 @media print {
   /* Intentionally neutral: each document keeps its existing print rules. */
 }
