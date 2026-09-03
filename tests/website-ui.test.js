@@ -63,12 +63,12 @@ test('instagram controls open the official DAHAM account in a new tab', () => {
 });
 
 test('kakao consultation opens the official DAHAM Kakao channel in a new tab', () => {
-  const src = html();
+  const src = source();
   assert.match(src, /https:\/\/pf\.kakao\.com\/_xnvxgTX/);
-  assert.match(src, /class="kakao-btn"/);
-  assert.match(src, /target="_blank"/);
-  assert.match(src, /rel="noopener noreferrer"/);
-  assert.doesNotMatch(src, /class="kakao-btn"[^>]*data-open-inquiry/);
+  assert.match(src, /\.kakao-btn/);
+  assert.match(src, /removeAttribute\('data-open-inquiry'\)/);
+  assert.match(src, /target='_blank'/);
+  assert.match(src, /rel='noopener noreferrer'/);
 });
 
 test('public homepage talks only to public website tables', () => {
