@@ -39,3 +39,10 @@ test('approved journal index includes overview, filters, progress, and three-col
   assert.match(html,/현장일지 보기/);
   assert.match(css,/grid-template-columns:repeat\(3,minmax\(260px,1fr\)\)/);
 });
+
+test('approved project journal detail uses summary cards, timeline, trade and photo gallery',()=>{
+  ['stat-icon','stat-copy','date-group','trade-badge','log-card-body','log-detail','log-photos'].forEach(token=>assert.match(html,new RegExp(token)));
+  ['전체','이번달','현장 방문','사진','상세 보기'].forEach(label=>assert.match(html,new RegExp(label)));
+  assert.match(html,/cnt\.photo\+=r\.photos\.length/);
+  assert.match(html,/grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+});

@@ -105,16 +105,17 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .phs-n{font-size:22px;font-weight:800;font-family:'Bebas Neue',sans-serif;line-height:1}
 .phs-l{font-size:9px;color:var(--dim);margin-top:2px;letter-spacing:.04em}
 
-.lv-main{max-width:900px;margin:0 auto;padding:20px 16px 100px}
+.lv-main{max-width:1040px;margin:0 auto;padding:20px 20px 100px}
 
 /* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.stat{background:#fff;border-radius:10px;padding:12px 8px;text-align:center;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);cursor:pointer;border:2px solid transparent;transition:all .15s}
-.stat:hover{border-color:rgba(230,81,0,.3)}
-.stat.active{border-color:var(--orange)}
-.stat-n{font-size:22px;font-weight:800;font-family:'Bebas Neue',sans-serif;line-height:1;color:var(--orange)}
-.stat-l{font-size:10px;font-weight:700;color:var(--dim);margin-top:3px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.stat{background:#fff;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;text-align:left;
+  box-shadow:0 3px 14px rgba(20,38,70,.06);cursor:pointer;border:1px solid #e8ebf2;transition:all .15s}
+.stat:hover{border-color:#c9c2ff;transform:translateY(-1px)}
+.stat.active{border-color:#6950e8;box-shadow:0 4px 16px rgba(105,80,232,.12)}
+.stat-icon{width:38px;height:38px;border-radius:50%;background:#f0edff;color:#6248df;display:grid;place-items:center;font-size:17px;flex:0 0 auto}
+.stat-copy{display:flex;flex-direction:column-reverse;gap:2px}.stat-n{font-size:23px;font-weight:800;font-family:'Bebas Neue',sans-serif;line-height:1;color:#172033}
+.stat-l{font-size:10px;font-weight:700;color:#7d8494;margin:0}
 
 /* FILTER BAR */
 .filter-bar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
@@ -137,35 +138,41 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .vf-btn:hover{border-color:var(--orange);color:var(--orange)}
 
 /* DATE GROUP */
-.date-group{margin-bottom:24px}
-.date-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.date-hd-label{font-size:12px;font-weight:800;color:var(--ink)}
+.date-group{position:relative;margin:0 0 0 118px;padding:0 0 16px 24px;border-left:1px solid #ded9fb}
+.date-group:last-child{border-left-color:transparent}
+.date-group::before{content:'';position:absolute;left:-5px;top:16px;width:9px;height:9px;border-radius:50%;background:#6248df;box-shadow:0 0 0 4px #f2efff}
+.date-hd{position:absolute;right:100%;top:7px;width:142px;padding-right:25px;display:flex;align-items:flex-start;justify-content:flex-end;margin:0}
+.date-hd-label{font-size:12px;font-weight:800;color:#263044;text-align:right;white-space:pre-line;line-height:1.45}
 .date-hd-dow{font-size:11px;color:var(--dim)}
-.date-hd-add{font-family:var(--sans);font-size:10px;font-weight:600;padding:3px 10px;
+.date-hd-add{display:none;font-family:var(--sans);font-size:10px;font-weight:600;padding:3px 10px;
   cursor:pointer;border:1.5px solid var(--line);background:#fff;color:var(--mid);
   transition:all .12s;border-radius:20px;display:inline-flex;align-items:center;gap:3px}
 .date-hd-add:hover{border-color:var(--orange);color:var(--orange)}
-.date-hd-line{flex:1;height:1px;background:var(--line)}
+.date-hd-line{display:none}
 
 /* LOG CARD */
-.log-card{background:#fff;border-radius:8px;padding:14px 16px;margin-bottom:8px;
-  box-shadow:0 1px 6px rgba(0,0,0,.05);border:1.5px solid transparent;
-  border-left:3px solid var(--orange);transition:border-color .12s}
-.log-card:hover{border-color:rgba(230,81,0,.2);border-left-color:var(--orange)}
+.log-card{background:#fff;border-radius:11px;padding:16px 18px;margin-bottom:0;
+  box-shadow:0 3px 14px rgba(20,38,70,.06);border:1px solid #e8ebf2;transition:border-color .12s,box-shadow .12s}
+.log-card:hover{border-color:#d5cff8;box-shadow:0 5px 18px rgba(20,38,70,.09)}
 .log-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
 .log-meta{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
 .log-proj-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:12px}
 .log-worker{font-size:11px;color:var(--mid)}
+.trade-badge{font-size:11px;font-weight:800;padding:4px 10px;border-radius:6px;background:#fff0e5;color:#e35a00}
 .visit-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;flex-shrink:0}
 .vb-visit{background:#E8F5E9;color:#2E7D32}
 .vb-remote{background:#E3F2FD;color:#1565C0}
 .vb-none{background:#F5F5F5;color:#757575}
-.log-content{font-size:13px;color:var(--ink);line-height:1.7;white-space:pre-wrap;margin-bottom:8px}
-.log-photos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
-.log-thumb{width:72px;height:72px;object-fit:cover;border-radius:6px;
+.log-card-body{display:grid;grid-template-columns:minmax(240px,.9fr) minmax(320px,1.35fr);gap:20px;align-items:start}
+.log-card-body.no-photos{grid-template-columns:1fr}
+.log-content{font-size:12px;color:#3e4656;line-height:1.8;white-space:pre-wrap;margin:4px 0 0;padding-left:14px;position:relative}
+.log-content::before{content:'•';position:absolute;left:2px;color:#24334d}
+.log-photos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0}
+.log-thumb{width:100%;height:108px;object-fit:cover;border-radius:7px;
   cursor:pointer;border:1.5px solid var(--line);transition:border-color .12s}
 .log-thumb:hover{border-color:var(--orange)}
-.log-card-actions{display:flex;gap:5px;justify-content:flex-end}
+.log-card-actions{display:flex;gap:5px;justify-content:flex-end;align-items:center}
+.log-detail{border:0;background:transparent;color:#333d50;font:700 11px var(--sans);cursor:pointer;padding:3px 2px}.log-detail:hover{color:#6248df}
 .act-btn{font-family:var(--sans);font-size:10px;font-weight:600;padding:3px 10px;cursor:pointer;
   border:1.5px solid var(--line);background:#fff;color:var(--mid);transition:all .12s}
 .act-btn:hover{border-color:var(--orange);color:var(--orange)}
@@ -259,7 +266,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
   .proj-cards{grid-template-columns:1fr 1fr}
   .stats{grid-template-columns:repeat(2,1fr)}
   .visit-filter{display:none}
-  .log-thumb,.preview-item,.preview-item img{width:60px;height:60px}
+  .date-group{margin-left:0;padding-left:18px}.date-hd{position:static;width:auto;padding:0 0 8px;justify-content:flex-start}.date-hd-label{text-align:left;white-space:normal}
+  .log-card-body{grid-template-columns:1fr}.log-photos{grid-template-columns:repeat(3,1fr)}
+  .log-thumb{height:76px}.preview-item,.preview-item img{width:60px;height:60px}
   .field-row{grid-template-columns:1fr}
   .proj-hd-stats{display:none}
 }
@@ -349,16 +358,16 @@ body.operations-worklog #modal-bg .journal-editor-layout{min-width:0!important}
     <!-- 통계 -->
     <div class="stats">
       <div class="stat active" id="stat-all" onclick="setStatFilter('all')">
-        <div class="stat-n" id="cnt-all">0</div><div class="stat-l">전체</div>
+        <i class="stat-icon">▤</i><span class="stat-copy"><div class="stat-n" id="cnt-all">0</div><div class="stat-l">전체</div></span>
       </div>
       <div class="stat" id="stat-month" onclick="setStatFilter('month')">
-        <div class="stat-n" id="cnt-month">0</div><div class="stat-l">이번달</div>
+        <i class="stat-icon">▦</i><span class="stat-copy"><div class="stat-n" id="cnt-month">0</div><div class="stat-l">이번달</div></span>
       </div>
       <div class="stat" id="stat-visit" onclick="setStatFilter('visit')">
-        <div class="stat-n" id="cnt-visit">0</div><div class="stat-l">현장방문</div>
+        <i class="stat-icon">♙</i><span class="stat-copy"><div class="stat-n" id="cnt-visit">0</div><div class="stat-l">현장 방문</div></span>
       </div>
       <div class="stat" id="stat-photo" onclick="setStatFilter('photo')">
-        <div class="stat-n" id="cnt-photo">0</div><div class="stat-l">사진있음</div>
+        <i class="stat-icon">▧</i><span class="stat-copy"><div class="stat-n" id="cnt-photo">0</div><div class="stat-l">사진</div></span>
       </div>
     </div>
 
@@ -895,7 +904,7 @@ function updateStats(){
   src.forEach(function(r){
     if((r.date||'').startsWith(tmStr)) cnt.month++;
     if(r.visitType==='visit') cnt.visit++;
-    if(r.photos&&r.photos.length) cnt.photo++;
+    if(r.photos&&r.photos.length) cnt.photo+=r.photos.length;
   });
   document.getElementById('cnt-all').textContent=cnt.all;
   document.getElementById('cnt-month').textContent=cnt.month;
@@ -977,7 +986,7 @@ function renderLogList(){
     var addArg=activeProjId?'\''+activeProjId+'\'':'null';
     html+='<div class="date-group">'
       +'<div class="date-hd">'
-        +'<span class="date-hd-label">'+esc(fmtDateFull(ds))+'</span>'
+        +'<span class="date-hd-label">'+esc(ds.replace(/-/g,'.'))+'\n'+esc(DOW_KO[new Date(ds+'T00:00:00').getDay()])+'</span>'
         +'<button class="date-hd-add" onclick="openModal(\''+ds+'\','+addArg+')">+ 이날 추가</button>'
         +'<span class="date-hd-line"></span>'
       +'</div>';
@@ -986,6 +995,7 @@ function renderLogList(){
       var projBadge=showProjBadge&&getProjName(r)
         ?'<span class="log-proj-badge" style="background:'+color+'22;color:'+color+'">'+esc(getProjName(r))+'</span>':'';
       var workerHtml=r.worker?'<span class="log-worker">👤 '+esc(r.worker)+'</span>':'';
+      var tradeHtml=r.trade?'<span class="trade-badge">'+esc(r.trade)+'</span>':'';
       var vbCls=r.visitType==='visit'?'vb-visit':r.visitType==='remote'?'vb-remote':'vb-none';
       var vbLbl=r.visitType==='visit'?'🏠 현장방문':r.visitType==='remote'?'📞 원격':'📋 기타';
       var photosHtml='';
@@ -996,14 +1006,16 @@ function renderLogList(){
         });
         photosHtml+='</div>';
       }
-      html+='<div class="log-card" style="border-left-color:'+color+'">'
-        +'<div class="log-card-top"><div class="log-meta">'+projBadge+workerHtml+'</div>'
-        +'<span class="visit-badge '+vbCls+'">'+vbLbl+'</span></div>'
-        +(r.content?'<div class="log-content">'+esc(r.content)+'</div>':'')
-        +photosHtml
+      html+='<div class="log-card">'
+        +'<div class="log-card-top"><div class="log-meta">'+tradeHtml+projBadge+workerHtml+'<span class="visit-badge '+vbCls+'">'+vbLbl+'</span></div>'
         +'<div class="log-card-actions">'
+          +'<button class="log-detail" onclick="openModal(null,null,\''+esc(r.id)+'\')">상세 보기　→</button>'
           +'<button class="act-btn del" onclick="deleteById(\''+esc(r.id)+'\')">삭제</button>'
           +'<button class="act-btn" onclick="openModal(null,null,\''+esc(r.id)+'\')">수정</button>'
+        +'</div></div>'
+        +'<div class="log-card-body '+(photosHtml?'':'no-photos')+'">'
+          +(r.content?'<div class="log-content">'+esc(r.content)+'</div>':'<div class="log-content">사진 기록</div>')
+          +photosHtml
         +'</div></div>';
     });
     html+='</div>';
