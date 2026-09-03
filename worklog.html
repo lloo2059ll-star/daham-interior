@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>DAHAM — 업무일지</title>
+<title>DAHAM — 현장일지</title>
 <script src="auth.js"></script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E65100">
@@ -43,6 +43,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .cv-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
 .cv-title{font-size:20px;font-weight:800}
 .cv-sub{font-size:12px;color:var(--dim);margin-top:3px}
+.migration-panel{display:none;background:#fff;border:1px solid var(--line);border-left:3px solid var(--orange);
+  padding:14px 16px;margin:-10px 0 20px;box-shadow:0 1px 6px rgba(0,0,0,.04)}
+.migration-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.migration-title{font-size:12px;font-weight:800}.migration-summary{font-size:11px;color:var(--mid);margin-top:4px}
+.migration-failures{margin-top:10px;display:grid;gap:6px}.migration-failure{font-size:10px;color:#C62828;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;background:#FFF5F5;padding:7px 9px}
 
 .proj-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 
@@ -220,6 +226,15 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 .preview-del{position:absolute;top:-6px;right:-6px;width:18px;height:18px;border-radius:50%;
   background:#C62828;color:#fff;border:none;cursor:pointer;font-size:11px;
   display:flex;align-items:center;justify-content:center;font-weight:700}
+.upload-row{display:grid;grid-template-columns:minmax(0,1fr) 52px auto auto;gap:7px;align-items:center;
+  padding:8px 0;border-bottom:1px solid var(--line-lt);font-size:11px}
+.upload-name{min-width:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.upload-size,.upload-status{color:var(--dim);font-size:10px}
+.upload-progress{height:4px;background:var(--line-lt);grid-column:1/4;border-radius:99px;overflow:hidden}
+.upload-progress i{display:block;height:100%;background:var(--orange);transition:width .15s}
+.upload-actions{display:flex;gap:4px;justify-content:flex-end}
+.upload-actions button{font:600 10px var(--sans);padding:3px 7px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--mid)}
+.upload-actions button:hover{border-color:var(--orange);color:var(--orange)}
 .modal-ft{padding:12px 20px;border-top:1px solid var(--line);
   display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:#fff}
 .modal-ft button{font-family:var(--sans);font-size:12px;font-weight:600;padding:8px 20px;
@@ -266,7 +281,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
   </div>
   <div class="tb-right">
     <span id="sync-dot" title="클라우드 동기화" style="font-size:14px;cursor:pointer;opacity:.4;transition:opacity .2s" onclick="manualSync()">☁</span>
-    <button class="tb-btn primary" id="btn-new-log" style="display:none" onclick="openModal(null,null)">+ 새 업무일지</button>
+    <button class="tb-btn" id="btn-archive" style="display:none" onclick="openArchiveModal()">준공자료</button>
+    <button class="tb-btn primary" id="btn-new-log" style="display:none" onclick="openModal(null,null)">+ 새 현장일지</button>
   </div>
 </div>
 
@@ -274,11 +290,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <div id="card-view">
   <div class="cv-header">
     <div>
-      <div class="cv-title">업무일지</div>
+      <div class="cv-title">현장일지</div>
       <div class="cv-sub" id="cv-sub">현장을 선택하세요</div>
     </div>
-    <button class="tb-btn primary" onclick="openModal(null,null)" style="flex-shrink:0">+ 새 업무일지</button>
+    <button class="tb-btn primary" onclick="openModal(null,null)" style="flex-shrink:0">+ 새 현장일지</button>
   </div>
+  <section class="migration-panel" id="migration-panel" aria-live="polite">
+    <div class="migration-head">
+      <div>
+        <div class="migration-title">기존 현장일지 사진 이전</div>
+        <div class="migration-summary" id="migration-summary">상태 확인 중</div>
+      </div>
+      <button class="tb-btn primary" id="migration-start" onclick="startLegacyMigration()">이전 시작</button>
+    </div>
+    <div class="migration-failures" id="migration-failures"></div>
+  </section>
   <div class="proj-cards" id="proj-card-grid"></div>
 </div>
 
@@ -345,7 +371,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <div class="modal-bg" id="modal-bg" style="display:none" onclick="onBgClick(event)">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-hd">
-      <div class="modal-title" id="modal-title">새 업무일지</div>
+      <div class="modal-title" id="modal-title">새 현장일지</div>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -387,7 +413,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
         <textarea id="m-content" placeholder="오늘 진행한 업무 내용을 입력하세요&#10;예) 거실 도배 시공 완료, 욕실 타일 작업 중, 고객 미팅 등"></textarea>
       </div>
       <div class="field">
-        <label>사진 첨부 (최대 5장)</label>
+        <label>사진 첨부 (최대 20장)</label>
         <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
           <div style="font-size:22px">📷</div>
           <p>클릭하여 사진 선택</p>
@@ -405,10 +431,40 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
   </div>
 </div>
 
+<!-- 준공자료 생성 및 열람 -->
+<div class="modal-bg archive-modal" id="archive-modal" style="display:none" onclick="archiveBgClick(event)">
+  <div class="modal archive-shell" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="archive-title">
+    <div class="modal-hd"><div><div class="modal-title" id="archive-title">준공자료 저장</div><div class="archive-project" id="archive-project"></div></div><button class="modal-close" onclick="closeArchiveModal()">✕</button></div>
+    <div class="modal-body">
+      <div class="archive-summary"><div><b id="archive-journals">0</b><span>현장일지</span></div><div><b id="archive-photos">0</b><span>원본 사진</span></div><div><b id="archive-size">0 MB</b><span>예상 용량</span></div></div>
+      <div class="archive-safety">✓ 원본 사진은 삭제되지 않습니다. DB에는 파일 정보만 저장되고 원본은 비공개 Storage에 유지됩니다.</div>
+      <ol class="archive-steps" id="archive-steps"><li>자료 확인</li><li>원본 검증</li><li>PDF 생성</li><li>ZIP 묶기</li></ol>
+      <div class="archive-status" id="archive-status">준공 시점의 현장일지와 사진을 하나의 자료로 보관합니다.</div>
+      <div class="archive-integrity" id="archive-integrity" hidden>✓ 무결성 확인 완료 <code id="archive-hash"></code></div>
+      <section class="archive-viewer" id="archive-viewer" hidden>
+        <div class="archive-viewer-tools"><input id="archive-search" class="search-input" placeholder="준공자료 검색" oninput="filterArchiveJournals()"><button class="tb-btn" onclick="showArchiveJournalList()">현장일지 보기</button></div>
+        <div id="archive-journal-list" class="archive-journal-list"></div>
+        <div class="archive-preview" id="archive-preview">PDF 미리보기는 ‘PDF 보기’에서 안전한 임시 링크로 열립니다.</div>
+      </section>
+      <div class="archive-health"><button class="tb-btn" onclick="runStorageHealthCheck()">저장소 안전 점검</button><span id="archive-health-result">필요할 때만 실행됩니다.</span></div>
+    </div>
+    <div class="modal-ft"><button onclick="closeArchiveModal()">닫기</button><button id="archive-retry" onclick="createCompletionArchive()" style="display:none">다시 시도</button><button id="archive-pdf" disabled onclick="downloadArchive('pdf')">PDF 보기</button><button id="archive-zip" disabled class="save" onclick="downloadArchive('zip')">ZIP 다운로드</button><button id="archive-create" class="save" onclick="createCompletionArchive()">준공자료 생성</button></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
+<script src="site-journal-domain.js"></script>
+<script src="site-journal-client.js"></script>
+<script src="site-journal-upload.js"></script>
+<script src="site-journal-upload-client.js"></script>
+<script src="site-journal-migration.js"></script>
+<script src="completion-archive-client.js"></script>
+<script src="site-journal-reconciliation.js"></script>
 <script>
 var LOG_KEY   = 'daham_worklog_v1';
+var DRAFT_KEY = 'daham_worklog_draft_v2';
+var MIGRATION_KEY = 'daham_worklog_migration_v1';
 var SCHED_KEY = 'daham_schedule_v1';
 var _AUTH_CONFIG = DAHAM_AUTH.getSupabaseConfig();
 var SUPA_URL  = _AUTH_CONFIG.url;
@@ -416,14 +472,26 @@ var SUPA_KEY  = _AUTH_CONFIG.key;
 var _authToken = DAHAM_AUTH.getAccessToken();
 var _HDRS = {'apikey':SUPA_KEY,'Authorization':'Bearer '+_authToken,'Content-Type':'application/json'};
 var _saveTimer = null;
+var archiveClient = DAHAM_COMPLETION_ARCHIVE.createClient({url:SUPA_URL,key:SUPA_KEY,getAccessToken:function(){return DAHAM_AUTH.getAccessToken();}});
+var currentArchive = null;
+var archivePollTimer = null;
 var MONTH_KO  = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
 var DOW_KO    = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
 
 var records       = [];
+var legacyRecords = [];
+var normalizedRecords = [];
 var schedProjects = [];
 var activeProjId  = null;   // null = 전체
 var editingId     = null;
 var pendingPhotos = [];
+var photoQueue = null;
+var pendingJournalId = null;
+var journalUploadClient = DAHAM_SITE_JOURNAL_UPLOAD_CLIENT.create({
+  url:SUPA_URL,key:SUPA_KEY,getAccessToken:function(){ return DAHAM_AUTH.getAccessToken(); },currentUser:function(){ return DAHAM_AUTH.currentUser(); }
+});
+var journalUploadContext = null;
+var pendingJournalSaved = false;
 var modalLockedProj = null;
 var monthOffset   = 0;
 var showAll       = false;
@@ -454,6 +522,112 @@ function relTime(iso){
   return Math.floor(h/24)+'일 전';
 }
 
+function readMigrationState(){
+  try{return JSON.parse(localStorage.getItem(MIGRATION_KEY)||'{"cursor":0,"status":"idle","ids":{},"errors":[]}');}
+  catch(e){return {cursor:0,status:'idle',ids:{},errors:[]};}
+}
+function persistMigrationState(state){
+  var bounded={cursor:Number(state.cursor)||0,status:String(state.status||'idle'),ids:state.ids||{},errors:(state.errors||[]).slice(-100)};
+  var encoded=JSON.stringify(bounded);
+  if(encoded.length>262144) throw new Error('이전 상태가 저장 한도를 초과했습니다');
+  localStorage.setItem(MIGRATION_KEY,encoded);
+  renderMigrationStatus();
+}
+function refreshJournalReads(){
+  records=DAHAM_SITE_JOURNAL_MIGRATION.mergeLegacyAndNormalized(normalizedRecords,legacyRecords,readMigrationState());
+}
+function normalizedDisplayRow(row){
+  return Object.assign({},row,{
+    id:row.id,date:row.work_date,projId:row.project_id,worker:row.trade||'',visitType:row.visit_type||'none',
+    content:row.content||'',createdAt:row.created_at,updatedAt:row.updated_at,_normalized:true
+  });
+}
+async function loadNormalizedRecords(){
+  try{
+    var response=await fetch(SUPA_URL+'/rest/v1/site_journals?deleted_at=is.null&select=id,project_id,work_date,trade,content,visit_type,created_at,updated_at&order=work_date.desc,created_at.desc',{headers:_HDRS});
+    if(!response.ok) throw new Error('normalized journal read failed');
+    var rows=await response.json();
+    normalizedRecords=Array.isArray(rows)?rows.map(normalizedDisplayRow):[];
+    refreshJournalReads(); renderCardGrid();
+    if(document.getElementById('log-view').style.display!=='none') renderLogList();
+  }catch(e){
+    normalizedRecords=[]; refreshJournalReads();
+  }
+  renderMigrationStatus();
+}
+function decodeLegacyBase64(source){
+  var match=/^data:([^;,]+);base64,([A-Za-z0-9+/]*={0,2})$/.exec(String(source||'').replace(/\s/g,''));
+  if(!match||match[2].length%4!==0) throw new Error('손상된 Base64 사진입니다');
+  var binary=atob(match[2]),bytes=new Uint8Array(binary.length);
+  for(var i=0;i<binary.length;i++) bytes[i]=binary.charCodeAt(i);
+  return new Blob([bytes],{type:match[1]});
+}
+var migrationContexts={};
+async function migrationContext(input){
+  if(migrationContexts[input.journalId]) return migrationContexts[input.journalId];
+  var context=await journalUploadClient.loadContext({journalId:input.journalId,projectId:input.projectId});
+  migrationContexts[input.journalId]=context;
+  return context;
+}
+async function verifyMigratedJournal(input){
+  var journalResponse=await fetch(SUPA_URL+'/rest/v1/site_journals?id=eq.'+encodeURIComponent(input.journalId)+'&deleted_at=is.null&select=id&limit=1',{headers:_HDRS});
+  if(!journalResponse.ok) throw new Error('현장일지 검증 조회에 실패했습니다');
+  var journalRows=await journalResponse.json();
+  var photoResponse=await fetch(SUPA_URL+'/rest/v1/site_journal_photos?journal_id=eq.'+encodeURIComponent(input.journalId)+'&deleted_at=is.null&select=id,byte_size,sha256,status',{headers:_HDRS});
+  if(!photoResponse.ok) throw new Error('사진 검증 조회에 실패했습니다');
+  return {journalExists:Array.isArray(journalRows)&&journalRows.length===1,photos:await photoResponse.json()};
+}
+var migrationAdapters={
+  loadState:function(){return Promise.resolve(readMigrationState());},
+  persistState:function(state){persistMigrationState(state);return Promise.resolve();},
+  decodeBase64:function(source){return Promise.resolve(decodeLegacyBase64(source));},
+  sha256:function(blob){return journalUploadClient.sha256(blob);},
+  createJournal:async function(input){
+    var context=await migrationContext(input);
+    var row=await journalUploadClient.createJournal(Object.assign({},context,{workDate:input.workDate,visitType:input.visitType,trade:input.trade,content:input.content}));
+    return Object.assign({},context,{row:row});
+  },
+  uploadPhoto:async function(blob,input){
+    var context=await migrationContext(input);
+    input.storagePath=DAHAM_SITE_JOURNAL.buildObjectPath({companyId:context.companyId,projectId:context.projectId,journalId:input.journalId,photoId:input.photoId,originalName:input.originalName});
+    await journalUploadClient.uploadStandard(blob,input.storagePath,function(){});
+  },
+  savePhotoMetadata:async function(input){
+    var context=await migrationContext(input);
+    return journalUploadClient.saveMetadata({id:input.photoId,companyId:context.companyId,journalId:input.journalId,storagePath:input.storagePath,
+      originalName:input.originalName,mimeType:input.mimeType,byteSize:input.byteSize,sha256:input.sha256,sortOrder:input.sortOrder,createdBy:context.authorId});
+  },
+  removeObject:function(input){return journalUploadClient.removeObject(input.storagePath);},
+  verifyJournal:verifyMigratedJournal,
+  yield:function(){return new Promise(function(resolve){setTimeout(resolve,0);});}
+};
+function renderMigrationStatus(){
+  var panel=document.getElementById('migration-panel');
+  if(!panel) return;
+  var allowed=DAHAM_SITE_JOURNAL_MIGRATION.canManageMigration(DAHAM_AUTH.currentUser());
+  panel.style.display=allowed?'block':'none';
+  if(!allowed) return;
+  var state=readMigrationState(),ids=Object.keys(state.ids||{}),migrated=0,skipped=0,failed=0;
+  ids.forEach(function(id){var status=state.ids[id]&&state.ids[id].status;if(status==='migrated'||status==='verified')migrated++;else if(status==='skipped')skipped++;else if(status==='failed')failed++;});
+  document.getElementById('migration-summary').textContent='전체 '+legacyRecords.length+'건 · 이전 '+migrated+' · 건너뜀 '+skipped+' · 실패 '+failed+' · 위치 '+Math.min(Number(state.cursor)||0,legacyRecords.length)+'/'+legacyRecords.length;
+  document.getElementById('migration-failures').innerHTML=(state.errors||[]).map(function(error){var encoded=encodeURIComponent(error.legacyId).replace(/'/g,'%27');return '<div class="migration-failure"><span>'+esc(error.legacyId)+' · '+esc(error.message)+'</span><button class="tb-btn" data-legacy-id="'+encoded+'" onclick="retryLegacyMigration(decodeURIComponent(this.dataset.legacyId))">재시도</button></div>';}).join('');
+}
+async function startLegacyMigration(recordIds){
+  if(!DAHAM_SITE_JOURNAL_MIGRATION.canManageMigration(DAHAM_AUTH.currentUser())){showToast('대표 또는 관리자만 이전할 수 있습니다');return;}
+  var button=document.getElementById('migration-start');button.disabled=true;migrationContexts={};
+  try{
+    if(recordIds&&recordIds.length){await DAHAM_SITE_JOURNAL_MIGRATION.migrateLegacyRecords(legacyRecords,migrationAdapters,{recordIds:recordIds});}
+    else{
+      var result;
+      do{result=await DAHAM_SITE_JOURNAL_MIGRATION.migrateLegacyRecords(legacyRecords,migrationAdapters,{batchSize:10});}
+      while(result.cursor<legacyRecords.length);
+    }
+    await loadNormalizedRecords(); showToast('현장일지 이전 상태를 갱신했습니다');
+  }catch(e){showToast(e.message||'현장일지 이전에 실패했습니다');}
+  finally{button.disabled=false;renderMigrationStatus();}
+}
+function retryLegacyMigration(id){return startLegacyMigration([id]);}
+
 function setSyncDot(state){
   var el=document.getElementById('sync-dot');
   if(!el) return;
@@ -463,7 +637,7 @@ function setSyncDot(state){
 }
 function cloudPush(){
   setSyncDot('up');
-  var str=JSON.stringify(records);
+  var str=JSON.stringify(legacyRecords);
   var ts=new Date().toISOString();
   localStorage.setItem(LOG_KEY+'_ts', ts);
   fetch(SUPA_URL+'/rest/v1/sync_data',{
@@ -487,7 +661,7 @@ function cloudPull(onDone){
       if(row.updated_at>localTs){
         try{
           var parsed=JSON.parse(row.value);
-          if(row.key===LOG_KEY){ records=parsed; updated=true; }
+          if(row.key===LOG_KEY){ legacyRecords=parsed; refreshJournalReads(); updated=true; }
           else if(row.key===SCHED_KEY){ schedProjects=parsed; }
           localStorage.setItem(row.key, row.value);
           localStorage.setItem(row.key+'_ts', row.updated_at);
@@ -506,17 +680,21 @@ function manualSync(){
   try{ schedProjects=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
   var inLogView=document.getElementById('log-view').style.display!=='none';
   cloudPull(function(){
-    renderCardGrid();
-    if(inLogView) renderLogList();
+    loadNormalizedRecords().then(function(){
+      renderCardGrid();
+      if(inLogView) renderLogList();
+    });
   });
 }
 
 function load(){
-  try{ records=JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }catch(e){ records=[]; }
+  try{ legacyRecords=JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }catch(e){ legacyRecords=[]; }
   try{ schedProjects=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+  refreshJournalReads();
 }
 function save(){
-  localStorage.setItem(LOG_KEY, JSON.stringify(records));
+  localStorage.setItem(LOG_KEY, JSON.stringify(legacyRecords));
+  refreshJournalReads();
   scheduleSave();
 }
 
@@ -537,6 +715,7 @@ function showCardView(){
   document.getElementById('btn-home').style.display='inline-flex';
   document.getElementById('btn-back').style.display='none';
   document.getElementById('btn-new-log').style.display='none';
+  document.getElementById('btn-archive').style.display='none';
   document.getElementById('tb-proj-name').style.display='none';
   renderCardGrid();
 }
@@ -549,14 +728,15 @@ function showLogView(projId){
   document.getElementById('btn-home').style.display='none';
   document.getElementById('btn-back').style.display='inline-flex';
   document.getElementById('btn-new-log').style.display='inline-flex';
+  document.getElementById('btn-archive').style.display=projId===null?'none':'inline-flex';
 
   // 툴바 현장명
   var nameEl=document.getElementById('tb-proj-name');
   if(projId===null){
-    nameEl.textContent='전체 업무일지';
+    nameEl.textContent='전체 현장일지';
   } else {
     var p=schedProjects.find(function(x){ return x.id===projId; });
-    nameEl.textContent=p?(p.info&&p.info.name)||'현장명 미입력':'전체 업무일지';
+    nameEl.textContent=p?(p.info&&p.info.name)||'현장명 미입력':'전체 현장일지';
   }
   nameEl.style.display='inline-block';
 
@@ -576,15 +756,15 @@ function showLogView(projId){
 function renderCardGrid(){
   var grid=document.getElementById('proj-card-grid');
   var total=records.length;
-  document.getElementById('cv-sub').textContent='총 '+total+'건 업무일지 · 현장 '+schedProjects.length+'개';
+  document.getElementById('cv-sub').textContent='총 '+total+'건 현장일지 · 현장 '+schedProjects.length+'개';
 
   var html='';
   // 전체 보기 카드
   var lastAll=records.length?records.slice().sort(function(a,b){ return (b.createdAt||'')>(a.createdAt||'')?1:-1; })[0]:null;
   html+='<div class="card-all" onclick="showLogView(null)">'
     +'<div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--mid);margin-bottom:10px;text-transform:uppercase">전체 현장</div>'
-    +'<div class="pc-name" style="font-size:16px">📋 전체 업무일지</div>'
-    +'<div class="pc-addr">모든 현장의 업무일지를 함께 봅니다</div>'
+    +'<div class="pc-name" style="font-size:16px">📋 전체 현장일지</div>'
+    +'<div class="pc-addr">모든 현장의 현장일지를 함께 봅니다</div>'
     +'<div class="pc-stats">'
       +'<div class="pc-stat"><div class="pc-stat-n" style="color:var(--ink)">'+records.length+'</div><div class="pc-stat-l">전체</div></div>'
       +'<div class="pc-stat"><div class="pc-stat-n" style="color:#2E7D32">'+records.filter(function(r){ return r.visitType==='visit'; }).length+'</div><div class="pc-stat-l">방문</div></div>'
@@ -622,7 +802,7 @@ function renderCardGrid(){
       +'<div class="pc-name">'+esc(name)+'</div>'
       +'<div class="pc-addr">'+(addr?esc(addr):client?esc(client):'')+(rangeStr?'<br><span style="font-size:10px;color:var(--dim)">📅 '+esc(rangeStr)+'</span>':'')+'</div>'
       +'<div class="pc-stats">'
-        +'<div class="pc-stat"><div class="pc-stat-n" style="color:'+color+'">'+logs.length+'</div><div class="pc-stat-l">업무일지</div></div>'
+        +'<div class="pc-stat"><div class="pc-stat-n" style="color:'+color+'">'+logs.length+'</div><div class="pc-stat-l">현장일지</div></div>'
         +'<div class="pc-stat"><div class="pc-stat-n" style="color:'+color+'">'+tasks.length+'</div><div class="pc-stat-l">전체공정</div></div>'
         +'<div class="pc-stat"><div class="pc-stat-n" style="color:#2E7D32">'+done+'</div><div class="pc-stat-l">완료</div></div>'
       +'</div>'
@@ -663,7 +843,7 @@ function renderProjHd(){
   document.getElementById('phd-stats').innerHTML=
     '<div class="phs"><div class="phs-n" style="color:'+(p.color||'#E65100')+'">'+tasks.length+'</div><div class="phs-l">전체공정</div></div>'
     +'<div class="phs"><div class="phs-n" style="color:#2E7D32">'+done+'</div><div class="phs-l">완료</div></div>'
-    +'<div class="phs"><div class="phs-n" style="color:var(--orange)">'+logCnt+'</div><div class="phs-l">업무일지</div></div>';
+    +'<div class="phs"><div class="phs-n" style="color:var(--orange)">'+logCnt+'</div><div class="phs-l">현장일지</div></div>';
 }
 
 /* ── stats / filter ── */
@@ -737,9 +917,9 @@ function renderLogList(){
 
   var el=document.getElementById('log-list');
   if(!list.length){
-    var msg=q?'검색 결과가 없습니다.':(!showAll&&statFilter==='all')?'이 달 업무일지가 없습니다.':'업무일지가 없습니다.';
+    var msg=q?'검색 결과가 없습니다.':(!showAll&&statFilter==='all')?'이 달 현장일지가 없습니다.':'현장일지가 없습니다.';
     el.innerHTML='<div class="lv-empty">'+msg+'<br>'
-      +'<button class="empty-add-btn" onclick="openModal(null,null)">+ 첫 업무일지 작성</button></div>';
+      +'<button class="empty-add-btn" onclick="openModal(null,null)">+ 첫 현장일지 작성</button></div>';
     return;
   }
 
@@ -800,47 +980,86 @@ function openViewer(id,idx){
 function closeViewer(){ document.getElementById('viewer-bg').style.display='none'; }
 
 /* ── PHOTO ── */
-function handlePhotos(input){
+function photoId(){
+  if(window.crypto&&crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var n=Math.floor(Math.random()*16);return(c==='x'?n:(n&3)|8).toString(16);});
+}
+function selectedProjectId(){
+  if(modalLockedProj) return modalLockedProj.id;
+  var sel=document.getElementById('m-proj-sel');
+  return sel&&sel.value&&sel.value!=='__direct__'?sel.value:null;
+}
+function beginPhotoQueue(){
+  pendingJournalId=photoId();
+  journalUploadContext=null;
+  pendingJournalSaved=false;
+  photoQueue=DAHAM_SITE_JOURNAL_UPLOAD.createUploadQueue({
+    concurrency:3,
+    uploadStandard:journalUploadClient.uploadStandard,
+    uploadResumable:journalUploadClient.uploadResumable,
+    saveMetadata:journalUploadClient.saveMetadata,
+    removeMetadata:journalUploadClient.removeMetadata,
+    removeObject:journalUploadClient.removeObject,
+    hashFile:journalUploadClient.sha256
+  });
+  photoQueue.subscribe(renderPhotoPreview);
+}
+function queuedPhotos(){ return photoQueue?photoQueue.snapshot():[]; }
+function fmtPhotoSize(bytes){
+  var n=Number(bytes)||0;
+  return n>=1024*1024?(n/(1024*1024)).toFixed(1)+' MB':Math.ceil(n/1024)+' KB';
+}
+async function handlePhotos(input){
   var files=Array.from(input.files||[]);
-  var rem=5-pendingPhotos.length;
-  if(!files.length||rem<=0){ if(rem<=0) showToast('사진은 최대 5장까지 가능합니다'); return; }
-  files.slice(0,rem).forEach(function(f){ compressImage(f,function(d){ pendingPhotos.push(d); renderPhotoPreview(); }); });
+  if(!files.length) return;
+  var projectId=selectedProjectId();
+  if(!projectId){ showToast('사진을 추가하기 전에 현장을 선택해주세요'); input.value=''; return; }
+  try{
+    if(!journalUploadContext) journalUploadContext=await journalUploadClient.loadContext({journalId:pendingJournalId,projectId:projectId});
+    photoQueue.add(files,Object.assign({},journalUploadContext,{currentPhotoCount:(Number(journalUploadContext.currentPhotoCount)||0)+photoQueue.intendedCount()}));
+  }catch(e){ showToast(e.message||'사진을 추가할 수 없습니다'); }
   input.value='';
 }
-function compressImage(file,cb){
-  var r=new FileReader();
-  r.onload=function(e){
-    var img=new Image();
-    img.onload=function(){
-      var MAX=1200,w=img.width,h=img.height;
-      if(w>MAX||h>MAX){ if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;} }
-      var c=document.createElement('canvas'); c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      cb(c.toDataURL('image/jpeg',0.75));
-    };
-    img.src=e.target.result;
-  };
-  r.readAsDataURL(file);
-}
-function renderPhotoPreview(){
-  document.getElementById('photo-preview').innerHTML=pendingPhotos.map(function(src,i){
-    return '<div class="preview-item"><img src="'+src+'"><button class="preview-del" onclick="removePhoto('+i+')">×</button></div>';
+function renderPhotoPreview(jobs){
+  var list=jobs||queuedPhotos();
+  document.getElementById('photo-preview').innerHTML=list.map(function(job){
+    var imageUrl=job.status==='ready'&&(job.metadata.thumbnailUrl||job.metadata.signedUrl);
+    var actions=(job.status==='queued'||job.status==='uploading')
+      ?'<button onclick="cancelPhotoUpload(\''+job.id+'\')">취소</button>'
+      :(job.status==='failed'||job.status==='cancelled')
+        ?'<button onclick="retryPhotoUpload(\''+job.id+'\')">재시도</button>':'';
+    return '<div class="upload-row">'
+      +'<div class="upload-name">'+(imageUrl?'<img class="preview-item" src="'+esc(imageUrl)+'" alt=""> ':'')+esc(job.file.name)+'</div>'
+      +'<span class="upload-size">'+fmtPhotoSize(job.file.size)+'</span>'
+      +'<span class="upload-status">'+esc(job.status)+(job.errorCode?' · '+esc(job.errorCode):'')+'</span>'
+      +'<span class="upload-actions">'+actions+'</span>'
+      +'<span class="upload-progress"><i style="width:'+Math.max(0,Math.min(100,job.progress))+'%"></i></span>'
+      +'</div>';
   }).join('');
 }
-function removePhoto(i){ pendingPhotos.splice(i,1); renderPhotoPreview(); }
+function cancelPhotoUpload(id){ if(photoQueue) photoQueue.cancel(id); }
+function retryPhotoUpload(id){ if(photoQueue) photoQueue.retry(id); }
+function saveDraft(){
+  var draft={date:document.getElementById('m-date').value,worker:document.getElementById('m-worker').value.slice(0,200),content:document.getElementById('m-content').value.slice(0,10000)};
+  localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));
+}
+function readDraft(){ try{return JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')}catch(e){return null} }
+function clearDraft(){ localStorage.removeItem(DRAFT_KEY); }
 
 /* ── MODAL ── */
 function openModal(dateStr, projId, logId){
   editingId=logId||null;
   modalLockedProj=null;
   pendingPhotos=[];
+  beginPhotoQueue();
   var r=logId?records.find(function(x){ return x.id===logId; }):null;
 
-  document.getElementById('modal-title').textContent=r?'업무일지 수정':'새 업무일지';
+  document.getElementById('modal-title').textContent=r?'현장일지 수정':'새 현장일지';
   document.getElementById('btn-del').style.display=r?'inline-flex':'none';
-  document.getElementById('m-date').value=dateStr||(r?r.date:null)||todayStr();
-  document.getElementById('m-worker').value=r?(r.worker||''):'';
-  document.getElementById('m-content').value=r?(r.content||''):'';
+  var draft=!r?readDraft():null;
+  document.getElementById('m-date').value=dateStr||(r?r.date:null)||(draft&&draft.date)||todayStr();
+  document.getElementById('m-worker').value=r?(r.worker||''):(draft&&draft.worker)||'';
+  document.getElementById('m-content').value=r?(r.content||''):(draft&&draft.content)||'';
 
   populateProjSel();
   // 수정 모드에서는 자유 선택, 새 추가(날짜/현장탭)에서만 고정
@@ -862,7 +1081,6 @@ function openModal(dateStr, projId, logId){
   document.getElementById('vt-remote').checked=(vt==='remote');
   document.getElementById('vt-none').checked=(vt==='none');
 
-  if(r&&r.photos) pendingPhotos=r.photos.slice();
   renderPhotoPreview();
   document.getElementById('modal-bg').style.display='flex';
 }
@@ -893,10 +1111,13 @@ function onProjSelChange(){
   var v=document.getElementById('m-proj-sel').value;
   document.getElementById('proj-text-field').style.display=(v==='__direct__')?'block':'none';
 }
-function closeModal(){ document.getElementById('modal-bg').style.display='none'; editingId=null; pendingPhotos=[]; modalLockedProj=null; }
+function closeModal(){
+  if(photoQueue&&queuedPhotos().some(function(job){ return job.status==='queued'||job.status==='uploading'; })){ showToast('사진 업로드를 완료하거나 각 항목을 취소해주세요'); return; }
+  document.getElementById('modal-bg').style.display='none'; editingId=null; pendingPhotos=[]; modalLockedProj=null; photoQueue=null;
+}
 function onBgClick(e){ if(e.target===document.getElementById('modal-bg')) closeModal(); }
 
-function saveRecord(){
+async function saveRecord(){
   var date=document.getElementById('m-date').value;
   if(!date){ showToast('날짜를 입력해주세요'); return; }
   var projId=null,projName='';
@@ -912,34 +1133,114 @@ function saveRecord(){
   var vt=document.querySelector('input[name="visit"]:checked');
   var visitType=vt?vt.value:'none';
   var content=document.getElementById('m-content').value.trim();
-  if(!content&&!pendingPhotos.length){ showToast('업무 내용 또는 사진을 입력해주세요'); return; }
+  if(!content&&!queuedPhotos().length){ showToast('업무 내용 또는 사진을 입력해주세요'); return; }
+
+  if(queuedPhotos().length){
+    if(!journalUploadContext){ showToast('사진 업로드 연결을 준비해주세요'); return; }
+    if(!photoQueue.canFinalize()){
+      if(queuedPhotos().some(function(job){ return job.status==='failed'||job.status==='cancelled'; })){ showToast('실패하거나 취소된 사진을 재시도하거나 제거해주세요'); return; }
+      try{
+        if(!pendingJournalSaved){
+          await journalUploadClient.createJournal(Object.assign({},journalUploadContext,{workDate:date,visitType:visitType,trade:'',content:content}));
+          pendingJournalSaved=true;
+        }
+        photoQueue.start();
+        showToast('사진 업로드가 완료되면 다시 저장해주세요');
+      }catch(e){ showToast(e.message||'현장일지를 저장할 수 없습니다'); }
+      return;
+    }
+  }
 
   if(editingId){
-    var rec=records.find(function(x){ return x.id===editingId; });
+    var shown=records.find(function(x){ return x.id===editingId; });
+    var legacyEditId=shown&&shown.legacyId?shown.legacyId:editingId;
+    var rec=legacyRecords.find(function(x){ return x.id===legacyEditId; });
+    if(!rec){ showToast('이전된 현장일지는 이 화면에서 수정할 수 없습니다'); return; }
     if(rec){ rec.date=date;rec.projId=projId;rec.projName=projName;rec.worker=worker;
-             rec.visitType=visitType;rec.content=content;rec.photos=pendingPhotos.slice();
+             rec.visitType=visitType;rec.content=content;
              rec.updatedAt=new Date().toISOString(); }
   } else {
-    records.push({id:uid(),date:date,projId:projId,projName:projName,worker:worker,
-      visitType:visitType,content:content,photos:pendingPhotos.slice(),createdAt:new Date().toISOString()});
+    var newRecord={id:uid(),date:date,projId:projId,projName:projName,worker:worker,
+      visitType:visitType,content:content,createdAt:new Date().toISOString()};
+    legacyRecords.push(newRecord);
+    if(pendingJournalSaved){
+      var migrationState=readMigrationState();
+      migrationState.ids=migrationState.ids||{};
+      migrationState.ids[newRecord.id]={journalId:pendingJournalId,status:'verified'};
+      persistMigrationState(migrationState);
+    }
   }
-  save(); closeModal();
+  save(); clearDraft(); closeModal();
   if(document.getElementById('log-view').style.display!=='none') renderLogList();
   renderCardGrid();
   showToast('✓ 저장했습니다');
 }
 function deleteById(id){
-  dahamConfirm('이 업무일지를 삭제할까요?', function() {
-    records=records.filter(function(x){ return x.id!==id; });
+  dahamConfirm('이 현장일지를 삭제할까요?', function() {
+    var shown=records.find(function(x){ return x.id===id; });
+    var legacyDeleteId=shown&&shown.legacyId?shown.legacyId:id;
+    if(!legacyRecords.some(function(x){return x.id===legacyDeleteId;})){showToast('이전된 현장일지는 이 화면에서 삭제할 수 없습니다');return;}
+    legacyRecords=legacyRecords.filter(function(x){ return x.id!==legacyDeleteId; });
     save(); renderLogList(); renderCardGrid(); showToast('삭제했습니다');
   });
 }
 function deleteRecord(){
   if(!editingId) return;
-  dahamConfirm('이 업무일지를 삭제할까요?', function() {
-    records=records.filter(function(x){ return x.id!==editingId; });
+  dahamConfirm('이 현장일지를 삭제할까요?', function() {
+    var shown=records.find(function(x){ return x.id===editingId; });
+    var legacyDeleteId=shown&&shown.legacyId?shown.legacyId:editingId;
+    if(!legacyRecords.some(function(x){return x.id===legacyDeleteId;})){showToast('이전된 현장일지는 이 화면에서 삭제할 수 없습니다');return;}
+    legacyRecords=legacyRecords.filter(function(x){ return x.id!==legacyDeleteId; });
     save(); closeModal(); renderLogList(); renderCardGrid(); showToast('삭제했습니다');
   });
+}
+
+function archiveProject(){return schedProjects.find(function(p){return p.id===activeProjId;});}
+function archiveSize(bytes){bytes=Number(bytes)||0;return bytes<1048576?Math.ceil(bytes/1024)+' KB':(bytes/1048576).toFixed(1)+' MB';}
+function setArchiveState(archive){
+  currentArchive=archive||null;
+  var state=archive&&archive.status||'idle', ready=state==='ready', failed=state==='failed';
+  var labels={idle:'준공 시점의 현장일지와 사진을 하나의 자료로 보관합니다.',queued:'자료 확인 중입니다.',processing:'원본을 검증하고 PDF·ZIP을 생성하고 있습니다.',ready:'준공자료 저장이 완료되었습니다.',failed:'생성 중 문제가 발생했습니다. 원본은 그대로 보관되어 있습니다.'};
+  document.getElementById('archive-status').textContent=labels[state]||labels.idle;
+  document.getElementById('archive-create').style.display=state==='idle'?'inline-flex':'none';
+  document.getElementById('archive-retry').style.display=failed?'inline-flex':'none';
+  document.getElementById('archive-pdf').disabled=!ready;document.getElementById('archive-zip').disabled=!ready;
+  document.getElementById('archive-viewer').hidden=!ready;document.getElementById('archive-integrity').hidden=!ready;
+  document.getElementById('archive-hash').textContent=ready&&archive.zip_sha256?archive.zip_sha256.slice(0,16)+'…':'';
+  if(archive){document.getElementById('archive-journals').textContent=archive.journal_count||0;document.getElementById('archive-photos').textContent=archive.photo_count||0;document.getElementById('archive-size').textContent=archiveSize(archive.source_bytes);}
+  document.querySelectorAll('#archive-steps li').forEach(function(el,i){var n=state==='ready'?4:state==='processing'?Math.min(3,Number(archive&&archive.checkpointStep)||2):state==='queued'?1:0;el.classList.toggle('done',i<n);el.classList.toggle('active',i===n&&n<4);});
+  if(ready)showArchiveJournalList();
+}
+async function openArchiveModal(){
+  if(!activeProjId){showToast('준공자료를 만들 현장을 먼저 선택해주세요');return;}
+  var p=archiveProject(),logs=records.filter(function(r){return r.projId===activeProjId;});
+  document.getElementById('archive-project').textContent=p&&p.info?(p.info.name||p.info.addr||activeProjId):activeProjId;
+  document.getElementById('archive-journals').textContent=logs.length;
+  document.getElementById('archive-photos').textContent=logs.reduce(function(n,r){return n+(r.photos&&r.photos.length||0);},0);
+  document.getElementById('archive-size').textContent='계산 중';document.getElementById('archive-modal').style.display='flex';setArchiveState(null);
+  try{setArchiveState(await archiveClient.get(activeProjId));}catch(e){document.getElementById('archive-status').textContent='저장된 준공자료를 확인하지 못했습니다. 새로 생성할 수 있습니다.';}
+}
+function closeArchiveModal(){document.getElementById('archive-modal').style.display='none';if(archivePollTimer){clearTimeout(archivePollTimer);archivePollTimer=null;}}
+function archiveBgClick(e){if(e.target===document.getElementById('archive-modal'))closeArchiveModal();}
+async function createCompletionArchive(){
+  if(!activeProjId)return;document.getElementById('archive-retry').style.display='none';document.getElementById('archive-create').style.display='none';
+  try{var result=await archiveClient.create(activeProjId);setArchiveState(Object.assign({},currentArchive||{},result));pollCompletionArchive(1000,0);}catch(e){setArchiveState({status:'failed',error_code:e.code});}
+}
+function pollCompletionArchive(delay,attempt){
+  if(archivePollTimer)clearTimeout(archivePollTimer);if(attempt>30)return;
+  archivePollTimer=setTimeout(async function(){try{var archive=await archiveClient.get(activeProjId);setArchiveState(archive);if(archive&&['queued','processing'].indexOf(archive.status)>=0)pollCompletionArchive(Math.min(delay*1.5,10000),attempt+1);}catch(e){pollCompletionArchive(Math.min(delay*2,10000),attempt+1);}},delay);
+}
+async function downloadArchive(type){
+  try{var signed=await archiveClient.createSignedDownload(currentArchive,type);window.open(signed,'_blank','noopener');}catch(e){showToast(e.message||'파일을 열 수 없습니다');}
+}
+function showArchiveJournalList(){
+  var rows=records.filter(function(r){return r.projId===activeProjId;}),q=(document.getElementById('archive-search').value||'').toLowerCase();
+  document.getElementById('archive-journal-list').innerHTML=rows.filter(function(r){return !q||[r.date,r.worker,r.content].join(' ').toLowerCase().indexOf(q)>=0;}).slice(0,100).map(function(r){return '<article><b>'+esc(r.date)+'</b><span>'+esc(r.worker||'기타')+'</span><p>'+esc(r.content||'사진 기록')+'</p></article>';}).join('')||'<p class="archive-empty">조건에 맞는 현장일지가 없습니다.</p>';
+}
+function filterArchiveJournals(){showArchiveJournalList();}
+async function runStorageHealthCheck(){
+  var out=document.getElementById('archive-health-result');out.textContent='점검 중…';
+  try{var response=await fetch(SUPA_URL+'/functions/v1/reconcile-site-journal-storage',{method:'POST',headers:_HDRS,body:JSON.stringify({repair:false})});var result=await response.json();if(!response.ok)throw new Error(result.error||'점검 실패');var issues=(result.orphaned||[]).length+(result.missing||[]).length+(result.checksumMismatch||[]).length+(result.staleUploads||[]).length+(result.stuckArchives||[]).length;out.textContent=issues?'확인 필요 '+issues+'건 · 자동 삭제 없음':'안전 점검 완료 · 이상 없음';}catch(e){out.textContent='점검을 완료하지 못했습니다.';}
 }
 function showToast(m){
   var t=document.getElementById('toast');
@@ -949,7 +1250,12 @@ function showToast(m){
 
 load();
 showCardView();
-cloudPull(function(){ renderCardGrid(); });
+renderMigrationStatus();
+cloudPull(function(){ loadNormalizedRecords(); });
+['m-date','m-worker','m-content'].forEach(function(id){
+  document.getElementById(id).addEventListener('input',saveDraft);
+  document.getElementById(id).addEventListener('change',saveDraft);
+});
 </script>
 <script src="auth.js"></script>
 

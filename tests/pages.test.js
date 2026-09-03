@@ -45,3 +45,15 @@ test('dashboard navigation exposes the commercial estimate workspace', () => {
   const html = read('index.html');
   assert.match(html, /<a href="estimate-commercial\.html"><span class="ico">[^<]+<\/span>상가 견적<\/a>/);
 });
+
+test('dashboard replaces the duplicate site estimate link with site journal', () => {
+  const dashboard = read('index.html');
+  assert.match(dashboard, /href="worklog\.html"[^>]*><span class="ico">⌂<\/span>현장일지<\/a>/);
+  assert.equal((dashboard.match(/href="estimate\.html"[^>]*><span class="ico">/g) || []).length, 1);
+});
+
+test('worklog uses the approved site journal name', () => {
+  const worklog = read('worklog.html');
+  assert.match(worklog, /<title>DAHAM — 현장일지<\/title>/);
+  assert.match(worklog, /class="cv-title">현장일지<\/div>/);
+});
