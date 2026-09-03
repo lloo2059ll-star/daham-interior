@@ -14,6 +14,7 @@ test('site journal editor preserves project, upload, draft and save hooks',()=>{
   ['m-proj-sel','photo-input','photo-preview','saveJournalDraft','saveRecord','deleteRecord'].forEach(token=>assert.match(html,new RegExp(token)));
   assert.match(html,/name="trade"/);
   assert.match(html,/trade:trade/);
+  assert.match(html,/var vt=\(r&&r\.visitType\)\|\|'visit'/);
 });
 
 test('site journal editor has desktop and mobile layouts scoped to worklog',()=>{

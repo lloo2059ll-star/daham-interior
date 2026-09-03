@@ -1077,7 +1077,7 @@ function openModal(dateStr, projId, logId){
     } else { showProjSel(r); }
   } else { showProjSel(r); }
 
-  var vt=(r&&r.visitType)||'none';
+  var vt=(r&&r.visitType)||'visit';
   document.getElementById('vt-visit').checked=(vt==='visit');
   document.getElementById('vt-remote').checked=(vt==='remote');
   document.getElementById('vt-none').checked=(vt==='none');
