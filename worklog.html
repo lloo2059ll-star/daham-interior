@@ -434,7 +434,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <!-- 준공자료 생성 및 열람 -->
 <div class="modal-bg archive-modal" id="archive-modal" style="display:none" onclick="archiveBgClick(event)">
   <div class="modal archive-shell" onclick="event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="archive-title">
-    <div class="modal-hd archive-head"><div class="archive-head-icon">⇩</div><div><div class="modal-title" id="archive-title">준공자료 저장</div><div class="archive-project" id="archive-project"></div></div><button class="modal-close" onclick="closeArchiveModal()">✕</button></div>
+    <div class="modal-hd archive-head"><div class="archive-head-icon">⇩</div><div><div class="modal-title" id="archive-title">준공자료 저장</div><div class="archive-project" id="archive-project"></div></div><span class="archive-ready-chip" id="archive-ready-chip" hidden>보관 완료</span><div class="archive-head-actions" id="archive-head-actions" hidden><button onclick="downloadArchive('zip')">⇩ ZIP 다운로드</button><button onclick="downloadArchive('pdf')">▤ PDF 보기</button></div><button class="modal-close" onclick="closeArchiveModal()">✕</button></div>
     <div class="modal-body archive-body">
       <section id="archive-build-view">
         <ol class="archive-steps" id="archive-steps"><li><b>1. 현장일지 확인</b><span>현장일지 검토 완료</span></li><li><b>2. 원본 사진 정리</b><span>사진 분류 및 정리 완료</span></li><li><b>3. PDF 보고서 생성</b><span>현장일지 PDF 생성 완료</span></li><li><b>4. ZIP 보관 완료</b><span>보관 파일 생성 준비 완료</span></li></ol>
@@ -454,7 +454,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
         </div>
       </section>
     </div>
-    <div class="modal-ft archive-actions"><button onclick="closeArchiveModal()">취소</button><button id="archive-retry" onclick="createCompletionArchive()" style="display:none">다시 시도</button><button id="archive-pdf" disabled onclick="downloadArchive('pdf')">▤ PDF 보기</button><button id="archive-zip" disabled onclick="downloadArchive('zip')">⇩ ZIP 다운로드</button><button id="archive-create" class="save" onclick="createCompletionArchive()">준공자료 생성</button></div>
+    <div class="modal-ft archive-actions" id="archive-build-actions"><button onclick="closeArchiveModal()">취소</button><button id="archive-retry" onclick="createCompletionArchive()" style="display:none">다시 시도</button><button id="archive-pdf" hidden disabled onclick="downloadArchive('pdf')">▤ PDF 보기</button><button id="archive-zip" hidden disabled onclick="downloadArchive('zip')">⇩ ZIP 다운로드</button><button id="archive-create" class="save" onclick="createCompletionArchive()">준공자료 생성</button></div>
   </div>
 </div>
 
@@ -1238,6 +1238,7 @@ function setArchiveState(archive){
   var labels={idle:'준공 시점의 현장일지와 사진을 하나의 자료로 보관합니다.',queued:'자료 확인 중입니다.',processing:'원본을 검증하고 PDF·ZIP을 생성하고 있습니다.',ready:'준공자료 저장이 완료되었습니다.',failed:'생성 중 문제가 발생했습니다. 원본은 그대로 보관되어 있습니다.'};
   document.getElementById('archive-status').textContent=labels[state]||labels.idle;
   document.getElementById('archive-title').textContent=ready?'준공자료':'준공자료 저장';
+  document.getElementById('archive-ready-chip').hidden=!ready;document.getElementById('archive-head-actions').hidden=!ready;document.getElementById('archive-build-actions').hidden=ready;
   document.getElementById('archive-build-view').hidden=ready;
   document.getElementById('archive-create').style.display=state==='idle'?'inline-flex':'none';
   document.getElementById('archive-retry').style.display=failed?'inline-flex':'none';
