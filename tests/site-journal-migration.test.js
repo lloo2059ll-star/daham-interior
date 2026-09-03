@@ -242,6 +242,7 @@ test('worklog wires a separate migration state panel and leaves the legacy key a
 test('worklog resolves stale legacy project ids through an exact current project name', () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'worklog.html'), 'utf8');
   assert.match(html, /function resolvedProjectId\(record\)/);
+  assert.match(html, /Math\.min\(left\.length,right\.length\)>=6/);
   assert.match(html, /rowLabel===projectLabel\(project\.info&&project\.info\.name\)/);
   assert.match(html, /resolvedProjectId\(r\)===p\.id/);
   assert.match(html, /resolvedProjectId\(r\)===activeProjId/);

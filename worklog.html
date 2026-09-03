@@ -702,6 +702,10 @@ function getProjName(r){ return r.projName||r.proj||''; }
 function projectLabel(value){
   return String(value||'').replace(/\s+/g,'').toLowerCase();
 }
+function projectLabelMatches(left,right){
+  left=projectLabel(left);right=projectLabel(right);
+  return !!left&&!!right&&(left===right||(Math.min(left.length,right.length)>=6&&(left.indexOf(right)===0||right.indexOf(left)===0)));
+}
 function resolvedProjectId(record){
   if(!record) return '';
   var rawId=record.projId||record.project_id||'';
@@ -718,8 +722,8 @@ function resolvedProjectId(record){
   var ids=Object.keys(candidates);
   if(ids.length===1) return ids[0];
 
-  var label=projectLabel(getProjName(record));
-  var matches=schedProjects.filter(function(project){return label&&label===projectLabel(project.info&&project.info.name);});
+  var label=getProjName(record);
+  var matches=schedProjects.filter(function(project){return projectLabelMatches(label,project.info&&project.info.name);});
   return matches.length===1?matches[0].id:rawId;
 }
 function getProjColor(r){
