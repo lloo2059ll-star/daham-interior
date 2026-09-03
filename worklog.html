@@ -270,6 +270,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <link rel="stylesheet" href="v2-theme.css">
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
+<script src="active-sites.js?v=20260904"></script>
 <link rel="stylesheet" href="operations-ui.css?v=20260904-journal-index-1">
 </head>
 <body class="operations-ui operations-admin operations-worklog">
@@ -483,7 +484,8 @@ var statFilter    = 'all';
 
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function activeEstimateSites(value){
-  return (Array.isArray(value)?value:[]).filter(function(project){return project&&project.estimateId;});
+  var estimates=[];try{estimates=JSON.parse(localStorage.getItem('daham_detail_v2')||'[]');}catch(e){}
+  return DAHAM_ACTIVE_SITES.filterSchedules(value,estimates);
 }
 function pad(n){ return n<10?'0'+n:String(n); }
 function todayStr(){ var d=new Date(); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }

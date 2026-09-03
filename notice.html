@@ -237,6 +237,7 @@ a.tb-btn{text-decoration:none}
 <script defer src="v2-suite.js"></script>
 <script src="notice-domain.js?v=202608301210"></script>
 <link rel="stylesheet" href="operations-ui.css">
+<script src="active-sites.js?v=20260904"></script>
 </head>
 <body class="operations-ui operations-document">
 
@@ -542,7 +543,7 @@ function loadScheduleProjects(){
   var sel=document.getElementById('sched-sel');
   if(!sel) return;
   var projects=[];
-  try{ projects=JSON.parse(localStorage.getItem('daham_schedule_v1')||'[]'); }catch(e){}
+  try{ projects=DAHAM_ACTIVE_SITES.filterSchedules(JSON.parse(localStorage.getItem('daham_schedule_v1')||'[]'),JSON.parse(localStorage.getItem('daham_detail_v2')||'[]')); }catch(e){}
   sel.innerHTML='<option value="">-- 직접 입력 --</option>';
   projects.forEach(function(p){
     var name=(p.info&&(p.info.name||p.info.addr))||'현장명 미입력';
@@ -565,7 +566,7 @@ function loadFromSchedule(){
   var id=document.getElementById('sched-sel').value;
   if(!id) return;
   var projects=[];
-  try{ projects=JSON.parse(localStorage.getItem('daham_schedule_v1')||'[]'); }catch(e){}
+  try{ projects=DAHAM_ACTIVE_SITES.filterSchedules(JSON.parse(localStorage.getItem('daham_schedule_v1')||'[]'),JSON.parse(localStorage.getItem('daham_detail_v2')||'[]')); }catch(e){}
   var p=null;
   for(var i=0;i<projects.length;i++){ if(projects[i].id===id){ p=projects[i]; break; } }
   if(!p) return;

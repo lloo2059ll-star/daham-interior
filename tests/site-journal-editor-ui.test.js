@@ -25,7 +25,7 @@ test('site journal editor has desktop and mobile layouts scoped to worklog',()=>
 
 test('site journal index only exposes schedule sites linked to an existing estimate',()=>{
   assert.match(html,/function activeEstimateSites\(value\)/);
-  assert.match(html,/project&&project\.estimateId/);
+  assert.match(html,/DAHAM_ACTIVE_SITES\.filterSchedules/);
   assert.match(html,/schedProjects=activeEstimateSites\(parsed\)/);
   assert.match(css,/\.operations-worklog \.worklog-app-nav/);
 });

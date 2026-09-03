@@ -184,6 +184,7 @@ body{background:#f4f6fa;color:#14213a}.toolbar{height:64px;border-bottom:1px sol
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
 <script src="warranty-domain.js?v=202608301900"></script>
+<script src="active-sites.js?v=20260904"></script>
 </head>
 <body class="operations-ui operations-document">
 
@@ -299,8 +300,8 @@ var currentSched  = null;
 var currentEstimate = null, currentSaved = null;
 
 function loadProjects(){
-  try{ schedProjects = JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
   try{ estimates = JSON.parse(localStorage.getItem(EST_KEY)||'[]'); }catch(e){ estimates=[]; }
+  try{ schedProjects = DAHAM_ACTIVE_SITES.filterSchedules(JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'),estimates); }catch(e){ schedProjects=[]; }
   try{ savedCertificates = JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'); }catch(e){ savedCertificates={}; }
 }
 

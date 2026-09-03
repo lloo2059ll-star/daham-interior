@@ -133,6 +133,7 @@ input[type=file]{display:none}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
+<script src="active-sites.js?v=20260904"></script>
 </head>
 <body class="operations-ui operations-admin operations-photos">
 
@@ -281,9 +282,7 @@ function loadSchedule() {
 }
 function loadContractedProjects() {
   try {
-    return JSON.parse(localStorage.getItem(ESTIMATE_KEY) || '[]').filter(function(p) {
-      return (p.contracted || p.completed) && p.client && p.client['cl-name'];
-    });
+    return DAHAM_ACTIVE_SITES.activeEstimates(JSON.parse(localStorage.getItem(ESTIMATE_KEY) || '[]'));
   } catch(e) { return []; }
 }
 function loadHiddenAlbums() {
@@ -318,7 +317,7 @@ function renderAlbums() {
   var hidden      = loadHiddenAlbums();
   var grid        = document.getElementById('album-grid');
 
-  var schedProjects = schedule.filter(function(p) {
+  var schedProjects = DAHAM_ACTIVE_SITES.filterSchedules(schedule,contracted).filter(function(p) {
     return p.info && p.info.name && hidden.indexOf(p.id) === -1;
   });
   var schedIds = schedProjects.map(function(p) { return p.id; });

@@ -145,7 +145,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <link rel="stylesheet" href="order-v2.css?v=202608301620">
 <script src="order-domain.js?v=202608301430"></script>
 <script defer src="https://developers.kakao.com/sdk/js/kakao.js"></script>
-<script defer src="order-v2.js?v=202608301620"></script>
+<script src="active-sites.js?v=20260904"></script>
+<script defer src="order-v2.js?v=20260904"></script>
 </head>
 <body class="operations-ui operations-admin">
 
@@ -285,8 +286,8 @@ function fmtDate(ds){
 
 function load(){
   try{ records  =JSON.parse(localStorage.getItem(ORDER_KEY)||'[]');   }catch(e){ records=[]; }
-  try{ schedProjs=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]');  }catch(e){ schedProjs=[]; }
   try{ estProjs  =JSON.parse(localStorage.getItem(EST_KEY)||'[]');    }catch(e){ estProjs=[]; }
+  try{ schedProjs=DAHAM_ACTIVE_SITES.filterSchedules(JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'),estProjs);  }catch(e){ schedProjs=[]; }
   try{ contacts  =JSON.parse(localStorage.getItem(CONTACT_KEY)||'[]');}catch(e){ contacts=[]; }
 }
 function save(){ localStorage.setItem(ORDER_KEY,JSON.stringify(records)); }

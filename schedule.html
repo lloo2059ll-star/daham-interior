@@ -1513,7 +1513,7 @@ function syncContractedProjects(){
 
   var result=DAHAM_SCHEDULE_DOMAIN.reconcileContractSites(allProjects,estProjects,uid,COLORS,holidayMap);
   allProjects=result.sites;
-  if(result.added>0||result.updated>0) saveDB();
+  if(result.added>0||result.updated>0||result.removed>0) saveDB();
   if(result.added>0) showToast('✓ 계약완료 현장 '+result.added+'건이 일정표에 등록됐습니다');
 }
 

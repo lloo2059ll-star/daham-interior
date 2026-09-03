@@ -127,6 +127,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
+<script src="active-sites.js?v=20260904"></script>
 </head>
 <body class="operations-ui operations-admin">
 
@@ -265,7 +266,7 @@ function daysDiff(from, to){
 
 function load(){
   try{ records=JSON.parse(localStorage.getItem(AS_KEY)||'[]'); }catch(e){ records=[]; }
-  try{ schedProjects=JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'); }catch(e){ schedProjects=[]; }
+  try{ schedProjects=DAHAM_ACTIVE_SITES.filterSchedules(JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'),JSON.parse(localStorage.getItem('daham_detail_v2')||'[]')); }catch(e){ schedProjects=[]; }
 }
 function save(){
   localStorage.setItem(AS_KEY, JSON.stringify(records));

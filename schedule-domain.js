@@ -148,7 +148,10 @@
     return 'estimate';
   }
   function reconcileContractSites(sites,projects,uid,colors,holidays){
-    var out=normalizeSites(sites,colors), byId={};
+    var activeIds={};
+    (projects||[]).forEach(function(p){var value=projectStatus(p);if(p&&p.id&&(value==='contracted'||value==='construction'))activeIds[String(p.id)]=true;});
+    var normalized=normalizeSites(sites,colors);
+    var out=normalized.filter(function(site){return site&&site.estimateId&&activeIds[String(site.estimateId)];}), removed=normalized.length-out.length, byId={};
     out.forEach(function(s){if(s.estimateId&&!byId[s.estimateId]) byId[s.estimateId]=s;});
     var added=0,updated=0;
     (projects||[]).forEach(function(p,index){
@@ -174,7 +177,7 @@
         if(site.tasks.length){site.autoScheduleInitialized=true;if(!wasNew)updated++;}
       }
     });
-    return {sites:out,added:added,updated:updated};
+    return {sites:out,added:added,updated:updated,removed:removed};
   }
   function normWorker(v){return String(v||'').trim().replace(/\s+/g,' ');}
   function findWorkerConflicts(next,sites){
