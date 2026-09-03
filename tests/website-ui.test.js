@@ -3,6 +3,7 @@ const path = require('node:path');
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
+// Final website verification intentionally spans the split HTML/CSS/JS shell.
 const root = path.join(__dirname, '..');
 function read(name){ return fs.readFileSync(path.join(root, name), 'utf8'); }
 function html(){ return read('website.html'); }
