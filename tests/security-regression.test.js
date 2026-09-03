@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const root = path.join(__dirname, '..');
 const htmlPages = fs.readdirSync(root).filter(name => name.endsWith('.html'));
-const publicPages = new Set(['login.html', 'signup.html']);
+const publicPages = new Set(['login.html', 'signup.html', 'website.html']);
 
 test('every internal page starts the shared auth guard from head', () => {
   for (const page of htmlPages.filter(name => !publicPages.has(name))) {
@@ -17,10 +17,13 @@ test('every internal page starts the shared auth guard from head', () => {
   }
 });
 
-test('only login and compatibility signup pages are public', () => {
-  assert.deepEqual([...publicPages].sort(), ['login.html', 'signup.html']);
+test('only login, compatibility signup, and customer website omit the ERP auth guard', () => {
+  assert.deepEqual([...publicPages].sort(), ['login.html', 'signup.html', 'website.html']);
   assert.match(fs.readFileSync(path.join(root, 'login.html'), 'utf8'), /DAHAM_AUTH\.login/);
   assert.match(fs.readFileSync(path.join(root, 'signup.html'), 'utf8'), /login\.html#signup/);
+  const website = fs.readFileSync(path.join(root, 'website.html'), 'utf8');
+  assert.doesNotMatch(website, /<script src="auth\.js"><\/script>/);
+  assert.doesNotMatch(website, /sync_data/);
 });
 
 test('tracked frontend contains no service-role or secret Supabase key', () => {
