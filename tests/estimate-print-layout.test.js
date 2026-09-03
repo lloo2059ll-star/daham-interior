@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const printModulePath = path.join(__dirname, '..', 'estimate-print.js');
 
 const html = fs.readFileSync(path.join(__dirname, '..', 'estimate.html'), 'utf8');
 
@@ -57,3 +58,41 @@ test('estimate print hides the sticky editing summary bar', () => {
 test('estimate print hides the editable client form', () => {
   assert.equal(printedDisplay(printCss(html), 'client-panel'), 'none');
 });
+
+test('estimate print moves rendered sections into the printable container and restores them afterward', () => {
+  const printLayout = require(printModulePath);
+  const source = fakeNode('sections-container');
+  const editorHost = fakeNode('v2-sections-host');
+  editorHost.appendChild(fakeNode('section-one'));
+  editorHost.appendChild(fakeNode('section-two'));
+  const listeners = {};
+  const root = { addEventListener(type, handler) { listeners[type] = handler; } };
+  const document = { getElementById(id) { return id === source.id ? source : editorHost; } };
+
+  printLayout.bind(root, document);
+  listeners.beforeprint();
+  assert.deepEqual(source.children.map(node => node.id), ['section-one', 'section-two']);
+  assert.equal(editorHost.children.length, 0);
+
+  listeners.afterprint();
+  assert.deepEqual(editorHost.children.map(node => node.id), ['section-one', 'section-two']);
+  assert.equal(source.children.length, 0);
+});
+
+test('estimate page loads the print layout bridge', () => {
+  assert.match(html, /<script src="estimate-print\.js"><\/script>/);
+});
+
+function fakeNode(id) {
+  return {
+    id,
+    children: [],
+    get firstChild() { return this.children[0] || null; },
+    appendChild(node) {
+      if (node.parentNode) node.parentNode.children.splice(node.parentNode.children.indexOf(node), 1);
+      this.children.push(node);
+      node.parentNode = this;
+      return node;
+    },
+  };
+}
