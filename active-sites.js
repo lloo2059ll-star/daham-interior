@@ -19,7 +19,8 @@
   function filterSchedules(schedules,projects){
     var ids={};activeEstimates(projects).forEach(function(project){ids[String(project.id)]=true;});
     return (Array.isArray(schedules)?schedules:[]).filter(function(site){
-      return site&&site.estimateId&&ids[String(site.estimateId)];
+      var siteStatus=site&&site.info&&site.info.status;
+      return site&&site.estimateId&&(ids[String(site.estimateId)]||siteStatus==='contracted'||siteStatus==='construction');
     });
   }
   return {status:status,activeEstimates:activeEstimates,filterSchedules:filterSchedules};
