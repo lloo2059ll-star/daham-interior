@@ -6,14 +6,43 @@ const assert = require('node:assert/strict');
 const htmlPath = path.join(__dirname, '..', 'website.html');
 function html(){ return fs.readFileSync(htmlPath, 'utf8'); }
 
-test('public homepage keeps the approved DAHAM sections', () => {
+test('public homepage keeps the approved DAHAM sections and copy', () => {
   const src = html();
   assert.match(src, /DAHAM INTERIOR/);
-  assert.match(src, /id="portfolio"/);
+  assert.match(src, /공간에 가치를 더하고,/);
+  assert.match(src, /일상에 편안함을 더합니다\./);
+  assert.match(src, /PORTFOLIO/);
   assert.match(src, /OUR PROCESS/);
+  assert.match(src, /ABOUT DAHAM/);
+  assert.match(src, /CUSTOMER CENTER/);
+  assert.match(src, /INSTAGRAM/);
+  assert.match(src, /QUICK MENU/);
   assert.match(src, /id="inquiry-modal"/);
   assert.match(src, /견적 문의하기/);
-  assert.match(src, /신뢰/);
+});
+
+test('approved desktop mockup structure replaces the old generic homepage styling', () => {
+  const src = html();
+  assert.match(src, /class="reference-home"/);
+  assert.match(src, /--page-width:940px/);
+  assert.match(src, /--header-height:78px/);
+  assert.match(src, /class="hero-trust"/);
+  assert.match(src, /class="portfolio-grid"/);
+  assert.match(src, /grid-template-columns:repeat\(4,1fr\)/);
+  assert.match(src, /class="process-grid"/);
+  assert.match(src, /grid-template-columns:repeat\(6,1fr\)/);
+  assert.match(src, /class="footer-panels"/);
+  assert.doesNotMatch(src, /class="cta-band"/);
+  assert.doesNotMatch(src, /ERP에서 공개 승인된 현장만 표시됩니다/);
+});
+
+test('homepage uses image assets or svg-like graphics rather than emoji process icons', () => {
+  const src = html();
+  assert.match(src, /data:image\/jpeg;base64,/);
+  assert.match(src, /data:image\/png;base64,/);
+  assert.doesNotMatch(src, /✦|⌖|▤|✓|◫/);
+  assert.match(src, /trust-sprite/);
+  assert.match(src, /process-sprite/);
 });
 
 test('public homepage talks only to public website tables', () => {
