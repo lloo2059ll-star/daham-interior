@@ -287,6 +287,7 @@ body.operations-worklog #modal-bg.journal-editor-modal{position:fixed!important;
 body.operations-worklog #modal-bg.journal-editor-modal>.journal-editor-shell{position:absolute!important;inset:0!important;display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;width:100vw!important;min-width:100vw!important;max-width:100vw!important;height:100dvh!important;min-height:100dvh!important;max-height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;transform:none!important}
 body.operations-worklog #modal-bg .journal-editor-main{width:auto!important;min-width:0!important;max-width:none!important;height:100dvh!important;overflow:auto!important}
 body.operations-worklog #modal-bg .journal-editor-layout{min-width:0!important}
+body.operations-worklog #modal-bg .visit-toggle label,body.operations-worklog #modal-bg .visit-toggle label>span{white-space:nowrap!important;word-break:keep-all!important;overflow-wrap:normal!important}
 @media(max-width:720px){body.operations-worklog #modal-bg.journal-editor-modal>.journal-editor-shell{display:block!important}body.operations-worklog #modal-bg .journal-editor-nav{display:none!important}}
 </style>
 </head>
@@ -409,7 +410,7 @@ body.operations-worklog #modal-bg .journal-editor-layout{min-width:0!important}
         <section class="journal-form-card">
           <div class="journal-top-fields">
             <div class="field"><label>작업일자</label><input type="date" id="m-date"></div>
-            <div class="field"><label>방문 유형</label><div class="visit-toggle"><input type="radio" name="visit" id="vt-visit" value="visit"><label for="vt-visit">현장방문</label><input type="radio" name="visit" id="vt-remote" value="remote"><label for="vt-remote">원격 확인</label><input type="radio" name="visit" id="vt-none" value="none" checked><label for="vt-none">기타</label></div></div>
+            <div class="field"><label>방문 유형</label><div class="visit-toggle"><input type="radio" name="visit" id="vt-visit" value="visit"><label for="vt-visit"><span>현장방문</span></label><input type="radio" name="visit" id="vt-remote" value="remote"><label for="vt-remote"><span>원격&nbsp;확인</span></label><input type="radio" name="visit" id="vt-none" value="none" checked><label for="vt-none"><span>기타</span></label></div></div>
             <div class="field"><label>작성자</label><input type="text" id="m-worker" placeholder="이름 입력"></div>
           </div>
           <div class="field" id="proj-select-field"><label>현장</label><select id="m-proj-sel" onchange="onProjSelChange()"></select></div>
