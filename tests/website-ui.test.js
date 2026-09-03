@@ -36,10 +36,14 @@ test('approved desktop mockup structure replaces the old generic homepage stylin
   assert.doesNotMatch(src, /ERP에서 공개 승인된 현장만 표시됩니다/);
 });
 
-test('homepage uses image assets or svg-like graphics rather than emoji process icons', () => {
+test('homepage uses repository image assets rather than emoji process icons', () => {
   const src = html();
-  assert.match(src, /data:image\/jpeg;base64,/);
-  assert.match(src, /data:image\/png;base64,/);
+  assert.match(src, /website-assets\/hero\.jpg/);
+  assert.match(src, /website-assets\/portfolio-cards\.jpg/);
+  assert.match(src, /website-assets\/trust-icons\.png/);
+  assert.match(src, /website-assets\/process-icons\.png/);
+  assert.match(src, /website-assets\/instagram\.jpg/);
+  assert.match(src, /website-assets\/misc-icons\.png/);
   assert.doesNotMatch(src, /✦|⌖|▤|✓|◫/);
   assert.match(src, /trust-sprite/);
   assert.match(src, /process-sprite/);
