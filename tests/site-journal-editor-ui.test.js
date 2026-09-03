@@ -29,3 +29,10 @@ test('site journal index only exposes schedule sites linked to an existing estim
   assert.match(html,/schedProjects=activeEstimateSites\(parsed\)/);
   assert.match(css,/\.operations-worklog \.worklog-app-nav/);
 });
+
+test('approved journal index includes overview, filters, progress, and three-column cards',()=>{
+  ['journal-overview','journal-index-filters','overview-sites','overview-logs','overview-photos','overview-size','project-search','project-status','project-trade','project-period'].forEach(token=>assert.match(html,new RegExp(token)));
+  assert.match(html,/pc-progress/);
+  assert.match(html,/현장일지 보기/);
+  assert.match(css,/grid-template-columns:repeat\(3,minmax\(260px,1fr\)\)/);
+});
