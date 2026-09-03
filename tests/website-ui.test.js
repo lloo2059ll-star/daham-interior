@@ -52,6 +52,14 @@ test('homepage uses repository image assets rather than emoji process icons', ()
   assert.match(src, /process-sprite/);
 });
 
+test('instagram links open the official DAHAM account in a new tab', () => {
+  const src = html();
+  const url = 'https://www.instagram.com/daham.co/';
+  const matches = src.match(new RegExp('href="' + url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"', 'g')) || [];
+  assert.ok(matches.length >= 2, 'instagram URL should be used by the panel and footer icon');
+  assert.match(src, /href="https:\/\/www\.instagram\.com\/daham\.co\/"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/);
+});
+
 test('public homepage talks only to public website tables', () => {
   const src = source();
   assert.match(src, /website-public-domain\.js/);
