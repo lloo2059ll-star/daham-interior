@@ -368,66 +368,30 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 </div>
 
 <!-- MODAL -->
-<div class="modal-bg" id="modal-bg" style="display:none" onclick="onBgClick(event)">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hd">
-      <div class="modal-title" id="modal-title">새 현장일지</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="field-row">
-        <div class="field">
-          <label>날짜</label>
-          <input type="date" id="m-date">
-        </div>
-        <div class="field">
-          <label>담당자</label>
-          <input type="text" id="m-worker" placeholder="이름 입력">
-        </div>
+<div class="modal-bg journal-editor-modal" id="modal-bg" style="display:none" onclick="onBgClick(event)">
+  <div class="modal journal-editor-shell" onclick="event.stopPropagation()">
+    <aside class="journal-editor-nav"><div class="journal-editor-logo">◈ DAHAM INTERIOR</div><nav><span>⌂　대시보드</span><span>▦　프로젝트 관리　⌄</span><span>▤　견적 관리　⌄</span><span>□　계약 관리　⌄</span><span>◉　공정 관리　⌄</span><b>▧　현장관리　⌃</b><small>현장 목록</small><small class="active">현장일지</small><small>현장 사진</small><small>자재 관리</small><small>안전 점검</small><span>♙　고객 관리</span><span>♧　협력업체 관리</span><span>▤　보고서</span><span>⚙　설정</span></nav><div class="journal-editor-user">●　<span id="editor-user-name">작성자</span><small>현장관리 담당</small></div></aside>
+    <main class="journal-editor-main">
+      <div class="journal-editor-crumb">프로젝트　›　현장관리　›　현장일지　›　<b>작성</b></div>
+      <header><div><h1 id="modal-title">현장일지 작성</h1><strong id="editor-project-title">현장을 선택해주세요</strong></div><button class="modal-close" onclick="closeModal()">✕</button></header>
+      <div class="journal-editor-layout">
+        <section class="journal-form-card">
+          <div class="journal-top-fields">
+            <div class="field"><label>작업일자</label><input type="date" id="m-date"></div>
+            <div class="field"><label>방문 유형</label><div class="visit-toggle"><input type="radio" name="visit" id="vt-visit" value="visit"><label for="vt-visit">현장방문</label><input type="radio" name="visit" id="vt-remote" value="remote"><label for="vt-remote">원격 확인</label><input type="radio" name="visit" id="vt-none" value="none" checked><label for="vt-none">기타</label></div></div>
+            <div class="field"><label>작성자</label><input type="text" id="m-worker" placeholder="이름 입력"></div>
+          </div>
+          <div class="field" id="proj-select-field"><label>현장</label><select id="m-proj-sel" onchange="onProjSelChange()"></select></div>
+          <div class="field" id="proj-locked-field" style="display:none"><label>현장</label><div class="proj-locked" id="proj-locked-display"></div></div>
+          <div class="field" id="proj-text-field" style="display:none"><label>현장명 직접 입력</label><input type="text" id="m-proj-text" placeholder="현장명을 직접 입력하세요"></div>
+          <div class="field"><label>공종</label><div class="trade-toggle"><input type="radio" name="trade" id="tr-demolition" value="철거"><label for="tr-demolition">철거</label><input type="radio" name="trade" id="tr-carpentry" value="목공"><label for="tr-carpentry">목공</label><input type="radio" name="trade" id="tr-electric" value="전기"><label for="tr-electric">전기</label><input type="radio" name="trade" id="tr-tile" value="타일"><label for="tr-tile">타일</label><input type="radio" name="trade" id="tr-paint" value="도장"><label for="tr-paint">도장</label><input type="radio" name="trade" id="tr-furniture" value="가구"><label for="tr-furniture">가구</label><input type="radio" name="trade" id="tr-other" value="기타" checked><label for="tr-other">기타</label></div></div>
+          <div class="field"><label>공사 내용</label><textarea id="m-content" placeholder="오늘 진행한 공사 내용을 입력하세요&#10;예) 거실 목작업 완료, 중문 치수 확인, 다음 공정 준비"></textarea></div>
+          <div class="field journal-photo-field"><div class="journal-photo-title"><label>원본 사진</label><button type="button" onclick="document.getElementById('photo-input').click()">＋ 사진 추가</button></div><div class="journal-photo-area"><div class="photo-upload-area" onclick="document.getElementById('photo-input').click()"><div>☁</div><p>사진을 드래그하거나<br>＋ 사진 추가 버튼을 클릭하세요</p><small>원본 화질로 최대 20장 · 장당 25MB</small></div><input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(this)"><div class="photo-preview-row" id="photo-preview"></div></div></div>
+        </section>
+        <aside class="journal-save-summary"><h2>저장 정보</h2><dl><dt>▦　프로젝트</dt><dd id="summary-project">-</dd><dt>▣　작업일자</dt><dd id="summary-date">-</dd><dt>♙　작성자</dt><dd id="summary-worker">-</dd><dt>▧　원본 사진</dt><dd id="summary-photos">0장</dd><dt>▱　예상 용량</dt><dd id="summary-size">0 MB</dd><dt>▱　저장 위치</dt><dd>비공개 저장소</dd></dl><div>♢　원본은 비공개 저장소에<br>안전하게 보관됩니다.</div></aside>
       </div>
-      <div class="field" id="proj-select-field">
-        <label>현장 (계약 현장 연동)</label>
-        <select id="m-proj-sel" onchange="onProjSelChange()"></select>
-      </div>
-      <div class="field" id="proj-locked-field" style="display:none">
-        <label>현장</label>
-        <div class="proj-locked" id="proj-locked-display"></div>
-      </div>
-      <div class="field" id="proj-text-field" style="display:none">
-        <label>현장명 직접 입력</label>
-        <input type="text" id="m-proj-text" placeholder="현장명을 직접 입력하세요">
-      </div>
-      <div class="field">
-        <label>방문 여부</label>
-        <div class="visit-toggle">
-          <input type="radio" name="visit" id="vt-visit" value="visit">
-          <label for="vt-visit">🏠 현장 방문</label>
-          <input type="radio" name="visit" id="vt-remote" value="remote">
-          <label for="vt-remote">📞 원격/전화</label>
-          <input type="radio" name="visit" id="vt-none" value="none" checked>
-          <label for="vt-none">📋 기타</label>
-        </div>
-      </div>
-      <div class="field">
-        <label>업무 내용</label>
-        <textarea id="m-content" placeholder="오늘 진행한 업무 내용을 입력하세요&#10;예) 거실 도배 시공 완료, 욕실 타일 작업 중, 고객 미팅 등"></textarea>
-      </div>
-      <div class="field">
-        <label>사진 첨부 (최대 20장)</label>
-        <div class="photo-upload-area" onclick="document.getElementById('photo-input').click()">
-          <div style="font-size:22px">📷</div>
-          <p>클릭하여 사진 선택</p>
-          <p style="font-size:10px">JPG · PNG · HEIC</p>
-        </div>
-        <input type="file" id="photo-input" accept="image/*" multiple style="display:none" onchange="handlePhotos(this)">
-        <div class="photo-preview-row" id="photo-preview"></div>
-      </div>
-    </div>
-    <div class="modal-ft">
-      <button class="del" id="btn-del" style="display:none" onclick="deleteRecord()">삭제</button>
-      <button onclick="closeModal()">취소</button>
-      <button class="save" onclick="saveRecord()">저장</button>
-    </div>
+      <footer class="journal-editor-actions"><button class="del" id="btn-del" style="display:none" onclick="deleteRecord()">삭제</button><button onclick="saveJournalDraft()">▤　임시저장</button><button onclick="closeModal()">취소</button><button class="save" onclick="saveRecord()">▣　현장일지 저장</button></footer>
+    </main>
   </div>
 </div>
 
@@ -1070,13 +1034,16 @@ function renderPhotoPreview(jobs){
       +'<span class="upload-progress"><i style="width:'+Math.max(0,Math.min(100,job.progress))+'%"></i></span>'
       +'</div>';
   }).join('');
+  updateEditorSummary();
 }
 function cancelPhotoUpload(id){ if(photoQueue) photoQueue.cancel(id); }
 function retryPhotoUpload(id){ if(photoQueue) photoQueue.retry(id); }
 function saveDraft(){
-  var draft={date:document.getElementById('m-date').value,worker:document.getElementById('m-worker').value.slice(0,200),content:document.getElementById('m-content').value.slice(0,10000)};
+  var trade=document.querySelector('input[name="trade"]:checked');
+  var draft={date:document.getElementById('m-date').value,worker:document.getElementById('m-worker').value.slice(0,200),trade:trade&&trade.value||'기타',content:document.getElementById('m-content').value.slice(0,10000)};
   localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));
 }
+function saveJournalDraft(){saveDraft();showToast('임시저장했습니다');}
 function readDraft(){ try{return JSON.parse(localStorage.getItem(DRAFT_KEY)||'null')}catch(e){return null} }
 function clearDraft(){ localStorage.removeItem(DRAFT_KEY); }
 
@@ -1088,7 +1055,7 @@ function openModal(dateStr, projId, logId){
   beginPhotoQueue();
   var r=logId?records.find(function(x){ return x.id===logId; }):null;
 
-  document.getElementById('modal-title').textContent=r?'현장일지 수정':'새 현장일지';
+  document.getElementById('modal-title').textContent=r?'현장일지 수정':'현장일지 작성';
   document.getElementById('btn-del').style.display=r?'inline-flex':'none';
   var draft=!r?readDraft():null;
   document.getElementById('m-date').value=dateStr||(r?r.date:null)||(draft&&draft.date)||todayStr();
@@ -1114,8 +1081,12 @@ function openModal(dateStr, projId, logId){
   document.getElementById('vt-visit').checked=(vt==='visit');
   document.getElementById('vt-remote').checked=(vt==='remote');
   document.getElementById('vt-none').checked=(vt==='none');
+  var trade=(r&&r.trade)||(draft&&draft.trade)||'기타';
+  document.querySelectorAll('input[name="trade"]').forEach(function(input){input.checked=input.value===trade;});
+  var current=DAHAM_AUTH.currentUser()||{};document.getElementById('editor-user-name').textContent=current.name||current.fullName||document.getElementById('m-worker').value||'작성자';
 
   renderPhotoPreview();
+  updateEditorSummary();
   document.getElementById('modal-bg').style.display='flex';
 }
 function showProjSel(r){
@@ -1144,6 +1115,17 @@ function populateProjSel(){
 function onProjSelChange(){
   var v=document.getElementById('m-proj-sel').value;
   document.getElementById('proj-text-field').style.display=(v==='__direct__')?'block':'none';
+  updateEditorSummary();
+}
+function editorProjectName(){
+  if(modalLockedProj)return modalLockedProj.name;
+  var sel=document.getElementById('m-proj-sel'),value=sel&&sel.value;
+  if(value&&value!=='__direct__'){var p=schedProjects.find(function(row){return row.id===value;});return p&&p.info&&p.info.name||'';}
+  return document.getElementById('m-proj-text').value.trim();
+}
+function updateEditorSummary(){
+  var name=editorProjectName()||'현장을 선택해주세요',jobs=queuedPhotos(),bytes=jobs.reduce(function(sum,job){return sum+Number(job.file&&job.file.size||0);},0);
+  document.getElementById('editor-project-title').textContent=name;document.getElementById('summary-project').textContent=name;document.getElementById('summary-date').textContent=document.getElementById('m-date').value||'-';document.getElementById('summary-worker').textContent=document.getElementById('m-worker').value||'-';document.getElementById('summary-photos').textContent=jobs.length+'장';document.getElementById('summary-size').textContent=archiveSize(bytes);
 }
 function closeModal(){
   if(photoQueue&&queuedPhotos().some(function(job){ return job.status==='queued'||job.status==='uploading'; })){ showToast('사진 업로드를 완료하거나 각 항목을 취소해주세요'); return; }
@@ -1167,6 +1149,7 @@ async function saveRecord(){
   var vt=document.querySelector('input[name="visit"]:checked');
   var visitType=vt?vt.value:'none';
   var content=document.getElementById('m-content').value.trim();
+  var tradeInput=document.querySelector('input[name="trade"]:checked'),trade=tradeInput?tradeInput.value:'기타';
   if(!content&&!queuedPhotos().length){ showToast('업무 내용 또는 사진을 입력해주세요'); return; }
 
   if(queuedPhotos().length){
@@ -1175,7 +1158,7 @@ async function saveRecord(){
       if(queuedPhotos().some(function(job){ return job.status==='failed'||job.status==='cancelled'; })){ showToast('실패하거나 취소된 사진을 재시도하거나 제거해주세요'); return; }
       try{
         if(!pendingJournalSaved){
-          await journalUploadClient.createJournal(Object.assign({},journalUploadContext,{workDate:date,visitType:visitType,trade:'',content:content}));
+          await journalUploadClient.createJournal(Object.assign({},journalUploadContext,{workDate:date,visitType:visitType,trade:trade,content:content}));
           pendingJournalSaved=true;
         }
         photoQueue.start();
@@ -1190,11 +1173,11 @@ async function saveRecord(){
     var legacyEditId=shown&&shown.legacyId?shown.legacyId:editingId;
     var rec=legacyRecords.find(function(x){ return x.id===legacyEditId; });
     if(!rec){ showToast('이전된 현장일지는 이 화면에서 수정할 수 없습니다'); return; }
-    if(rec){ rec.date=date;rec.projId=projId;rec.projName=projName;rec.worker=worker;
+    if(rec){ rec.date=date;rec.projId=projId;rec.projName=projName;rec.worker=worker;rec.trade=trade;
              rec.visitType=visitType;rec.content=content;
              rec.updatedAt=new Date().toISOString(); }
   } else {
-    var newRecord={id:uid(),date:date,projId:projId,projName:projName,worker:worker,
+    var newRecord={id:uid(),date:date,projId:projId,projName:projName,worker:worker,trade:trade,
       visitType:visitType,content:content,createdAt:new Date().toISOString()};
     legacyRecords.push(newRecord);
     if(pendingJournalSaved){
@@ -1292,9 +1275,11 @@ showCardView();
 renderMigrationStatus();
 cloudPull(function(){ loadNormalizedRecords(); });
 ['m-date','m-worker','m-content'].forEach(function(id){
-  document.getElementById(id).addEventListener('input',saveDraft);
-  document.getElementById(id).addEventListener('change',saveDraft);
+  document.getElementById(id).addEventListener('input',function(){saveDraft();updateEditorSummary();});
+  document.getElementById(id).addEventListener('change',function(){saveDraft();updateEditorSummary();});
 });
+document.getElementById('m-proj-text').addEventListener('input',updateEditorSummary);
+document.querySelectorAll('input[name="trade"],input[name="visit"]').forEach(function(input){input.addEventListener('change',saveDraft);});
 </script>
 <script src="auth.js"></script>
 
