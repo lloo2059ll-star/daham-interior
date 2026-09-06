@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /erp.html
+Disallow: /login.html
+Disallow: /website-admin.html
+
+Sitemap: https://daham-interior.com/sitemap.xml

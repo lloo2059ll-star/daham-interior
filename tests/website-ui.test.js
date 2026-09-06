@@ -99,3 +99,22 @@ test('public homepage shows the current representative phone number', () => {
   assert.equal((src.match(/010-2059-0347/g) || []).length, 2);
   assert.doesNotMatch(src, /010-5633-6807/);
 });
+
+test('search engines receive one canonical public homepage and crawlable sitemap', () => {
+  const src = html();
+  const portfolio = read('portfolio.html');
+  const canonical = src.match(/<link rel="canonical" href="([^"]+)">/);
+  const jsonLd = src.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+  const robots = read('robots.txt');
+  const sitemap = read('sitemap.xml');
+
+  assert.equal(canonical?.[1], 'https://daham-interior.com/');
+  assert.match(portfolio, /<link rel="canonical" href="https:\/\/daham-interior\.com\/portfolio\.html">/);
+  assert.equal(JSON.parse(jsonLd?.[1]).url, 'https://daham-interior.com/');
+  assert.match(robots, /User-agent: \*/);
+  assert.match(robots, /Allow: \//);
+  assert.match(robots, /Sitemap: https:\/\/daham-interior\.com\/sitemap\.xml/);
+  assert.match(sitemap, /<loc>https:\/\/daham-interior\.com\/<\/loc>/);
+  assert.match(sitemap, /<loc>https:\/\/daham-interior\.com\/portfolio\.html<\/loc>/);
+  assert.doesNotMatch(sitemap, /erp\.html|login\.html|website\.html/);
+});
