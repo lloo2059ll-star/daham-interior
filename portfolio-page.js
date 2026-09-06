@@ -12,18 +12,25 @@ var close=document.querySelector('.project-close');
 
 function esc(value){var d=document.createElement('div');d.textContent=String(value==null?'':value);return d.innerHTML;}
 function coverPosition(index){return index===0?'0%':(index/(rows.length-1)*100)+'%';}
-function galleryPosition(index){var col=index%4,row=Math.floor(index/4);var x=col===0?0:(col===1?33.333:(col===2?66.667:100));var y=row===0?0:100;return x+'% '+y+'%';}
+function galleryPosition(projectIndex,photoIndex){
+  var index=projectIndex*8+photoIndex;
+  var col=index%8,row=Math.floor(index/8);
+  var x=col===0?0:(col/7*100);
+  var y=row===0?0:(row/7*100);
+  return x+'% '+y+'%';
+}
 function card(row){return '<button class="portfolio-project" type="button" data-project="'+esc(row.slug)+'"><div class="portfolio-project-photo" style="background-image:var(--portfolio-cover-sprite);background-position:'+coverPosition(row.coverIndex)+' 0"></div><div class="portfolio-project-copy"><h2>'+esc(row.title)+'</h2><div class="portfolio-project-meta">'+esc([row.location,row.area].filter(Boolean).join(' · '))+'</div><div class="portfolio-project-line"><span>'+esc(row.kind)+'</span><b>'+row.photoCount+' PHOTOS →</b></div></div></button>';}
 
 function renderCards(){if(!list)return;list.innerHTML=rows.map(card).join('');}
 function openProject(slug,updateHash){
   var row=api&&api.findProject(slug);if(!row||!images)return;
+  var projectIndex=rows.findIndex(function(item){return item.slug===row.slug;});
   title.textContent=row.title;
   meta.textContent=[row.location,row.area,row.kind].filter(Boolean).join(' · ');
   gallery.innerHTML='<div class="portfolio-loading">사진을 불러오는 중입니다.</div>';
   modal.classList.add('open');document.body.style.overflow='hidden';
   if(updateHash)history.replaceState(null,'','#'+row.slug);
-  images.load(row.galleryKey).then(function(url){
+  images.load('portfolio-galleries').then(function(url){
     gallery.innerHTML='';
     for(var i=0;i<row.photoCount;i+=1){
       var el=document.createElement('div');
@@ -31,7 +38,7 @@ function openProject(slug,updateHash){
       el.setAttribute('role','img');
       el.setAttribute('aria-label',row.title+' 시공 사진 '+(i+1));
       el.style.backgroundImage='url("'+url+'")';
-      el.style.backgroundPosition=galleryPosition(i);
+      el.style.backgroundPosition=galleryPosition(projectIndex,i);
       gallery.appendChild(el);
     }
   }).catch(function(){gallery.innerHTML='<div class="portfolio-loading">사진을 불러오지 못했습니다.</div>';});
