@@ -87,3 +87,9 @@ test('public inquiry stays on the website and shows in-place result state', () =
   assert.match(src, /id="inquiry-result"/);
   assert.match(src, /문의가 접수되었습니다/);
 });
+
+test('public homepage shows the current representative phone number', () => {
+  const src = html();
+  assert.equal((src.match(/010-2059-0347/g) || []).length, 2);
+  assert.doesNotMatch(src, /010-5633-6807/);
+});
