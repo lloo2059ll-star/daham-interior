@@ -1,0 +1,20 @@
+name: Portfolio Verify
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify portfolio assets and scripts
+        run: |
+          node --test tests/portfolio-binary-assets.test.js tests/portfolio-static.test.js
+          node --check portfolio-image-loader.js
+          node --check portfolio-page.js
+          node --check website-final.js
