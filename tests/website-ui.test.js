@@ -109,6 +109,7 @@ test('search engines receive one canonical public homepage and crawlable sitemap
   const sitemap = read('sitemap.xml');
 
   assert.equal(canonical?.[1], 'https://daham-interior.com/');
+  assert.match(src, /name="google-site-verification" content="YzRyfSap9nAltolhjGu60RPMk2VIeCyU9vRuWJvI6fo"/);
   assert.match(portfolio, /<link rel="canonical" href="https:\/\/daham-interior\.com\/portfolio\.html">/);
   assert.equal(JSON.parse(jsonLd?.[1]).url, 'https://daham-interior.com/');
   assert.match(robots, /User-agent: \*/);
