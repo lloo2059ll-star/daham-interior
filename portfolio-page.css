@@ -23,7 +23,7 @@
 .project-dialog-head p{margin:0;font-size:11px;color:#777}
 .project-close{border:0;background:none;font-size:30px;line-height:1;cursor:pointer;padding:0 3px}
 .project-gallery{padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.project-gallery-photo{aspect-ratio:3/2;background-repeat:no-repeat;background-size:400% 200%;background-color:#ececec}
+.project-gallery-photo{aspect-ratio:3/2;background-repeat:no-repeat;background-size:800% 800%;background-color:#ececec}
 .portfolio-back{display:inline-flex;align-items:center;gap:10px;margin-top:28px;text-decoration:none;font-size:11px;font-weight:700}
 .portfolio-back:before{content:"←";font-size:14px}
 @media(max-width:900px){
