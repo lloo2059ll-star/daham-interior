@@ -9,13 +9,15 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="website-public-domain.js"></script>
+<script src="portfolio-static-domain.js"></script>
+<script src="portfolio-image-loader.js"></script>
 <link rel="stylesheet" href="website-final.css">
 </head>
 <body class="reference-home">
 <header class="header">
   <div class="shell header-inner">
     <a class="brand" href="#top" aria-label="다함 인테리어 홈"><span class="brand-ko">다함 인테리어</span><span class="brand-en">DAHAM INTERIOR</span></a>
-    <nav class="nav" aria-label="주요 메뉴"><a href="#about">회사소개</a><a href="#portfolio">포트폴리오</a><a href="#process">공사과정</a><a href="#service">서비스</a><a href="#portfolio">고객후기</a><a href="#" data-open-inquiry>견적문의</a></nav>
+    <nav class="nav" aria-label="주요 메뉴"><a href="#about">회사소개</a><a href="portfolio.html">포트폴리오</a><a href="#process">공사과정</a><a href="#service">서비스</a><a href="#portfolio">고객후기</a><a href="#" data-open-inquiry>견적문의</a></nav>
     <button class="quote-btn" type="button" data-open-inquiry>견적 문의하기</button>
   </div>
 </header>
@@ -27,7 +29,7 @@
         <div class="hero-sub">구미 인테리어 · 아파트 리모델링 전문</div>
         <div class="hero-rule"></div>
         <p class="hero-desc">다함 인테리어는 고객의 라이프스타일에 맞춘<br>최적의 공간을 제안하고 시공합니다.</p>
-        <a class="hero-cta" href="#portfolio">포트폴리오 보기</a>
+        <a class="hero-cta" href="portfolio.html">포트폴리오 보기</a>
       </div>
     </div>
     <div class="hero-trust">
@@ -41,12 +43,12 @@
   </section>
   <section class="portfolio-section" id="portfolio">
     <div class="shell">
-      <div class="portfolio-head"><div><h2>PORTFOLIO</h2><p>다함 인테리어의 실제 시공 사례</p></div><a class="more-btn" href="#portfolio">더 많은 포트폴리오 보기</a></div>
+      <div class="portfolio-head"><div><h2>PORTFOLIO</h2><p>다함 인테리어의 실제 시공 사례</p></div><a class="more-btn" href="portfolio.html">더 많은 포트폴리오 보기</a></div>
       <div class="portfolio-grid" id="portfolio-grid" aria-live="polite">
-        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">구미 푸르지오캐슬 34평</div><div class="portfolio-kind">전체 인테리어</div><div class="portfolio-tags">#아파트 #34평 #모던미니멀</div><span class="card-arrow">→</span></div></article>
-        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">구미 옥계 현진에버빌 48평</div><div class="portfolio-kind">전체 인테리어</div><div class="portfolio-tags">#아파트 #48평 #내추럴모던</div><span class="card-arrow">→</span></div></article>
-        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">구미 옥계 이편한세상 35평</div><div class="portfolio-kind">전체 인테리어</div><div class="portfolio-tags">#아파트 #35평 #모던</div><span class="card-arrow">→</span></div></article>
-        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">구미 송정동 단독주택</div><div class="portfolio-kind">전체 리모델링</div><div class="portfolio-tags">#주택 #리모델링 #빈티지모던</div><span class="card-arrow">→</span></div></article>
+        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">구미 푸르지오캐슬 A단지 32평</div><div class="portfolio-kind">전체 인테리어</div><div class="portfolio-tags">#아파트 #32평 #전체인테리어</div><span class="card-arrow">→</span></div></article>
+        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">거창 푸르지오 34평</div><div class="portfolio-kind">전체 인테리어</div><div class="portfolio-tags">#아파트 #34평 #전체인테리어</div><span class="card-arrow">→</span></div></article>
+        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">봉곡 현진에버빌 36평</div><div class="portfolio-kind">전체 인테리어</div><div class="portfolio-tags">#아파트 #36평 #전체인테리어</div><span class="card-arrow">→</span></div></article>
+        <article class="portfolio-card sample"><div class="portfolio-photo"></div><div class="portfolio-body"><div class="portfolio-title">임은동 코오롱하늘채 35평</div><div class="portfolio-kind">전체 인테리어</div><div class="portfolio-tags">#아파트 #35평 #전체인테리어</div><span class="card-arrow">→</span></div></article>
       </div>
     </div>
   </section>
@@ -67,7 +69,7 @@
       <div class="panel about"><div class="panel-title">ABOUT DAHAM</div><div class="about-name">다함 인테리어</div><p class="about-copy">다함 인테리어는 고객의 공간을<br>내 가족의 공간처럼 생각하며,<br>정직한 시공과 책임 있는 A/S로<br>보답하겠습니다.</p><a class="outline-light" href="#about">회사소개 자세히 보기</a></div>
       <div class="panel customer"><div class="panel-title">CUSTOMER CENTER</div><div class="phone-row"><span class="misc-icon phone-icon" aria-hidden="true"></span><span class="phone-number">010-5633-6807</span></div><div class="hours">평일 09:00 - 18:00<br>토요일 09:00 - 13:00<br>일요일 · 공휴일 휴무</div><a class="kakao-btn" href="#" data-open-inquiry><span class="misc-icon kakao-icon" aria-hidden="true"></span>카카오톡 상담하기</a></div>
       <div class="panel instagram"><div class="panel-title">INSTAGRAM</div><div class="insta-sheet" aria-label="다함 인테리어 시공 이미지"></div><a class="insta-btn" href="#portfolio">인스타그램 더보기</a></div>
-      <div class="panel quick"><div class="panel-title">QUICK MENU</div><div class="quick-links"><a href="#portfolio">포트폴리오</a><a href="#process">공사과정</a><a href="#service">서비스 안내</a><a href="#portfolio">고객 후기</a><a href="#" data-open-inquiry>견적 문의</a></div></div>
+      <div class="panel quick"><div class="panel-title">QUICK MENU</div><div class="quick-links"><a href="portfolio.html">포트폴리오</a><a href="#process">공사과정</a><a href="#service">서비스 안내</a><a href="#portfolio">고객 후기</a><a href="#" data-open-inquiry>견적 문의</a></div></div>
     </div>
   </section>
 </main>
