@@ -6,7 +6,7 @@
   const SUPABASE_KEY='sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
   const SESSION_KEY='daham_supabase_session_v1';
   const PROFILE_KEY='daham_supabase_profile_v1';
-  const page=location.pathname.split('/').pop()||'index.html';
+  const page=location.pathname.split('/').pop()||'erp.html';
   const publicPages=['login.html','signup.html','schedule-view.html'];
 
   if(!publicPages.includes(page)&&window.document){

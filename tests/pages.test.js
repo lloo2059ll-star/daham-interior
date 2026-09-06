@@ -35,19 +35,19 @@ test('employee page is guarded for owner and uses the employee management APIs',
 });
 
 test('dashboard employee link starts hidden and is revealed only for owner', () => {
-  const html = read('index.html');
+  const html = read('erp.html');
   assert.match(html, /id="employeesLink"[^>]*hidden/);
   assert.match(html, /u\.role===['"]owner['"]/);
   assert.match(html, /employeesLink\.hidden=false/);
 });
 
 test('dashboard navigation exposes the commercial estimate workspace', () => {
-  const html = read('index.html');
+  const html = read('erp.html');
   assert.match(html, /<a href="estimate-commercial\.html"><span class="ico">[^<]+<\/span>상가 견적<\/a>/);
 });
 
 test('dashboard replaces the duplicate site estimate link with site journal', () => {
-  const dashboard = read('index.html');
+  const dashboard = read('erp.html');
   assert.match(dashboard, /href="worklog\.html"[^>]*><span class="ico">⌂<\/span>현장일지<\/a>/);
   assert.equal((dashboard.match(/href="estimate\.html"[^>]*><span class="ico">/g) || []).length, 1);
 });

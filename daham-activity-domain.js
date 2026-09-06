@@ -11,7 +11,7 @@
   function clean(value){return String(value==null?'':value).trim();}
 
   function safeTargetUrl(value){
-    var url=clean(value)||'index.html';
+    var url=clean(value)||'erp.html';
     if(/^[a-z][a-z0-9+.-]*:/i.test(url)||url.indexOf('//')===0) throw new Error('targetUrl must be same-origin relative');
     return url;
   }

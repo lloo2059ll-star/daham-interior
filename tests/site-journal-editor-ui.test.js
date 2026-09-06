@@ -52,7 +52,7 @@ test('every visible worklog sidebar item navigates to a real page',()=>{
   assert.equal(navs.length,2);
   for(const nav of navs){
     assert.doesNotMatch(nav,/<(?:span|small|b)(?:\s|>)/,'visible sidebar labels must not be inert');
-    for(const target of ['index.html','estimate.html','contract.html','schedule.html','worklog.html','photos.html','order.html','consult.html','contacts.html']){
+    for(const target of ['erp.html','estimate.html','contract.html','schedule.html','worklog.html','photos.html','order.html','consult.html','contacts.html']){
       assert.match(nav,new RegExp('href="'+target.replace('.','\\.')+'"'));
     }
   }

@@ -28,7 +28,7 @@ test('portfolio findProject returns a project by slug and null for unknown slugs
 });
 
 test('public website is wired to static portfolio browsing', () => {
-  const websitePath = path.join(root, 'website.html');
+  const websitePath = path.join(root, 'index.html');
   const portfolioPagePath = path.join(root, 'portfolio.html');
   assert.equal(fs.existsSync(websitePath), true);
   assert.equal(fs.existsSync(portfolioPagePath), true, 'portfolio.html should exist');

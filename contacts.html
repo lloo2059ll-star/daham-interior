@@ -161,7 +161,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 
 <div class="toolbar">
   <div style="display:flex;align-items:center;gap:12px">
-    <a href="index.html" class="tb-btn">← 홈</a>
+    <a href="erp.html" class="tb-btn">← 홈</a>
     <span class="brand">DAHAM</span>
   </div>
   <button class="tb-btn primary" onclick="openModal()">+ 거래처 추가</button>
@@ -232,7 +232,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 <div class="toast" id="toast"></div>
 
 <nav class="mobile-nav">
-  <a href="index.html" class="mn-item"><span class="mn-icon">🏠</span><span class="mn-label">홈</span></a>
+  <a href="erp.html" class="mn-item"><span class="mn-icon">🏠</span><span class="mn-label">홈</span></a>
   <a href="schedule.html" class="mn-item"><span class="mn-icon">📅</span><span class="mn-label">일정</span></a>
   <a href="consult.html" class="mn-item"><span class="mn-icon">💬</span><span class="mn-label">상담</span></a>
   <a href="contacts.html" class="mn-item active"><span class="mn-icon">👷</span><span class="mn-label">거래처</span></a>
@@ -250,7 +250,7 @@ try{ _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
 
 function cloudPushContacts(){
   if(!_sb) return;
-  /* index.html과 동일한 구조: id='main', data={...} */
+  /* erp.html과 동일한 구조: id='main', data={...} */
   _sb.from('daham_backup').select('data').eq('id','main').maybeSingle().then(function(res){
     var existing = (res.data && res.data.data) ? res.data.data : {};
     existing[STORE_KEY] = JSON.stringify(records);

@@ -6,8 +6,14 @@ const assert = require('node:assert/strict');
 // Final website verification intentionally spans the split HTML/CSS/JS shell.
 const root = path.join(__dirname, '..');
 function read(name){ return fs.readFileSync(path.join(root, name), 'utf8'); }
-function html(){ return read('website.html'); }
-function source(){ return [read('website.html'), read('website-final.css'), read('website-final.js')].join('\n'); }
+function html(){ return read('index.html'); }
+function source(){ return [read('index.html'), read('website-final.css'), read('website-final.js')].join('\n'); }
+
+test('root is the public homepage and ERP has its own address', () => {
+  assert.match(read('index.html'), /class="reference-home"/);
+  assert.match(read('erp.html'), /DAHAM INTERIOR — Dashboard/);
+  assert.match(read('website.html'), /location\.replace\(['"]\.\/['"]\)/);
+});
 
 test('public homepage keeps the approved DAHAM sections and copy', () => {
   const src = html();

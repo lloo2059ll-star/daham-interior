@@ -25,7 +25,7 @@ test('shared price catalog contains every real estimate category and electric it
 });
 
 test('dashboard price control is a modal trigger and hides completely from staff', () => {
-  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'erp.html'), 'utf8');
   assert.match(html, /id="priceManagerButton"/);
   assert.match(html, /id="priceManagerModal"/);
   assert.match(html, /DAHAM_PRICES\.canManage/);
@@ -43,7 +43,7 @@ test('estimate loads the shared catalog and preserves per-project unit price sna
 });
 
 test('price modal can target one existing estimate and persists its updated price snapshot', () => {
-  const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(root, 'erp.html'), 'utf8');
   assert.match(html, /id="priceProject"/);
   assert.match(html, /DAHAM_PRICES\.saveProjectOverrides/);
   assert.match(html, /key:'daham_settings_v1'/);

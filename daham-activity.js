@@ -10,7 +10,7 @@
   function writeQueue(rows){root.localStorage.setItem(QUEUE_KEY,JSON.stringify(rows||[]));}
   function payload(event){return {
     p_project_id:event.projectId||null,p_entity_type:event.entityType,p_entity_id:event.entityId,p_action:event.action,
-    p_title:event.title,p_summary:event.summary||'',p_changed_fields:event.changedFields||{},p_target_url:event.targetUrl||'index.html',p_dedupe_key:event.dedupeKey
+    p_title:event.title,p_summary:event.summary||'',p_changed_fields:event.changedFields||{},p_target_url:event.targetUrl||'erp.html',p_dedupe_key:event.dedupeKey
   };}
   async function send(event){
     var cfg=root.DAHAM_AUTH.getSupabaseConfig();

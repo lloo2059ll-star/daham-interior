@@ -144,7 +144,7 @@ form.addEventListener('submit',async(e)=>{
   msg.textContent='';
   try{
     await DAHAM_AUTH.login(username.value,password.value);
-    location.href='index.html';
+    location.href='erp.html';
   }catch(err){
     msg.textContent=err && err.message ? err.message : '로그인에 실패했습니다.';
   }

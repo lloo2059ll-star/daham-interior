@@ -185,7 +185,7 @@ input[type=file]{display:none}
 <div class="toast" id="toast"></div>
 
 <nav class="mobile-nav">
-  <a href="index.html"><span class="mn-icon">🏠</span><span class="mn-label">홈</span></a>
+  <a href="erp.html"><span class="mn-icon">🏠</span><span class="mn-label">홈</span></a>
   <a href="schedule.html"><span class="mn-icon">📅</span><span class="mn-label">일정</span></a>
   <a href="consult.html"><span class="mn-icon">💬</span><span class="mn-label">상담</span></a>
   <a href="contacts.html"><span class="mn-icon">👷</span><span class="mn-label">거래처</span></a>
@@ -298,7 +298,7 @@ function showAlbumView() {
   document.getElementById('album-view').style.display = '';
   document.getElementById('photo-view').classList.remove('active');
   document.getElementById('header-title').textContent = '현장 사진첩';
-  document.getElementById('back-btn').onclick = function() { location.href = 'index.html'; };
+  document.getElementById('back-btn').onclick = function() { location.href = 'erp.html'; };
   renderAlbums();
 }
 function showPhotoView(projId) {
