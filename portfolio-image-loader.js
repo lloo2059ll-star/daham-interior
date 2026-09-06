@@ -2,15 +2,15 @@
   'use strict';
 
   var PARTS={
-    'portfolio-covers':['portfolio-data/portfolio-covers-0.txt','portfolio-data/portfolio-covers-1.txt'],
-    'prugio-castle-a-32':['portfolio-data/prugio-castle-a-32-0.txt','portfolio-data/prugio-castle-a-32-1.txt'],
-    'geochang-prugio-34':['portfolio-data/geochang-prugio-34-0.txt','portfolio-data/geochang-prugio-34-1.txt','portfolio-data/geochang-prugio-34-2.txt'],
-    'bonggok-hyunjin-36':['portfolio-data/bonggok-hyunjin-36-0.txt','portfolio-data/bonggok-hyunjin-36-1.txt'],
-    'imeun-kolon-35':['portfolio-data/imeun-kolon-35-0.txt','portfolio-data/imeun-kolon-35-1.txt'],
-    'songjeong-house-23':['portfolio-data/songjeong-house-23-0.txt','portfolio-data/songjeong-house-23-1.txt','portfolio-data/songjeong-house-23-2.txt','portfolio-data/songjeong-house-23-3.txt'],
-    'okgye-epyeon-35':['portfolio-data/okgye-epyeon-35-0.txt','portfolio-data/okgye-epyeon-35-1.txt','portfolio-data/okgye-epyeon-35-2.txt'],
-    'songjeong-dongyang-42':['portfolio-data/songjeong-dongyang-42-0.txt','portfolio-data/songjeong-dongyang-42-1.txt'],
-    'daegu-sangin-hwasung':['portfolio-data/daegu-sangin-hwasung-0.txt','portfolio-data/daegu-sangin-hwasung-1.txt']
+    'portfolio-covers':['portfolio-data/portfolio-covers.txt'],
+    'prugio-castle-a-32':['portfolio-data/prugio-castle-a-32.txt'],
+    'geochang-prugio-34':['portfolio-data/geochang-prugio-34.txt'],
+    'bonggok-hyunjin-36':['portfolio-data/bonggok-hyunjin-36.txt'],
+    'imeun-kolon-35':['portfolio-data/imeun-kolon-35.txt'],
+    'songjeong-house-23':['portfolio-data/songjeong-house-23-0.txt','portfolio-data/songjeong-house-23-1.txt'],
+    'okgye-epyeon-35':['portfolio-data/okgye-epyeon-35.txt'],
+    'songjeong-dongyang-42':['portfolio-data/songjeong-dongyang-42.txt'],
+    'daegu-sangin-hwasung':['portfolio-data/daegu-sangin-hwasung.txt']
   };
   var cache={};
 
