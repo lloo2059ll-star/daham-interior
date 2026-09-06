@@ -15,7 +15,8 @@ test('static portfolio exposes eight curated projects', () => {
   for (const [index, project] of projects.entries()) {
     assert.ok(project.title);
     assert.equal(project.coverIndex, index);
-    assert.equal(project.galleryKey, project.slug);
+    assert.equal(project.galleryKey, 'portfolio-galleries');
+    assert.ok(project.photoCount >= 7 && project.photoCount <= 8);
     assert.ok(Array.isArray(project.tags));
   }
 });
