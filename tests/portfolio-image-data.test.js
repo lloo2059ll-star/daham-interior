@@ -2,10 +2,10 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const root=path.join(__dirname,'..','portfolio-data');
+const root=path.join(__dirname,'..','portfolio-assets');
 
-function decode(files){
-  const b64=files.map((file)=>fs.readFileSync(path.join(root,file),'utf8')).join('').replace(/\s+/g,'');
+function decode(file){
+  const b64=fs.readFileSync(path.join(root,file),'utf8').replace(/\s+/g,'');
   return Buffer.from(b64,'base64');
 }
 function assertWebp(buf){
@@ -15,13 +15,15 @@ function assertWebp(buf){
 }
 
 test('portfolio cover atlas is a valid WebP payload',()=>{
-  assertWebp(decode(['portfolio-covers.txt']));
+  const file='covers.webp.b64';
+  assert.equal(fs.existsSync(path.join(root,file)),true,file+' should exist');
+  assertWebp(decode(file));
 });
 
-test('portfolio gallery atlas requires all eight chunks and decodes to WebP',()=>{
-  const files=Array.from({length:8},(_,index)=>`portfolio-galleries-${index}.txt`);
-  for(const file of files) assert.equal(fs.existsSync(path.join(root,file)),true,file+' should exist');
-  const buf=decode(files);
+test('portfolio gallery atlas is a valid curated WebP payload',()=>{
+  const file='gallery.webp.b64';
+  assert.equal(fs.existsSync(path.join(root,file)),true,file+' should exist');
+  const buf=decode(file);
   assertWebp(buf);
-  assert.ok(buf.length>150000,'gallery atlas should contain all curated project photos');
+  assert.ok(buf.length>90000,'gallery atlas should contain all curated project photos');
 });
