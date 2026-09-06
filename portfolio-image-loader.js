@@ -1,29 +1,17 @@
 (function(root){
   'use strict';
 
-  var PARTS={
-    'portfolio-covers':['portfolio-data/portfolio-covers.txt'],
-    'portfolio-galleries':['portfolio-data/portfolio-galleries-0.txt','portfolio-data/portfolio-galleries-1.txt','portfolio-data/portfolio-galleries-2.txt','portfolio-data/portfolio-galleries-3.txt']
+  var FILES={
+    'portfolio-covers':'portfolio-assets/v2-covers.webp',
+    'portfolio-galleries':'portfolio-assets/v2-gallery.webp'
   };
   var cache={};
 
-  function toBlobUrl(base64){
-    var raw=atob(base64);
-    var bytes=new Uint8Array(raw.length);
-    for(var i=0;i<raw.length;i+=1)bytes[i]=raw.charCodeAt(i);
-    return URL.createObjectURL(new Blob([bytes],{type:'image/webp'}));
-  }
-
   function load(key){
     if(cache[key])return cache[key];
-    var files=PARTS[key];
-    if(!files)return Promise.reject(new Error('포트폴리오 이미지를 찾을 수 없습니다.'));
-    cache[key]=Promise.all(files.map(function(file){
-      return fetch(file,{cache:'force-cache'}).then(function(response){
-        if(!response.ok)throw new Error('포트폴리오 이미지 로딩 실패');
-        return response.text();
-      });
-    })).then(function(chunks){return toBlobUrl(chunks.join('').replace(/\s+/g,''));});
+    var file=FILES[key];
+    if(!file)return Promise.reject(new Error('포트폴리오 이미지를 찾을 수 없습니다.'));
+    cache[key]=Promise.resolve(file);
     return cache[key];
   }
 
