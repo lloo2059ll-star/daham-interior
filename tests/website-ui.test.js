@@ -70,6 +70,13 @@ test('homepage vector sprites are complete standalone SVG images', () => {
   assert.match(miscIcons, /<\/svg>\s*$/);
 });
 
+test('mobile header keeps the quote button inside the viewport', () => {
+  const css = read('website-assets-fix.css');
+  assert.match(css, /@media\(max-width:560px\)/);
+  assert.match(css, /\.header-inner\{grid-template-columns:minmax\(0,1fr\) auto;gap:12px\}/);
+  assert.match(css, /\.quote-btn\{width:108px;max-width:100%\}/);
+});
+
 test('instagram controls open the official DAHAM account in a new tab', () => {
   const src = source();
   assert.match(src, /https:\/\/www\.instagram\.com\/daham\.co\//);
