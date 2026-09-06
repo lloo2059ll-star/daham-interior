@@ -8,7 +8,8 @@
 .portfolio-page-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px 18px}
 .portfolio-project{display:block;border:0;background:#fff;text-decoration:none;text-align:left;padding:0;cursor:pointer;box-shadow:0 1px 0 rgba(0,0,0,.04);transition:transform .18s ease,box-shadow .18s ease;color:#171717}
 .portfolio-project:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.08)}
-.portfolio-project-photo{aspect-ratio:3/2;background-repeat:no-repeat;background-size:800% 100%;background-color:#ddd}
+.portfolio-project-photo{aspect-ratio:3/2;background-color:#ddd;overflow:hidden}
+.portfolio-project-photo img{display:block;width:100%;height:100%;object-fit:cover}
 .portfolio-project-copy{padding:18px 18px 20px}
 .portfolio-project-copy h2{font-size:18px;line-height:1.25;margin:0 0 9px;letter-spacing:-.04em}
 .portfolio-project-meta{font-size:11px;color:#6f6f6f}
@@ -23,7 +24,9 @@
 .project-dialog-head p{margin:0;font-size:11px;color:#777}
 .project-close{border:0;background:none;font-size:30px;line-height:1;cursor:pointer;padding:0 3px}
 .project-gallery{padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.project-gallery-photo{aspect-ratio:3/2;background-repeat:no-repeat;background-size:800% 800%;background-color:#ececec}
+.project-gallery-photo{margin:0;background-color:#ececec;min-height:120px;display:flex;align-items:center;justify-content:center}
+.project-gallery-photo img{display:block;width:100%;height:auto}
+.project-gallery-photo.is-error{color:#777;font-size:12px}
 .portfolio-back{display:inline-flex;align-items:center;gap:10px;margin-top:28px;text-decoration:none;font-size:11px;font-weight:700}
 .portfolio-back:before{content:"←";font-size:14px}
 @media(max-width:900px){

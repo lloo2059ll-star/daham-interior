@@ -12,9 +12,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install image decoder
+        run: python -m pip install Pillow
       - name: Verify portfolio assets and scripts
         run: |
           node --test tests/portfolio-binary-assets.test.js tests/portfolio-static.test.js
-          node --check portfolio-image-loader.js
           node --check portfolio-page.js
           node --check website-final.js
+          node --check portfolio-static-domain.js

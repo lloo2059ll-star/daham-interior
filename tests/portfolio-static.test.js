@@ -14,9 +14,8 @@ test('static portfolio exposes eight curated projects', () => {
   assert.equal(new Set(projects.map((project) => project.slug)).size, 8);
   for (const [index, project] of projects.entries()) {
     assert.ok(project.title);
-    assert.equal(project.coverIndex, index);
-    assert.equal(project.galleryKey, 'portfolio-galleries');
-    assert.ok(project.photoCount >= 7 && project.photoCount <= 8);
+    assert.match(project.coverImage, new RegExp(`portfolio-assets/projects/${project.slug}/cover\\.webp$`));
+    assert.equal(project.photos.length, [8, 8, 8, 8, 7, 7, 7, 7][index]);
     assert.ok(Array.isArray(project.tags));
   }
 });
@@ -36,9 +35,8 @@ test('public website is wired to static portfolio browsing', () => {
   const website = fs.readFileSync(websitePath, 'utf8');
   const portfolioPage = fs.readFileSync(portfolioPagePath, 'utf8');
   assert.match(website, /portfolio-static-domain\.js/);
-  assert.match(website, /portfolio-image-loader\.js/);
   assert.match(website, /href="portfolio\.html"/);
   assert.match(portfolioPage, /portfolio-static-domain\.js/);
-  assert.match(portfolioPage, /portfolio-image-loader\.js/);
   assert.match(portfolioPage, /portfolio-page\.js/);
+  assert.doesNotMatch(website + portfolioPage, /portfolio-image-loader\.js/);
 });
