@@ -3,14 +3,7 @@
 
   var PARTS={
     'portfolio-covers':['portfolio-data/portfolio-covers.txt'],
-    'prugio-castle-a-32':['portfolio-data/prugio-castle-a-32.txt'],
-    'geochang-prugio-34':['portfolio-data/geochang-prugio-34.txt'],
-    'bonggok-hyunjin-36':['portfolio-data/bonggok-hyunjin-36.txt'],
-    'imeun-kolon-35':['portfolio-data/imeun-kolon-35.txt'],
-    'songjeong-house-23':['portfolio-data/songjeong-house-23-0.txt','portfolio-data/songjeong-house-23-1.txt'],
-    'okgye-epyeon-35':['portfolio-data/okgye-epyeon-35.txt'],
-    'songjeong-dongyang-42':['portfolio-data/songjeong-dongyang-42.txt'],
-    'daegu-sangin-hwasung':['portfolio-data/daegu-sangin-hwasung.txt']
+    'portfolio-galleries':['portfolio-data/portfolio-galleries-0.txt','portfolio-data/portfolio-galleries-1.txt','portfolio-data/portfolio-galleries-2.txt','portfolio-data/portfolio-galleries-3.txt']
   };
   var cache={};
 
@@ -30,9 +23,7 @@
         if(!response.ok)throw new Error('포트폴리오 이미지 로딩 실패');
         return response.text();
       });
-    })).then(function(chunks){
-      return toBlobUrl(chunks.join('').replace(/\s+/g,''));
-    });
+    })).then(function(chunks){return toBlobUrl(chunks.join('').replace(/\s+/g,''));});
     return cache[key];
   }
 
@@ -44,5 +35,12 @@
     });
   }
 
-  root.DAHAM_PORTFOLIO_IMAGES={load:load,applyCoverSprite:applyCoverSprite};
+  function applyGalleryAtlas(){
+    return load('portfolio-galleries').then(function(url){
+      document.documentElement.style.setProperty('--portfolio-gallery-atlas','url("'+url+'")');
+      return url;
+    });
+  }
+
+  root.DAHAM_PORTFOLIO_IMAGES={load:load,applyCoverSprite:applyCoverSprite,applyGalleryAtlas:applyGalleryAtlas};
 })(typeof window!=='undefined'?window:this);
