@@ -1,0 +1,4 @@
+.portfolio-card.sample:nth-child(1) .portfolio-photo{background-image:var(--card-1);background-size:cover;background-position:center}
+.portfolio-card.sample:nth-child(2) .portfolio-photo{background-image:var(--card-2);background-size:cover;background-position:center}
+.portfolio-card.sample:nth-child(3) .portfolio-photo{background-image:var(--card-3);background-size:cover;background-position:center}
+.portfolio-card.sample:nth-child(4) .portfolio-photo{background-image:var(--card-4);background-size:cover;background-position:center}

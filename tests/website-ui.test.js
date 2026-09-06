@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 const root = path.join(__dirname, '..');
 function read(name){ return fs.readFileSync(path.join(root, name), 'utf8'); }
 function html(){ return read('index.html'); }
-function source(){ return [read('index.html'), read('website-final.css'), read('website-final.js')].join('\n'); }
+function source(){ return [read('index.html'), read('website-final.css'), read('website-assets-fix.css'), read('website-final.js')].join('\n'); }
 
 test('root is the public homepage and ERP has its own address', () => {
   assert.match(read('index.html'), /class="reference-home"/);
@@ -47,15 +47,27 @@ test('approved desktop mockup structure replaces the old generic homepage stylin
 
 test('homepage uses repository image assets rather than emoji process icons', () => {
   const src = source();
-  assert.match(src, /website-assets\/hero\.jpg/);
-  assert.match(src, /website-assets\/portfolio-cards\.jpg/);
+  assert.match(src, /portfolio-assets\/projects\/prugio-castle-a-32\/01\.webp/);
+  assert.match(src, /portfolio-assets\/projects\/geochang-prugio-34\/cover\.webp/);
   assert.match(src, /website-assets\/trust-icons\.png/);
-  assert.match(src, /website-assets\/process-icons\.png/);
+  assert.match(src, /website-assets\/process-icons\.svg/);
   assert.match(src, /website-assets\/instagram\.jpg/);
-  assert.match(src, /website-assets\/misc-icons\.png/);
+  assert.match(src, /website-assets\/misc-icons\.svg/);
+  assert.doesNotMatch(src, /website-assets\/(?:hero|portfolio-cards)\.jpg|website-assets\/(?:process|misc)-icons\.png/);
   assert.doesNotMatch(src, /✦|⌖|▤|✓|◫/);
   assert.match(src, /trust-sprite/);
   assert.match(src, /process-sprite/);
+});
+
+test('homepage vector sprites are complete standalone SVG images', () => {
+  const processIcons = read('website-assets/process-icons.svg');
+  const miscIcons = read('website-assets/misc-icons.svg');
+  assert.match(processIcons, /^<svg[^>]+viewBox="0 0 264 44"/);
+  assert.equal((processIcons.match(/<g transform="translate\(/g) || []).length, 6);
+  assert.match(processIcons, /<\/svg>\s*$/);
+  assert.match(miscIcons, /^<svg[^>]+viewBox="0 0 180 30"/);
+  assert.equal((miscIcons.match(/<g transform="translate\(/g) || []).length, 6);
+  assert.match(miscIcons, /<\/svg>\s*$/);
 });
 
 test('instagram controls open the official DAHAM account in a new tab', () => {
