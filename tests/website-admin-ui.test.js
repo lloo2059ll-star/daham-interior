@@ -23,3 +23,23 @@ test('website admin publishes to the isolated public portfolio table', () => {
   assert.doesNotMatch(src, /cl-name/);
   assert.doesNotMatch(src, /cl-tel/);
 });
+
+test('website admin edits ordered gallery urls for the current static projects', () => {
+  const src = html();
+  assert.match(src, /portfolio-static-domain\.js/);
+  assert.match(src, /id="gallery-list"/);
+  assert.match(src, /id="gallery-url"/);
+  assert.match(src, /id="gallery-add"/);
+  assert.match(src, /data-gallery-up/);
+  assert.match(src, /data-gallery-down/);
+  assert.match(src, /data-gallery-remove/);
+  assert.match(src, /data-gallery-cover/);
+  assert.match(src, /gallery_image_urls/);
+});
+
+test('website admin preserves legacy portfolio editing before the gallery migration runs', () => {
+  const src = html();
+  assert.match(src, /gallerySchemaReady/);
+  assert.match(src, /isMissingGalleryColumn/);
+  assert.match(src, /delete record\.gallery_image_urls/);
+});

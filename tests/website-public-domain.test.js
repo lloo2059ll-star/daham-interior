@@ -57,11 +57,13 @@ test('safeImageUrl permits http(s) only', () => {
 test('normalizePortfolioRow exposes only homepage fields and filters unsafe image URLs', () => {
   const row = website.normalizePortfolioRow({
     id: '1', slug: 'a', title: '옥계 48평', location: '구미 옥계', area_pyeong: 48,
-    style: '모던', summary: '설명', cover_image_url: 'javascript:boom()', sort_order: 3,
+    style: '모던', summary: '설명', cover_image_url: 'javascript:boom()',
+    gallery_image_urls: ['https://example.com/living.jpg', 'data:image/png,bad', '/portfolio/bath.webp', 'https://example.com/living.jpg'], sort_order: 3,
     client_name: '절대 노출 금지', estimate_total: 99999999,
   });
   assert.deepEqual(row, {
     id: '1', slug: 'a', title: '옥계 48평', location: '구미 옥계', areaPyeong: 48,
-    style: '모던', summary: '설명', coverImageUrl: '', sortOrder: 3,
+    style: '모던', summary: '설명', coverImageUrl: '',
+    galleryImageUrls: ['https://example.com/living.jpg', '/portfolio/bath.webp'], sortOrder: 3,
   });
 });

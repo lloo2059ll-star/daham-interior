@@ -7,11 +7,11 @@ const { spawnSync } = require('node:child_process');
 const root = path.join(__dirname, '..');
 const portfolio = require(path.join(root, 'portfolio-static-domain.js'));
 
-test('all 60 project photos and eight covers exist and fully decode', () => {
+test('all 72 curated project photos and eight covers exist and fully decode', () => {
   const projects = portfolio.listProjects();
-  assert.deepEqual(projects.map((project) => project.photos.length), [8, 8, 8, 8, 7, 7, 7, 7]);
+  assert.deepEqual(projects.map((project) => project.photos.length), [12, 10, 10, 10, 8, 7, 7, 8]);
   const relativeFiles = projects.flatMap((project) => [project.coverImage, ...project.photos]);
-  assert.equal(projects.reduce((sum, project) => sum + project.photos.length, 0), 60);
+  assert.equal(projects.reduce((sum, project) => sum + project.photos.length, 0), 72);
   for (const relativeFile of relativeFiles) {
     const file = path.join(root, relativeFile);
     assert.equal(fs.existsSync(file), true, `${relativeFile} should exist`);

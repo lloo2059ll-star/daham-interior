@@ -4,6 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const migrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260903143000_public_website_erp.sql');
+const galleryMigrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260908_website_portfolio_gallery.sql');
 
 function sqlText(){
   return fs.readFileSync(migrationPath, 'utf8').toLowerCase();
@@ -21,6 +22,14 @@ test('public website migration isolates public data with RLS and minimum grants'
   assert.match(sql, /grant insert on table public\.website_inquiries to anon/);
   assert.doesNotMatch(sql, /grant\s+select[^;]*public\.website_inquiries[^;]*to\s+anon/);
   assert.doesNotMatch(sql, /grant\s+(?:insert|update|delete)[^;]*public\.sync_data[^;]*to\s+anon/);
+});
+
+test('portfolio gallery migration stores an ordered json array without widening access', () => {
+  const sql = fs.readFileSync(galleryMigrationPath, 'utf8').toLowerCase();
+  assert.match(sql, /add column if not exists gallery_image_urls jsonb not null default '\[\]'::jsonb/);
+  assert.match(sql, /jsonb_typeof\(gallery_image_urls\) = 'array'/);
+  assert.doesNotMatch(sql, /grant\s+/);
+  assert.doesNotMatch(sql, /create policy/);
 });
 
 test('anonymous policies expose published portfolio rows and insert-only inquiries', () => {

@@ -25,6 +25,12 @@
     try{var u=new URL(raw);return u.protocol==='http:'||u.protocol==='https:'?raw:'';}catch(e){return '';}
   }
 
+  function normalizeGalleryUrls(values){
+    var rows=Array.isArray(values)?values:String(values==null?'':values).split(/\r?\n/);
+    var seen={};
+    return rows.map(safeImageUrl).filter(function(url){if(!url||seen[url])return false;seen[url]=true;return true;});
+  }
+
   function extractProjectPublicMeta(detail){
     detail=detail||{};
     var client=detail.client||{};
@@ -46,17 +52,18 @@
     var explicitArea=numeric(values.areaPyeong);
     return {
       source_project_id:sourceProjectId,
-      slug:'project-'+slugify(values.slug||sourceProjectId),
+      slug:projectMeta.staticSlug||'project-'+slugify(values.slug||sourceProjectId),
       title:title,
       location:text(values.location)||text(projectMeta.suggestedLocation),
       area_pyeong:explicitArea||projectMeta.areaPyeong||null,
       style:text(values.style),
       summary:text(values.summary),
       cover_image_url:safeImageUrl(values.coverImageUrl),
+      gallery_image_urls:normalizeGalleryUrls(values.galleryImageUrls),
       sort_order:Number(values.sortOrder)||0,
       is_published:values.isPublished===true
     };
   }
 
-  return {coarseLocation:coarseLocation,slugify:slugify,extractProjectPublicMeta:extractProjectPublicMeta,buildPortfolioRecord:buildPortfolioRecord};
+  return {coarseLocation:coarseLocation,slugify:slugify,normalizeGalleryUrls:normalizeGalleryUrls,extractProjectPublicMeta:extractProjectPublicMeta,buildPortfolioRecord:buildPortfolioRecord};
 });

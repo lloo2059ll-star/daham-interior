@@ -113,6 +113,19 @@ test('public inquiry stays on the website and shows in-place result state', () =
   assert.match(src, /문의가 접수되었습니다/);
 });
 
+test('homepage renders static portfolio immediately and then loads published overrides', () => {
+  const src = source();
+  assert.match(src, /renderStaticPortfolio\(\);loadPortfolio\(\)/);
+  assert.match(src, /href="portfolio\.html#/);
+  assert.match(src, /gallery_image_urls/);
+});
+
+test('public homepage retries published overrides without the gallery column before migration', () => {
+  const src = source();
+  assert.match(src, /isMissingGalleryColumn/);
+  assert.match(src, /PORTFOLIO_LEGACY_FIELDS/);
+});
+
 test('public homepage shows the current representative phone number', () => {
   const src = html();
   assert.equal((src.match(/010-2059-0347/g) || []).length, 2);

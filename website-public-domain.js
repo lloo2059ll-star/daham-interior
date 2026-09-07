@@ -24,6 +24,11 @@
     }catch(e){ return ''; }
   }
 
+  function normalizeGalleryUrls(values){
+    var seen={};
+    return (Array.isArray(values)?values:[]).map(safeImageUrl).filter(function(url){if(!url||seen[url])return false;seen[url]=true;return true;});
+  }
+
   function buildInquiryPayload(values){
     values=values||{};
     var name=text(values.name);
@@ -59,9 +64,10 @@
       style:text(row.style),
       summary:text(row.summary),
       coverImageUrl:safeImageUrl(row.cover_image_url),
+      galleryImageUrls:normalizeGalleryUrls(row.gallery_image_urls),
       sortOrder:Number(row.sort_order)||0
     };
   }
 
-  return {normalizePhone:normalizePhone,safeImageUrl:safeImageUrl,buildInquiryPayload:buildInquiryPayload,normalizePortfolioRow:normalizePortfolioRow};
+  return {normalizePhone:normalizePhone,safeImageUrl:safeImageUrl,normalizeGalleryUrls:normalizeGalleryUrls,buildInquiryPayload:buildInquiryPayload,normalizePortfolioRow:normalizePortfolioRow};
 });
