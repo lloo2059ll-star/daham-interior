@@ -8,6 +8,10 @@
 <script src="auth.js"></script>
 <script src="price-catalog.js"></script>
 <script src="price-management.js"></script>
+<link rel="stylesheet" href="sales-funnel-dashboard.css?v=20260908-1">
+<script src="sales-funnel-domain.js?v=20260908-1" defer></script>
+<script src="sales-funnel-client.js?v=20260908-1" defer></script>
+<script src="sales-funnel-dashboard.js?v=20260908-1" defer></script>
 <style>
 :root{
   --navy:#172238; --navy-2:#202d48; --navy-3:#2a3959;
@@ -126,6 +130,31 @@ button{cursor:pointer}
           <div class="card kpi customer-sensitive"><div class="kpi-top"><span class="kpi-label">실제 마진</span><span class="kpi-icon purple">◎</span></div><strong id="kpiActualMargin">0원</strong><small id="kpiActualMarginSub">실제 원가 반영 기준</small></div>
           <div class="card kpi customer-sensitive"><div class="kpi-top"><span class="kpi-label">미수금</span><span class="kpi-icon orange">!</span></div><strong id="kpiReceivable">0원</strong><small class="warn" id="kpiReceivableSub">미수 현장 0건</small></div>
         </div>
+
+        <section id="salesFunnelShell" class="sales-funnel-shell customer-sensitive" hidden aria-label="영업 퍼널">
+          <div class="sales-funnel-toolbar">
+            <div><span class="sales-funnel-eyebrow">SALES FUNNEL</span><h2>영업 퍼널</h2><p>월간 활동 실적과 신규 문의 cohort 전환율을 분리해 봅니다.</p></div>
+            <div class="sales-funnel-filters">
+              <select id="salesFunnelPeriod" aria-label="영업 퍼널 기간">
+                <option value="this_month">이번 달</option><option value="last_month">지난달</option>
+                <option value="last_3_months">최근 3개월</option><option value="year">올해</option><option value="month">월 직접 선택</option>
+              </select>
+              <input id="salesFunnelMonth" type="month" aria-label="영업 퍼널 월 직접 선택">
+              <button id="salesFunnelGoalButton" type="button">월 목표 수정</button>
+            </div>
+          </div>
+          <div id="salesFunnelStatus" class="sales-funnel-status">불러오는 중…</div>
+          <div id="salesFunnelContent"></div>
+          <div id="salesFunnelDetails" class="sales-funnel-details" hidden></div>
+          <div id="salesFunnelGoalModal" class="sales-funnel-goal-backdrop" hidden>
+            <form id="salesFunnelGoalForm" class="sales-funnel-goal-card">
+              <div><h3>월 목표 수정</h3><p id="salesFunnelGoalMonthLabel"></p></div>
+              <div id="salesFunnelGoalFields" class="sales-funnel-goal-fields"></div>
+              <p id="salesFunnelGoalError" class="sales-funnel-error"></p>
+              <div class="sales-funnel-goal-actions"><button type="button" data-goal-close>취소</button><button type="submit" class="primary">저장</button></div>
+            </form>
+          </div>
+        </section>
 
         <div class="dashboard-grid">
           <div class="card panel">

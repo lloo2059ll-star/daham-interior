@@ -109,6 +109,7 @@ test('keeps source, source type, contact channel, and loss reasons independent',
   ];
   assert.equal(Funnel.groupBySource(records, september, [], () => 0).find(row => row.key === '네이버 블로그').cohortConversion, 100);
   assert.equal(Funnel.groupBySourceType(records, september).find(row => row.key === 'paid').inquiries, 1);
+  assert.equal(Funnel.groupBySourceType(records, september).find(row => row.key === 'organic').contracts, 1);
   assert.equal(Funnel.groupByContactChannel(records, september).find(row => row.key === '카카오채널').inquiries, 1);
   assert.equal(Funnel.lossAnalysis(records, september).reasons.find(row => row.key === '예산').count, 1);
   assert.ok(Funnel.groupBySource(records, september, [], () => 0).some(row => row.key === '지역카페'));

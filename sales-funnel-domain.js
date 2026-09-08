@@ -188,7 +188,13 @@
     }).filter(function (row) { return row.inquiry || row.site_visit || row.estimate_meeting || row.contract; }).sort(function (a, b) { return b.inquiry - a.inquiry || a.key.localeCompare(b.key, 'ko'); });
   }
 
-  function groupBySourceType(records, period) { return simpleGroup(records, period, function (record) { return String(record.sourceType || 'unknown'); }); }
+  function groupBySourceType(records, period) {
+    return simpleGroup(records, period, function (record) { return String(record.sourceType || 'unknown'); }).map(function (row) {
+      const subset = (records || []).filter(function (record) { return String(record.sourceType || 'unknown') === row.key; });
+      row.contracts = cohortMetrics(subset, period).reached.contract;
+      return row;
+    });
+  }
   function groupByContactChannel(records, period) { return simpleGroup(records, period, function (record) { return String(record.contactChannel || '미분류'); }); }
 
   function outcomeStatus(record) {
