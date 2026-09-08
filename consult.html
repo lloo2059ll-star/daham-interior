@@ -701,6 +701,10 @@ function saveModal(){
   var scopes=[].slice.call(document.querySelectorAll('.scope-check:checked')).map(function(x){return x.value;});
   var scopeDetails=readScopeDetails();
   var source=(document.getElementById('f-source').value||'').trim();
+  var sourceType=(document.getElementById('f-source-type').value||'unknown').trim();
+  var contactChannel=(document.getElementById('f-contact-channel').value||'').trim();
+  var outcomeStatus=(document.getElementById('f-outcome-status').value||'in_progress').trim();
+  var lostReason=(document.getElementById('f-lost-reason').value||'').trim();
   var survey={visitDate:document.getElementById('f-visit-date').value||'',measured:document.getElementById('f-measured').checked,polycamDone:document.getElementById('f-polycam-done').checked,polycamUrl:(document.getElementById('f-polycam-url').value||'').trim(),photoUrls:(document.getElementById('f-photo-urls').value||'').split(/\r?\n/).map(function(x){return x.trim();}).filter(Boolean),note:(document.getElementById('f-survey-note').value||'').trim()};
   var status  =_curStatus;
 
@@ -712,6 +716,7 @@ function saveModal(){
 
   /* 새 상담용 ID를 미리 생성해 프로젝트 연결에 사용 */
   var newId=_editId?null:uid();
+  if(!_editId) _modalHist=DAHAM_CONSULT_MODAL.ensureInquiryMilestone(_modalHist,localDTStr());
 
   /* 계약 단계 진입 → 프로젝트 생성 */
   var prevProjId=null;
@@ -735,7 +740,7 @@ function saveModal(){
     db[idx]=Object.assign({},db[idx],{
       consultTitle:consultTitle,consultContent:consultContent,name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,unit:unit,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
-      works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
+      works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,sourceType:sourceType,contactChannel:contactChannel,outcomeStatus:outcomeStatus,lostReason:lostReason,survey:survey,status:status,
       history:_modalHist.slice(),scheduleReservations:scheduleReservations,updatedAt:nowISO()
     });
     if(newProjId) db[idx].projId=newProjId;
@@ -744,7 +749,7 @@ function saveModal(){
       id:newId,createdAt:nowISO(),updatedAt:nowISO(),
       consultTitle:consultTitle,consultContent:consultContent,name:name,tel:tel,email:email,altTel:altTel,postcode:postcode,addr:addr,addrDetail:addrDetail,siteName:siteName,unit:unit,area:area,buildYear:buildYear,housingType:housingType,manager:manager,
       schedDate:sdate,schedTime:stime,schedPlace:splace,
-      works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,survey:survey,status:status,
+      works:works,scopes:scopes,scopeDetails:scopeDetails,budget:budget,moveDate:moveDate,memo:memo,source:source,sourceType:sourceType,contactChannel:contactChannel,outcomeStatus:outcomeStatus,lostReason:lostReason,survey:survey,status:status,
       projId:newProjId||null,history:_modalHist.slice(),scheduleReservations:scheduleReservations
     });
   }

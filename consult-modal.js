@@ -18,9 +18,20 @@
 
   function selectOptions(values, value, placeholder) {
     var html = placeholder == null ? '' : '<option value="">' + esc(placeholder) + '</option>';
-    return html + values.map(function (option) {
+    var options = values.slice();
+    if (value && options.indexOf(value) < 0) options.push(value);
+    return html + options.map(function (option) {
       return '<option value="' + esc(option) + '"' + selected(value, option) + '>' + esc(option) + '</option>';
     }).join('');
+  }
+
+  function ensureInquiryMilestone(history, at) {
+    var result = Array.isArray(history) ? history.slice() : [];
+    var exists = result.some(function (item) {
+      return item && item.type === 'milestone' && item.status === 'inquiry' && item.at;
+    });
+    if (!exists) result.push({ type: 'milestone', status: 'inquiry', at: at, memo: '' });
+    return result;
   }
 
   function buildBody(record, additions) {
@@ -68,7 +79,11 @@
       + '<section class="consult-form-card consult-existing-details"><h3><span>✓</span> 상담 상세 정보</h3>'
       + '<div class="consult-detail-field-grid"><div class="form-row"><label>예산</label><input id="f-budget" placeholder="5,000 ~ 7,000만원" value="' + esc(r.budget) + '"></div>'
       + '<div class="form-row"><label>이사 예정일</label><input id="f-movedate" type="date" value="' + esc(r.moveDate) + '"></div>'
-      + '<div class="form-row"><label>유입경로</label><select id="f-source">' + selectOptions(['소개','온라인 검색','블로그/SNS','기존 고객','기타'], r.source, '-- 선택 --') + '</select></div>'
+      + '<div class="form-row"><label>유입경로</label><select id="f-source">' + selectOptions(['네이버 블로그','인스타그램','소개','기존 고객 / 재문의','기타'], r.source, '-- 선택 --') + '</select></div>'
+      + '<div class="form-row"><label>유입유형</label><select id="f-source-type">' + selectOptions(['organic','paid','referral','unknown'], r.sourceType || 'unknown', '-- 선택 --') + '</select></div>'
+      + '<div class="form-row"><label>문의수단</label><select id="f-contact-channel">' + selectOptions(['네이버폼','카카오채널','인스타 DM','전화','문자','기타'], r.contactChannel, '-- 선택 --') + '</select></div>'
+      + '<div class="form-row"><label>진행 결과</label><select id="f-outcome-status">' + selectOptions(['in_progress','on_hold','lost','cancelled'], r.outcomeStatus || (r.status === 'cancelled' ? 'cancelled' : 'in_progress'), null) + '</select></div>'
+      + '<div class="form-row"><label>보류·미계약 사유</label><select id="f-lost-reason">' + selectOptions(['예산','타 업체 계약','일정 불일치','공사 범위 불일치','연락두절','고객 보류','지역 문제','기타'], r.lostReason, '-- 해당 시 선택 --') + '</select></div>'
       + '<div class="form-row"><label>현장 방문일</label><input id="f-visit-date" type="datetime-local" value="' + esc(survey.visitDate) + '"></div></div>'
       + '<input id="f-works" type="hidden" value="' + esc(r.works) + '"><div class="scope-picker">' + scopePicker + '</div><div id="scope-option-area">' + scopeOptions + '</div>'
       + '<div class="consult-survey-grid"><label class="consult-check"><input id="f-measured" type="checkbox"' + (survey.measured ? ' checked' : '') + '> 실측 완료</label>'
@@ -78,6 +93,6 @@
       + '</section></div>';
   }
 
-  return { buildBody: buildBody, escapeHtml: esc };
+  return { buildBody: buildBody, escapeHtml: esc, ensureInquiryMilestone: ensureInquiryMilestone };
 });
 
