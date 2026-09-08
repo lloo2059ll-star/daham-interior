@@ -5,7 +5,7 @@ const path = require('node:path');
 
 const root = path.join(__dirname, '..');
 const htmlPages = fs.readdirSync(root).filter(name => name.endsWith('.html'));
-const publicPages = new Set(['index.html', 'login.html', 'portfolio.html', 'signup.html', 'website.html']);
+const publicPages = new Set(['index.html', 'inquiry.html', 'login.html', 'portfolio.html', 'signup.html', 'website.html']);
 
 test('every internal page starts the shared auth guard from head', () => {
   for (const page of htmlPages.filter(name => !publicPages.has(name))) {
@@ -18,7 +18,7 @@ test('every internal page starts the shared auth guard from head', () => {
 });
 
 test('only login, compatibility signup, and customer website pages omit the ERP auth guard', () => {
-  assert.deepEqual([...publicPages].sort(), ['index.html', 'login.html', 'portfolio.html', 'signup.html', 'website.html']);
+  assert.deepEqual([...publicPages].sort(), ['index.html', 'inquiry.html', 'login.html', 'portfolio.html', 'signup.html', 'website.html']);
   assert.match(fs.readFileSync(path.join(root, 'login.html'), 'utf8'), /DAHAM_AUTH\.login/);
   assert.match(fs.readFileSync(path.join(root, 'signup.html'), 'utf8'), /login\.html#signup/);
   const website = fs.readFileSync(path.join(root, 'index.html'), 'utf8');

@@ -113,6 +113,16 @@ test('public inquiry stays on the website and shows in-place result state', () =
   assert.match(src, /문의가 접수되었습니다/);
 });
 
+test('dedicated Naver Blog inquiry page uses the existing public ERP intake safely', () => {
+  const html = fs.readFileSync(path.join(root, 'inquiry.html'), 'utf8');
+  const js = fs.readFileSync(path.join(root, 'inquiry.js'), 'utf8');
+  assert.match(html, /name="workScope" value="전체 공사"/);
+  assert.match(html, /name="workScope" value="부분 공사"/);
+  assert.match(html, /id="privacy"/);
+  assert.match(js, /from\('website_inquiries'\)\.insert\(payload\)/);
+  assert.match(js, /sourceLabel:'네이버 블로그'/);
+});
+
 test('homepage renders static portfolio immediately and then loads published overrides', () => {
   const src = source();
   assert.match(src, /renderStaticPortfolio\(\);loadPortfolio\(\)/);

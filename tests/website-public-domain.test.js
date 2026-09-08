@@ -67,3 +67,21 @@ test('normalizePortfolioRow exposes only homepage fields and filters unsafe imag
     galleryImageUrls: ['https://example.com/living.jpg', '/portfolio/bath.webp'], sortOrder: 3,
   });
 });
+
+test('buildInquiryPayload records Naver Blog source and one allowed work scope in the message', () => {
+  const payload = website.buildInquiryPayload({
+    name: '홍길동',
+    phone: '01012345678',
+    workScope: '전체 공사',
+    sourceLabel: '네이버 블로그',
+    message: '입주 전에 완공하고 싶어요.',
+    privacyConsent: true,
+    honeypot: '',
+  });
+
+  assert.equal(payload.source, 'website');
+  assert.equal(payload.message, '[유입: 네이버 블로그]\n[공사 범위: 전체 공사]\n입주 전에 완공하고 싶어요.');
+  assert.throws(() => website.buildInquiryPayload({
+    name: '홍길동', phone: '01012345678', workScope: '허용하지 않은 값', privacyConsent: true,
+  }), /공사 범위/);
+});

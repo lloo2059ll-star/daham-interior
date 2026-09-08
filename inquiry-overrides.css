@@ -1,0 +1,3 @@
+body{overflow-x:hidden}
+.intro,.form-panel{min-width:0}
+@media(min-width:901px){.intro h1{font-size:clamp(42px,4.8vw,70px)}}
