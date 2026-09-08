@@ -76,6 +76,35 @@ test('database integration script proves staff denial and owner price settings u
   assert.match(sql, /rollback\s*;/);
 });
 
+test('sales funnel goals are month and company scoped with owner admin RLS', () => {
+  const projectRoot = path.join(__dirname, '..');
+  const migrationName = fs.readdirSync(path.join(projectRoot, 'supabase', 'migrations'))
+    .find((name) => /_sales_funnel_goals\.sql$/.test(name));
+  assert.ok(migrationName, 'sales funnel goals migration is required');
+  const sql = fs.readFileSync(path.join(projectRoot, 'supabase', 'migrations', migrationName), 'utf8').toLowerCase();
+  assert.match(sql, /create table(?: if not exists)? public\.sales_funnel_goals/);
+  assert.match(sql, /primary key\s*\(company_id,\s*month\)/);
+  for (const column of ['inquiry_target', 'site_visit_target', 'estimate_meeting_target', 'contract_target']) {
+    assert.match(sql, new RegExp(column + '[\\s\\S]*check\\s*\\(' + column + '\\s*>=\\s*0\\)'));
+  }
+  assert.match(sql, /alter table public\.sales_funnel_goals enable row level security/);
+  assert.match(sql, /revoke all on table public\.sales_funnel_goals from anon/);
+  assert.match(sql, /grant select, insert, update on table public\.sales_funnel_goals to authenticated/);
+  assert.match(sql, /for update to authenticated[\s\S]*using\s*\([\s\S]*is_active_company_owner_or_admin[\s\S]*with check\s*\([\s\S]*is_active_company_owner_or_admin/);
+  assert.doesNotMatch(sql, /grant delete/);
+});
+
+test('sales funnel goal SQL test covers staff denial company isolation and month independence', () => {
+  const sql = fs.readFileSync(path.join(__dirname, '..', 'supabase', 'tests', 'sales_funnel_goals_security.sql'), 'utf8').toLowerCase();
+  assert.match(sql, /set local role authenticated/);
+  assert.match(sql, /staff goal insert unexpectedly succeeded/);
+  assert.match(sql, /cross-company goal read unexpectedly succeeded/);
+  assert.match(sql, /owner goal insert unexpectedly failed/);
+  assert.match(sql, /admin goal update unexpectedly failed/);
+  assert.match(sql, /september update changed august goal/);
+  assert.match(sql, /rollback\s*;/);
+});
+
 test('project price overrides are merged atomically through the protected settings record', () => {
   const sql = fs.readFileSync(path.join(__dirname, '..', 'supabase/migrations/20260830103000_atomic_project_price_overrides.sql'), 'utf8');
   assert.match(sql, /create or replace function public\.update_project_price_overrides/);
