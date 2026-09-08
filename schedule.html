@@ -249,7 +249,7 @@ select.mf-inp{cursor:pointer}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
-<script src="schedule-domain.js?v=20260901-auto3"></script>
+<script src="schedule-domain.js?v=20260909-auto4"></script>
 <script src="consult-schedule-link.js?v=20260901-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
@@ -1516,6 +1516,13 @@ function syncContractedProjects(){
   if(result.added>0||result.updated>0||result.removed>0) saveDB();
   if(result.added>0) showToast('✓ 계약완료 현장 '+result.added+'건이 일정표에 등록됐습니다');
 }
+function completePastSchedules(){
+  var result=DAHAM_SCHEDULE_DOMAIN.completePastSchedules(allProjects,allGeneralEvents,todayStr());
+  allProjects=result.sites;
+  allGeneralEvents=result.generalEvents;
+  if(result.changedSites>0) saveDB();
+  if(result.changedGeneralEvents>0) saveGeneralDB();
+}
 
 /* ════ NAVIGATE TO TASK ════ */
 function goToProjectTask(projId,taskId){
@@ -1550,7 +1557,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProject
     cloudPullKey(GENERAL_DB_KEY,function(){
       reconcileConsultationCalendar(function(){
         pullCurrentEstimateCache(function(){
-          syncContractedProjects();renderSidebar();renderSiteCards();
+          syncContractedProjects();completePastSchedules();renderSidebar();renderSiteCards();
           var requested=allProjects.find(function(p){return p.estimateId===requestedEstimateId;});
           if(requested) openProject(requested.id); else showAllCalendar();
         });

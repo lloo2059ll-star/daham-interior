@@ -379,6 +379,34 @@ test('site progress counts schedules ending today or earlier', () => {
   assert.equal(D.scheduleProgress([],'2026-08-31'),0);
 });
 
+test('past construction and general schedules become done after their end date', () => {
+  const sites=[{id:'site',unknown:'keep',tasks:[
+    {id:'past',start:'2026-09-07',end:'2026-09-08',status:'progress',memo:'keep'},
+    {id:'today',start:'2026-09-09',end:'2026-09-09',status:'progress'},
+    {id:'future',start:'2026-09-10',end:'2026-09-10',status:'planned'},
+    {id:'single-day',start:'2026-09-08',status:'planned'},
+    {id:'invalid',start:'not-a-date',end:'not-a-date',status:'planned'},
+    {id:'already-done',start:'2026-09-01',end:'2026-09-01',status:'done'}
+  ]}];
+  const generalEvents=[
+    {id:'general-past',start:'2026-09-08',end:'2026-09-08',status:'planned',generalType:'consult'},
+    {id:'general-today',start:'2026-09-09',end:'2026-09-09',status:'progress'}
+  ];
+
+  const result=D.completePastSchedules(sites,generalEvents,'2026-09-09');
+
+  assert.equal(result.changedSites,2);
+  assert.equal(result.changedGeneralEvents,1);
+  assert.deepEqual(result.sites[0].tasks.map(task=>task.status),[
+    'done','progress','planned','done','planned','done'
+  ]);
+  assert.deepEqual(result.generalEvents.map(event=>event.status),['done','progress']);
+  assert.equal(result.sites[0].unknown,'keep');
+  assert.equal(result.sites[0].tasks[0].memo,'keep');
+  assert.notEqual(result.sites,sites);
+  assert.notEqual(result.generalEvents,generalEvents);
+});
+
 
 
 
