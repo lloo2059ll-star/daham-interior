@@ -1,46 +1,7 @@
-<!doctype html>
-<html lang="ko">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="다함 인테리어 무료 견적 상담 신청">
-  <title>견적 문의 | 다함 인테리어</title>
-  <link rel="stylesheet" href="inquiry.css">
-  <link rel="stylesheet" href="inquiry-overrides.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="website-public-domain.js"></script>
-</head>
-<body>
-  <header class="topbar"><a class="brand" href="index.html">DAHAM</a><a class="back" href="index.html">홈으로 <span>↗</span></a></header>
-  <main>
-    <section class="intro">
-      <div class="eyebrow"><i></i> FREE ESTIMATE</div>
-      <h1>공간의 시작을<br><em>함께 설계합니다.</em></h1>
-      <p>남겨주신 내용을 확인한 뒤 담당자가 순서대로 연락드립니다.<br>현장 방문 견적은 무료입니다.</p>
-      <dl><div><dt>01</dt><dd>문의 접수</dd></div><div><dt>02</dt><dd>전화 상담</dd></div><div><dt>03</dt><dd>현장 방문</dd></div></dl>
-    </section>
-    <section class="form-panel">
-      <div class="form-heading"><span>ESTIMATE REQUEST</span><h2>견적 문의</h2><p><b>*</b> 표시는 필수 입력 항목입니다.</p></div>
-      <form id="inquiry-page-form" novalidate>
-        <div class="grid">
-          <label><span>성함 <b>*</b></span><input name="name" autocomplete="name" maxlength="80" required placeholder="성함을 입력해 주세요"></label>
-          <label><span>연락처 <b>*</b></span><input name="phone" autocomplete="tel" inputmode="tel" maxlength="30" required placeholder="010-0000-0000"></label>
-          <label class="wide"><span>현장 주소</span><input name="address" maxlength="300" placeholder="예: 경북 구미시 옥계동"></label>
-          <label><span>아파트 / 현장명</span><input name="siteName" maxlength="160" placeholder="예: 푸르지오캐슬"></label>
-          <label><span>평형</span><input name="area" maxlength="40" inputmode="decimal" placeholder="예: 34평"></label>
-          <fieldset class="wide scope"><legend>공사 범위 <b>*</b></legend><label><input type="radio" name="workScope" value="전체 공사" required><span><strong>전체 공사</strong><small>철거부터 마감까지 전체 리모델링</small></span></label><label><input type="radio" name="workScope" value="부분 공사" required><span><strong>부분 공사</strong><small>주방·욕실·도배 등 필요한 범위만</small></span></label></fieldset>
-          <label><span>예산</span><select name="budget"><option value="">선택해 주세요</option><option>2천만원 미만</option><option>2천~3천만원</option><option>3천~4천만원</option><option>4천~5천만원</option><option>5천만원 이상</option></select></label>
-          <label><span>희망 공사 시점</span><input name="moveDate" type="date"></label>
-          <label class="wide"><span>문의 내용</span><textarea name="message" maxlength="4000" placeholder="원하시는 공간과 참고사항을 자유롭게 적어주세요."></textarea></label>
-          <label class="honeypot" aria-hidden="true"><span>website</span><input name="website" tabindex="-1" autocomplete="off"></label>
-        </div>
-        <label class="privacy"><input id="privacy" type="checkbox" required><span>견적 상담을 위한 개인정보 수집 및 이용에 동의합니다. <b>*</b></span></label>
-        <div id="form-result" class="result" role="status"></div>
-        <button id="submit-inquiry" class="submit" type="submit"><span>무료 견적 문의하기</span><i>→</i></button>
-      </form>
-      <p class="contact">빠른 상담 <a href="tel:01020590347">010-2059-0347</a></p>
-    </section>
-  </main>
-  <script src="inquiry.js"></script>
-</body>
-</html>
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="다함 인테리어 무료 견적 상담 신청"><title>견적 문의 | 다함 인테리어</title><link rel="stylesheet" href="inquiry.css"><link rel="stylesheet" href="inquiry-overrides.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="website-public-domain.js"></script><script src="inquiry-domain.js"></script></head>
+<body><header class="topbar"><a class="brand" href="index.html">다함 인테리어</a><span>구미 · 경북 인테리어 상담</span></header><main>
+<section class="intro"><div class="eyebrow">DAHAM INTERIOR CONSULTATION</div><h1>예쁜 집보다,<br><em>이유 있는 공간을</em><br>만듭니다.</h1><p>생활 방식과 공사 범위를 먼저 듣고,<br>꼭 필요한 시공부터 솔직하게 안내해 드립니다.</p></section>
+<section class="form-panel"><ol id="inquiry-progress" class="progress" aria-label="견적 문의 진행 단계" aria-live="polite"><li aria-current="step">01 <span>기본 정보</span></li><li>02 <span>현장 정보</span></li><li>03 <span>상담 내용</span></li></ol>
+<form id="inquiry-page-form" novalidate><fieldset data-step-panel="1"><legend>상담을 위해<br>기본 정보만 알려주세요.</legend><label><span>성함</span><input name="name" autocomplete="name" maxlength="80" placeholder="어떻게 불러드릴까요?"></label><label><span>연락처</span><input name="phone" autocomplete="tel" inputmode="tel" maxlength="30" placeholder="010-0000-0000"></label><div class="step-actions first"><small>약 2분 정도 걸립니다.</small><button type="button" data-step-next>다음 단계 <i>→</i></button></div></fieldset>
+<fieldset data-step-panel="2" hidden><legend>어떤 공간을<br>계획하고 계신가요?</legend><div class="field-grid"><label class="wide"><span>현장 주소</span><input name="address" maxlength="300" placeholder="예: 경북 구미시 옥계동"></label><label><span>아파트 / 현장명</span><input name="siteName" maxlength="160" placeholder="예: 푸르지오캐슬"></label><label><span>평형</span><input name="area" maxlength="40" inputmode="decimal" placeholder="예: 34평"></label><div class="scope wide"><span>공사 범위</span><div><label><input type="radio" name="workScope" value="전체 공사"><b>전체 공사</b><small>철거부터 마감까지</small></label><label><input type="radio" name="workScope" value="부분 공사"><b>부분 공사</b><small>필요한 공간만</small></label></div></div><label><span>예산</span><select name="budget"><option value="">선택해 주세요</option><option>2천만원 미만</option><option>2천~3천만원</option><option>3천~4천만원</option><option>4천~5천만원</option><option>5천만원 이상</option></select></label><label><span>희망 공사 시점</span><input name="moveDate" type="date"></label></div><div class="step-actions"><button type="button" class="back" data-step-back>← 이전</button><button type="button" data-step-next>다음 단계 <i>→</i></button></div></fieldset>
+<fieldset data-step-panel="3" hidden><legend>마지막으로,<br>필요한 내용을 들려주세요.</legend><label><span>문의 내용</span><textarea name="message" maxlength="4000" placeholder="원하시는 공간과 참고사항을 자유롭게 적어주세요."></textarea></label><label class="privacy"><input id="privacy" type="checkbox"><span>견적 상담을 위한 개인정보 수집 및 이용에 동의합니다.</span></label><label class="honeypot" aria-hidden="true"><span>website</span><input name="website" tabindex="-1" autocomplete="off"></label><div id="form-result" class="result" role="status"></div><div class="step-actions"><button type="button" class="back" data-step-back>← 이전</button><button id="submit-inquiry" type="submit">상담 신청하기 <i>→</i></button></div></fieldset></form><p class="contact">전화 상담 <a href="tel:01020590347">010-2059-0347</a></p></section></main><script src="inquiry.js"></script></body></html>

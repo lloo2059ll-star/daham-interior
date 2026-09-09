@@ -116,11 +116,23 @@ test('public inquiry stays on the website and shows in-place result state', () =
 test('dedicated Naver Blog inquiry page uses the existing public ERP intake safely', () => {
   const html = fs.readFileSync(path.join(root, 'inquiry.html'), 'utf8');
   const js = fs.readFileSync(path.join(root, 'inquiry.js'), 'utf8');
+  const css = fs.readFileSync(path.join(root, 'inquiry-overrides.css'), 'utf8');
   assert.match(html, /name="workScope" value="전체 공사"/);
   assert.match(html, /name="workScope" value="부분 공사"/);
   assert.match(html, /id="privacy"/);
+  for (const marker of ['data-step-panel="1"', 'data-step-panel="2"', 'data-step-panel="3"', 'id="inquiry-progress"']) {
+    assert.match(html, new RegExp(marker));
+  }
+  assert.match(html, /예쁜 집보다,[\s\S]*이유 있는 공간/);
+  assert.match(html, /inquiry-domain\.js[\s\S]*inquiry\.js/);
+  assert.match(css, /@media\s*\(max-width:\s*600px\)/);
+  assert.match(css, /letter-spacing:\s*-0\.04em/);
+  assert.match(css, /letter-spacing:\s*-0\.015em/);
   assert.match(js, /from\('website_inquiries'\)\.insert\(payload\)/);
-  assert.match(js, /sourceLabel:'네이버 블로그'/);
+  assert.match(js, /sourceChannel:'naver_blog'/);
+  assert.match(js, /validateStep/);
+  assert.match(js, /aria-busy/);
+  assert.match(js, /\.focus\(\)/);
 });
 
 test('homepage renders static portfolio immediately and then loads published overrides', () => {
