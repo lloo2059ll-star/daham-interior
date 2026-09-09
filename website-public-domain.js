@@ -7,6 +7,8 @@
 
   function text(value){ return String(value==null?'':value).trim(); }
 
+  function normalizeSourceChannel(value){ return value==='naver_blog'?'naver_blog':'website'; }
+
   function normalizePhone(value){
     var digits=String(value==null?'':value).replace(/\D/g,'');
     if(digits.length===11) return digits.slice(0,3)+'-'+digits.slice(3,7)+'-'+digits.slice(7);
@@ -34,14 +36,12 @@
     var name=text(values.name);
     var phone=normalizePhone(values.phone);
     var workScope=text(values.workScope);
-    var sourceLabel=text(values.sourceLabel);
     var message=text(values.message);
     if(!name) throw new Error('이름을 입력해 주세요.');
     if(!phone) throw new Error('연락처를 입력해 주세요.');
     if(values.privacyConsent!==true) throw new Error('개인정보 수집 및 이용에 동의해 주세요.');
     if(workScope&&['전체 공사','부분 공사'].indexOf(workScope)<0) throw new Error('공사 범위를 올바르게 선택해 주세요.');
     var messageParts=[];
-    if(sourceLabel) messageParts.push('[유입: '+sourceLabel+']');
     if(workScope) messageParts.push('[공사 범위: '+workScope+']');
     if(message) messageParts.push(message);
     return {
@@ -57,7 +57,8 @@
       message:messageParts.join('\n'),
       privacy_consent:true,
       honeypot:text(values.honeypot),
-      source:'website'
+      source:'website',
+      source_channel:normalizeSourceChannel(values.sourceChannel)
     };
   }
 
@@ -77,5 +78,5 @@
     };
   }
 
-  return {normalizePhone:normalizePhone,safeImageUrl:safeImageUrl,normalizeGalleryUrls:normalizeGalleryUrls,buildInquiryPayload:buildInquiryPayload,normalizePortfolioRow:normalizePortfolioRow};
+  return {normalizePhone:normalizePhone,normalizeSourceChannel:normalizeSourceChannel,safeImageUrl:safeImageUrl,normalizeGalleryUrls:normalizeGalleryUrls,buildInquiryPayload:buildInquiryPayload,normalizePortfolioRow:normalizePortfolioRow};
 });

@@ -37,6 +37,7 @@ test('buildInquiryPayload trims fields and keeps the public insert shape only', 
     privacy_consent: true,
     honeypot: '',
     source: 'website',
+    source_channel: 'website',
   });
   assert.equal('status' in payload, false);
   assert.equal('erp_synced_at' in payload, false);
@@ -73,14 +74,15 @@ test('buildInquiryPayload records Naver Blog source and one allowed work scope i
     name: '홍길동',
     phone: '01012345678',
     workScope: '전체 공사',
-    sourceLabel: '네이버 블로그',
+    sourceChannel: 'naver_blog',
     message: '입주 전에 완공하고 싶어요.',
     privacyConsent: true,
     honeypot: '',
   });
 
   assert.equal(payload.source, 'website');
-  assert.equal(payload.message, '[유입: 네이버 블로그]\n[공사 범위: 전체 공사]\n입주 전에 완공하고 싶어요.');
+  assert.equal(payload.source_channel, 'naver_blog');
+  assert.equal(payload.message, '[공사 범위: 전체 공사]\n입주 전에 완공하고 싶어요.');
   assert.throws(() => website.buildInquiryPayload({
     name: '홍길동', phone: '01012345678', workScope: '허용하지 않은 값', privacyConsent: true,
   }), /공사 범위/);
