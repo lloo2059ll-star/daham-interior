@@ -128,6 +128,7 @@ test('dedicated Naver Blog inquiry page uses the existing public ERP intake safe
   assert.match(css, /@media\s*\(max-width:\s*600px\)/);
   assert.match(css, /letter-spacing:\s*-0\.04em/);
   assert.match(css, /letter-spacing:\s*-0\.015em/);
+  assert.match(css, /\.intro h1 em\{[^}]*color:\s*inherit/);
   assert.match(js, /from\('website_inquiries'\)\.insert\(payload\)/);
   assert.match(js, /sourceChannel:'naver_blog'/);
   assert.match(js, /validateStep/);
