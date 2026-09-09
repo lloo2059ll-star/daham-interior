@@ -5,6 +5,12 @@ const assert = require('node:assert/strict');
 
 const migrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260903143000_public_website_erp.sql');
 const galleryMigrationPath = path.join(__dirname, '..', 'supabase', 'migrations', '20260908_website_portfolio_gallery.sql');
+function naverMigration(){
+  const dir=path.join(__dirname,'..','supabase','migrations');
+  const name=fs.readdirSync(dir).find(file => file.endsWith('_naver_blog_inquiry_notifications.sql'));
+  assert.ok(name,'Naver inquiry notification migration must exist');
+  return fs.readFileSync(path.join(dir,name),'utf8').toLowerCase();
+}
 
 function sqlText(){
   return fs.readFileSync(migrationPath, 'utf8').toLowerCase();
@@ -61,4 +67,30 @@ test('integration SQL checks anon boundaries and rolls back', () => {
   assert.match(sql, /insert into public\.website_inquiries/);
   assert.match(sql, /daham_consult_v1/);
   assert.match(sql, /rollback\s*;/);
+});
+
+test('Naver inquiry migration preserves insert-only access and adds a typed source', () => {
+  const sql=naverMigration();
+  assert.match(sql,/add column if not exists source_channel text not null default 'website'/);
+  assert.match(sql,/check \(source_channel in \('website','naver_blog'\)\)/);
+  assert.match(sql,/grant insert on table public\.website_inquiries to anon/);
+  assert.doesNotMatch(sql,/grant\s+select[^;]*website_inquiries[^;]*to\s+anon/);
+  assert.match(sql,/set search_path\s*=\s*''/);
+  assert.match(sql,/revoke all on function private\.import_website_inquiry_to_consult\(\) from public, anon, authenticated/);
+});
+
+test('Naver inquiry migration creates one ERP consultation and privacy-safe staff notification', () => {
+  const sql=naverMigration();
+  assert.match(sql,/v_consult_title := case[^;]*'네이버 블로그 견적 문의'/);
+  assert.match(sql,/'consulttitle',\s*v_consult_title/);
+  assert.match(sql,/v_source_label := case[^;]*'네이버 블로그'/);
+  assert.match(sql,/'source',\s*v_source_label/);
+  assert.match(sql,/'type','milestone','status','inquiry'/);
+  assert.match(sql,/insert into public\.activity_events/);
+  assert.match(sql,/insert into public\.notification_outbox/);
+  assert.match(sql,/신규 상담 · 네이버 블로그/);
+  assert.match(sql,/website-inquiry:/);
+  assert.match(sql,/consult\.html\?consult=/);
+  const outbox=sql.slice(sql.indexOf('insert into public.notification_outbox'));
+  assert.doesNotMatch(outbox,/new\.phone|new\.address_detail|new\.message/);
 });

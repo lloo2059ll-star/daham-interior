@@ -95,3 +95,8 @@ test('tablet workspace reflows without hiding the detail editor', () => {
   assert.match(html, /\.scope-details\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 
+test('push deep link selects the requested consultation', () => {
+  assert.match(html, /new URLSearchParams\(location\.search\)\.get\('consult'\)/);
+  assert.match(html, /_selectedId=requested/);
+});
+

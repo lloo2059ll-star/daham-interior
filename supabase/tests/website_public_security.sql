@@ -14,10 +14,10 @@ where source_project_id like 'website-test-%';
 
 insert into public.website_inquiries(
   name, phone, email, address, address_detail, site_name, area, budget, move_date, message,
-  privacy_consent, honeypot, source
+  privacy_consent, honeypot, source, source_channel
 ) values (
   '홈페이지 테스트', '010-1111-2222', '', '경상북도 구미시', '', '테스트 현장', '34', '4000만원', null,
-  '통합 테스트 문의', true, '', 'website'
+  '통합 테스트 문의', true, '', 'website', 'naver_blog'
 );
 
 reset role;
@@ -29,8 +29,18 @@ select case when exists (
   where s.key = 'daham_consult_v1'
     and item.record ->> 'name' = '홈페이지 테스트'
     and item.record ->> 'tel' = '010-1111-2222'
-    and item.record ->> 'source' = '홈페이지'
+    and item.record ->> 'source' = '네이버 블로그'
+    and item.record ->> 'status' = 'inquiry'
+    and item.record -> 'history' @> '[{"type":"milestone","status":"inquiry"}]'::jsonb
     and nullif(item.record ->> 'websiteInquiryId', '') is not null
 ) then 'ok' else 'missing' end as inquiry_synced_to_erp;
+
+select case when exists (
+  select 1 from public.notification_outbox
+  where dedupe_key like 'website-inquiry:%'
+    and title = '신규 상담 · 네이버 블로그'
+    and body not like '%010-1111-2222%'
+    and target_url like 'consult.html?consult=web_%'
+) then 'ok' else 'missing' end as inquiry_notification_enqueued;
 
 rollback;

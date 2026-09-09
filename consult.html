@@ -833,7 +833,7 @@ DAHAM_AUTH.ready.then(function(ready){
   _currentUser=DAHAM_AUTH.currentUser();
   _canDeleteConsult=DAHAM_CONSULT_DELETE.canDeleteConsult(_currentUser);
   initCloud();
-  var requested=localStorage.getItem('daham_open_consult');
+  var requested=new URLSearchParams(location.search).get('consult')||localStorage.getItem('daham_open_consult');
   if(requested){_selectedId=requested;localStorage.removeItem('daham_open_consult');}
   renderTabs();
   renderList();
