@@ -15,13 +15,14 @@
 <main id="detail-content"><div class="shell detail-loading">시공 사례를 불러오는 중입니다.</div></main>
 <script src="portfolio-detail.js?v=14"></script>
 <script>
-if(['geochang-prugio-34','prugio-castle-a-32'].indexOf(new URLSearchParams(location.search).get('project'))>=0){
+if(['geochang-prugio-34','prugio-castle-a-32','bonggok-hyunjin-36'].indexOf(new URLSearchParams(location.search).get('project'))>=0){
   var d=document.createElement('section'); d.className='detail-section';
   d.innerHTML='<h2>DURING · 공사 중</h2><div class="detail-space-gallery">'+['during-01.jpg','during-02.jpg','during-03.jpg'].map(function(p){return '<figure><img src="portfolio-assets/projects/' + new URLSearchParams(location.search).get('project') + '/'+p+'" alt="거창 푸르지오 공사 중 사진" loading="lazy"><figcaption>DURING · 공사 중 사진</figcaption></figure>';}).join('')+'</div><p>철거 후 목공과 설비 작업이 진행 중인 현장을 확인하며 주방 동선과 수납 위치를 조정했습니다.</p>';
   var firstAfter=document.querySelectorAll('.detail-section')[1]; if(firstAfter){firstAfter.parentNode.insertBefore(d,firstAfter);} else {document.getElementById('detail-content').appendChild(d);}
 }
 </script>
 </body></html>
+
 
 
 
