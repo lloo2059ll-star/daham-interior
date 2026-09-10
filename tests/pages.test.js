@@ -57,3 +57,8 @@ test('worklog uses the approved site journal name', () => {
   assert.match(worklog, /<title>DAHAM — 현장일지<\/title>/);
   assert.match(worklog, /class="cv-title">현장일지<\/div>/);
 });
+
+test('public homepage footer displays the business registration number', () => {
+  const html = read('index.html');
+  assert.match(html, /사업자등록번호\s*497-34-01080/);
+});
