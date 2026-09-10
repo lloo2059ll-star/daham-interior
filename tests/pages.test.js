@@ -62,3 +62,8 @@ test('public homepage footer displays the business registration number', () => {
   const html = read('index.html');
   assert.match(html, /사업자등록번호\s*497-34-01080/);
 });
+
+test('public homepage footer displays the office address', () => {
+  const html = read('index.html');
+  assert.match(html, /경상북도 구미시 신시로10길 75-2/);
+});
