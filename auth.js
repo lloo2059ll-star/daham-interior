@@ -7,7 +7,7 @@
   const SESSION_KEY='daham_supabase_session_v1';
   const PROFILE_KEY='daham_supabase_profile_v1';
   const page=location.pathname.split('/').pop()||'erp.html';
-  const publicPages=['login.html','signup.html','schedule-view.html'];
+  const publicPages=['login.html','signup.html','schedule-view.html','portfolio-detail.html'];
 
   if(!publicPages.includes(page)&&window.document){
     const style=document.createElement('style');
