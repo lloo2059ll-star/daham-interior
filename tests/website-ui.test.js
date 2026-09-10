@@ -139,7 +139,9 @@ test('dedicated Naver Blog inquiry page uses the existing public ERP intake safe
 test('homepage renders static portfolio immediately and then loads published overrides', () => {
   const src = source();
   assert.match(src, /renderStaticPortfolio\(\);loadPortfolio\(\)/);
-  assert.match(src, /href="portfolio\.html#/);
+  assert.match(src, /function projectHref\(slug\)/);
+  assert.match(src, /'portfolio\/'\+encodeURIComponent\(slug\)\+'\.html'/);
+  assert.match(src, /'portfolio\.html#'\+encodeURIComponent\(slug\)/);
   assert.match(src, /gallery_image_urls/);
 });
 
@@ -174,4 +176,36 @@ test('search engines receive one canonical public homepage and crawlable sitemap
   assert.match(sitemap, /<loc>https:\/\/daham-interior\.com\/<\/loc>/);
   assert.match(sitemap, /<loc>https:\/\/daham-interior\.com\/portfolio\.html<\/loc>/);
   assert.doesNotMatch(sitemap, /erp\.html|login\.html|website\.html/);
+});
+
+test('homepage states the Gumi service scope in searchable text without keyword stuffing', () => {
+  const src = html();
+  assert.match(src, /class="local-service-summary"/);
+  assert.match(src, /구미에서 아파트 전체 인테리어와 리모델링을 설계·시공하는 다함 인테리어/);
+  assert.match(src, /구미 · 김천 · 대구/);
+  assert.match(src, /전체 인테리어 · 주방 · 욕실 · 수납/);
+  assert.ok((src.match(/구미 인테리어/g) || []).length <= 3);
+});
+
+test('homepage business schema matches the visible official business identity', () => {
+  const src = html();
+  const jsonLd = JSON.parse(src.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1]);
+  assert.equal(jsonLd.taxID, '497-34-01080');
+  assert.equal(jsonLd.address.streetAddress, '신시로10길 75-2');
+  assert.equal(jsonLd.address.addressLocality, '구미시');
+  assert.ok(jsonLd.sameAs.includes('https://blog.naver.com/lloo0347ll'));
+});
+
+test('footer Naver links point to the official blog instead of an on-page placeholder', () => {
+  const src = html();
+  assert.match(src, /href="https:\/\/blog\.naver\.com\/lloo0347ll"[^>]*aria-label="블로그"/);
+  assert.match(src, /href="https:\/\/blog\.naver\.com\/lloo0347ll"[^>]*aria-label="네이버"/);
+});
+
+test('sitemap exposes four priority portfolio detail documents', () => {
+  const sitemap = read('sitemap.xml');
+  for (const slug of ['prugio-castle-a-32', 'imeun-kolon-35', 'bonggok-hyunjin-36', 'okgye-epyeon-35']) {
+    assert.match(sitemap, new RegExp(`<loc>https://daham-interior\\.com/portfolio/${slug}\\.html</loc>`));
+    assert.equal(fs.existsSync(path.join(root, 'portfolio', `${slug}.html`)), true);
+  }
 });

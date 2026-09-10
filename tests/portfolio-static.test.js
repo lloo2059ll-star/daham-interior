@@ -72,3 +72,33 @@ test('portfolio cards apply curated cover positions without cropping detail phot
   assert.match(home, /coverPosition/);
   assert.match(css, /\.project-gallery-photo img\{[^}]*height:auto/);
 });
+
+test('Bonggok Hyunjin top-floor project uses the confirmed 38-pyeong area', () => {
+  const portfolio = require(domainPath);
+  const project = portfolio.findProject('bonggok-hyunjin-36');
+  assert.equal(project.area, '38평');
+  assert.match(project.title, /38평/);
+  assert.ok(project.tags.includes('#38평'));
+});
+
+test('priority portfolio detail documents have unique searchable metadata and visible content', () => {
+  const slugs = ['prugio-castle-a-32', 'imeun-kolon-35', 'bonggok-hyunjin-36', 'okgye-epyeon-35'];
+  const titles = new Set();
+  const descriptions = new Set();
+  for (const slug of slugs) {
+    const html = fs.readFileSync(path.join(root, 'portfolio', `${slug}.html`), 'utf8');
+    const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
+    const description = html.match(/<meta name="description" content="([^"]+)">/)?.[1];
+    assert.ok(title);
+    assert.ok(description);
+    assert.equal(titles.has(title), false);
+    assert.equal(descriptions.has(description), false);
+    titles.add(title);
+    descriptions.add(description);
+    assert.match(html, new RegExp(`<link rel="canonical" href="https://daham-interior\\.com/portfolio/${slug}\\.html">`));
+    assert.match(html, /<h1>[^<]+<\/h1>/);
+    assert.match(html, /기존 상태|설계 판단|주요 시공|완공 결과/);
+    assert.match(html, /견적 문의/);
+    assert.match(html, /href="\.\.\/inquiry\.html"/);
+  }
+});
