@@ -73,6 +73,13 @@ test('portfolio cards apply curated cover positions without cropping detail phot
   assert.match(css, /\.project-gallery-photo img\{[^}]*height:auto/);
 });
 
+test('homepage hero background points to an existing curated image', () => {
+  const css = fs.readFileSync(path.join(root, 'website-final.css'), 'utf8');
+  const heroPath = css.match(/--hero-image:url\("([^"]+)"\)/)?.[1];
+  assert.ok(heroPath);
+  assert.equal(fs.existsSync(path.join(root, heroPath)), true, `missing hero image: ${heroPath}`);
+});
+
 test('Bonggok Hyunjin top-floor project uses the confirmed 38-pyeong area', () => {
   const portfolio = require(domainPath);
   const project = portfolio.findProject('bonggok-hyunjin-36');
