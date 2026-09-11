@@ -67,3 +67,11 @@ test('public homepage footer displays the office address', () => {
   const html = read('index.html');
   assert.match(html, /경상북도 구미시 신시로10길 75-2/);
 });
+
+test('public homepage exposes local interior FAQ content and FAQ schema', () => {
+  const html = read('index.html');
+  assert.match(html, /id="faq"/);
+  assert.match(html, /구미 인테리어 상담은 어떻게 진행되나요/);
+  assert.match(html, /"@type": "FAQPage"/);
+  assert.match(html, /"@type": "WebSite"/);
+});
