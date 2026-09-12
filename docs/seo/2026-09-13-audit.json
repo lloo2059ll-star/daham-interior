@@ -1,0 +1,195 @@
+{
+  "checked_at": "2026-09-13T02:42:18.467982+09:00",
+  "status": "PARTIAL",
+  "scope": "daily public search and technical audit; management and complete map rankings require further checks",
+  "environment": {
+    "browser": "Codex in-app desktop browser",
+    "login": "logged out",
+    "location": "search displayed Gumi Songjeong-dong, business 270m; actual geolocation not independently verified",
+    "comparable_to_baseline": "not established"
+  },
+  "technical": [
+    {
+      "url": "https://daham-interior.com/",
+      "status": 200,
+      "canonical": "https://daham-interior.com/",
+      "title": [
+        "다함 인테리어 | 구미 인테리어 · 아파트 리모델링"
+      ],
+      "description": "다함 인테리어 — 구미 아파트 리모델링과 주거 인테리어 포트폴리오, 견적 문의",
+      "h1": [
+        "공간에 가치를 더하고,<br>일상에 편안함을 더합니다."
+      ],
+      "noindex": false,
+      "robots_header": null,
+      "content": null
+    },
+    {
+      "url": "https://daham-interior.com/portfolio.html",
+      "status": 200,
+      "canonical": "https://daham-interior.com/portfolio.html",
+      "title": [
+        "포트폴리오 | 다함 인테리어"
+      ],
+      "description": "다함 인테리어 실제 시공 포트폴리오",
+      "h1": [
+        "실제 공간으로 보여드리는<br>다함의 시공 결과입니다."
+      ],
+      "noindex": false,
+      "robots_header": null,
+      "content": null
+    },
+    {
+      "url": "https://daham-interior.com/robots.txt",
+      "status": 200,
+      "canonical": null,
+      "title": [],
+      "description": null,
+      "h1": [],
+      "noindex": false,
+      "robots_header": null,
+      "content": "User-agent: *\nAllow: /\nDisallow: /erp.html\nDisallow: /login.html\nDisallow: /website-admin.html\n\nSitemap: https://daham-interior.com/sitemap.xml\n"
+    },
+    {
+      "url": "https://daham-interior.com/sitemap.xml",
+      "status": 200,
+      "canonical": null,
+      "title": [],
+      "description": null,
+      "h1": [],
+      "noindex": false,
+      "robots_header": null,
+      "content": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n  <url>\n    <loc>https://daham-interior.com/</loc>\n    <lastmod>2026-09-11</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://daham-interior.com/portfolio.html</loc>\n    <lastmod>2026-09-11</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.9</priority>\n  </url>\n  <url><loc>https://daham-interior.com/portfolio/prugio-castle-a-32.html</loc><lastmod>2026-09-11</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n  <url><loc>https://daham-interior.com/portfolio/imeun-kolon-35.html</loc><lastmod>2026-09-11</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n  <url><loc>https://daham-interior.com/portfolio/bonggok-hyunjin-36.html</loc><lastmod>2026-09-11</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n  <url><loc>https://daham-interior.com/portfolio/okgye-epyeon-35.html</loc><lastmod>2026-09-11</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>\n</urlset>\n"
+    },
+    {
+      "url": "https://daham-interior.com/portfolio/prugio-castle-a-32.html",
+      "status": 200,
+      "canonical": "https://daham-interior.com/portfolio/prugio-castle-a-32.html",
+      "title": [
+        "구미 푸르지오캐슬 A단지 32평 인테리어 | 다함 인테리어"
+      ],
+      "description": "구미 송정 푸르지오캐슬 A단지 32평을 화이트와 우드, 질감 포인트로 정리한 다함 인테리어 시공 사례입니다.",
+      "h1": [
+        "구미 푸르지오캐슬 A단지 32평"
+      ],
+      "noindex": false,
+      "robots_header": null,
+      "content": null
+    },
+    {
+      "url": "https://daham-interior.com/portfolio/imeun-kolon-35.html",
+      "status": 200,
+      "canonical": "https://daham-interior.com/portfolio/imeun-kolon-35.html",
+      "title": [
+        "구미 임은동 코오롱하늘채 35평 인테리어 | 다함 인테리어"
+      ],
+      "description": "구미 임은동 코오롱하늘채 35평의 거실 벽과 수납, 주방, 침실, 욕실을 공간별로 정리한 전체 인테리어 사례입니다.",
+      "h1": [
+        "임은동 코오롱하늘채 35평"
+      ],
+      "noindex": false,
+      "robots_header": null,
+      "content": null
+    },
+    {
+      "url": "https://daham-interior.com/portfolio/bonggok-hyunjin-36.html",
+      "status": 200,
+      "canonical": "https://daham-interior.com/portfolio/bonggok-hyunjin-36.html",
+      "title": [
+        "구미 봉곡 현진에버빌 38평 탑층 인테리어 | 다함 인테리어"
+      ],
+      "description": "구미 봉곡 현진에버빌 38평 탑층의 거실, 주방, 현관, 침실과 욕실을 공간별로 정리한 다함 인테리어 시공 사례입니다.",
+      "h1": [
+        "봉곡 현진에버빌 38평 탑층"
+      ],
+      "noindex": false,
+      "robots_header": null,
+      "content": null
+    },
+    {
+      "url": "https://daham-interior.com/portfolio/okgye-epyeon-35.html",
+      "status": 200,
+      "canonical": "https://daham-interior.com/portfolio/okgye-epyeon-35.html",
+      "title": [
+        "구미 옥계 e편한세상 35평 인테리어 | 다함 인테리어"
+      ],
+      "description": "구미 옥계 e편한세상 35평의 거실과 주방 연결, 다이닝, 침실과 욕실을 정리한 다함 인테리어 시공 사례입니다.",
+      "h1": [
+        "옥계 e편한세상 35평"
+      ],
+      "noindex": false,
+      "robots_header": null,
+      "content": null
+    }
+  ],
+  "queries": [
+    {
+      "query": "다함 인테리어",
+      "homepage_first_page": true,
+      "place": "first natural place result, Gumi Songjeong-dong, 0507-1480-0655",
+      "web_rank": null,
+      "map_rank": null
+    },
+    {
+      "query": "다함 인테리어 구미",
+      "homepage_first_page": true,
+      "place": "single Gumi business card",
+      "web_rank": null,
+      "map_rank": null
+    },
+    {
+      "query": "구미 다함 인테리어",
+      "homepage_first_page": true,
+      "place": "single Gumi business card",
+      "web_rank": null,
+      "map_rank": null
+    },
+    {
+      "query": "구미 인테리어",
+      "homepage_first_page": false,
+      "place": "not observed in first two integrated place pages; not a total rank",
+      "web_rank": null,
+      "map_rank": null
+    },
+    {
+      "query": "구미 아파트 인테리어",
+      "homepage_first_page": true,
+      "place": "not observed among first integrated place results",
+      "web_rank": null,
+      "map_rank": null
+    },
+    {
+      "query": "구미 리모델링",
+      "homepage_first_page": false,
+      "place": "not observed among first integrated place results; not observed among initially rendered map items",
+      "web_rank": null,
+      "map_rank": null
+    }
+  ],
+  "portfolio_search_evidence": {
+    "queries": [
+      "다함 인테리어 구미",
+      "구미 다함 인테리어"
+    ],
+    "url": "https://daham-interior.com/portfolio/prugio-castle-a-32.html"
+  },
+  "blockers": [
+    "Smartplace not authenticated; keyword fields, homepage link, analytics and photo order not audited",
+    "Search Advisor not authenticated; collection errors and impression/click/CTR reports not audited",
+    "Full independent map ranking and exact web-document ranks not counted"
+  ],
+  "automation_evidence": {
+    "run_records_kst": [
+      "2026-09-13T01:24:10+09:00",
+      "2026-09-13T02:27:11+09:00"
+    ],
+    "content": "completed status without substantive audit results; cannot establish successful measurement"
+  },
+  "automation_update": {
+    "id": "automation",
+    "status": "ACTIVE",
+    "cadence_preserved": true,
+    "target_thread_preserved": true,
+    "requires_persistent_evidence": true
+  }
+}
