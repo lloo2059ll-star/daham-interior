@@ -14,7 +14,7 @@
 <script src="auth.js"></script>
 <script src="consult-delete.js"></script>
 <script src="consult-estimate-link.js"></script>
-<script src="consult-modal.js"></script>
+<script src="consult-modal.js?v=20260914-manager"></script>
 <script src="consult-schedule-link.js?v=20260901-2"></script>
 <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 <style>
@@ -678,7 +678,7 @@ function updateMs(idx,field,val){
 
 /* 모달 바디 */
 function renderModalBody(r){
-  document.getElementById('modal-body').innerHTML=DAHAM_CONSULT_MODAL.buildBody(r||{}, {
+  document.getElementById('modal-body').innerHTML=DAHAM_CONSULT_MODAL.buildBody(r, {
     scopePicker:renderScopePicker(r),
     scopeOptions:renderScopeOptions(r)
   });

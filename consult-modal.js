@@ -35,7 +35,7 @@
   }
 
   function buildBody(record, additions) {
-    var r = record || {};
+    var r = record || { manager: '최일성' };
     var survey = r.survey || {};
     var extra = additions || {};
     var scopePicker = extra.scopePicker || '';
