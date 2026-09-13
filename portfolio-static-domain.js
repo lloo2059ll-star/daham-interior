@@ -18,7 +18,15 @@
     project({slug:'songjeong-house-23',title:'송정 주택·상가 23평',location:'구미 송정동',area:'23평',kind:'주택·상가 리모델링',tags:['#주택','#23평','#리모델링'],photos:['living-kitchen','living-tv','kitchen','bathroom-main','bathroom-secondary','entry','storage','living-alt']}),
     project({slug:'okgye-epyeon-35',title:'옥계 e편한세상 35평',location:'구미 옥계',area:'35평',kind:'아파트 전체 인테리어',tags:['#아파트','#35평','#전체인테리어'],photos:['whole-space','living','dining','kitchen-dining','kitchen','bedroom','vanity']}),
     project({slug:'songjeong-dongyang-42',title:'송정동 동양한신 42평',location:'구미 송정동',area:'42평',kind:'아파트 전체 인테리어',tags:['#아파트','#42평','#전체인테리어'],photos:['living','living-window','living-kitchen','kitchen','kitchen-close','hallway','storage-detail']}),
-    project({slug:'daegu-sangin-hwasung',title:'대구 화성 상인화이츠 33평',location:'대구',area:'33평',kind:'아파트 전체 인테리어',tags:['#아파트','#33평','#대구','#전체인테리어'],photos:['living-main','living-alt','kitchen','kitchen-detail','kitchen-hall','bedroom-storage','bathroom','hallway']})
+    project({slug:'daegu-sangin-hwasung',title:'대구 화성 상인화이츠 33평',location:'대구',area:'33평',kind:'아파트 전체 인테리어',tags:['#아파트','#33평','#대구','#전체인테리어'],photos:['living-main','living-alt','kitchen','kitchen-detail','kitchen-hall','bedroom-storage','bathroom','hallway']}),
+    project({"slug":"gangbyeon-kolon-34","title":"구미 강변 코오롱하늘채 34평","location":"구미","area":"34평","kind":"아파트 인테리어","tags":["#아파트","#34평","#인테리어"],"photos":["living","kitchen","hallway","bedroom","bathroom","bathroom-secondary"]}),
+    project({"slug":"sandong-ssangyong-34","title":"구미 산동 쌍용예가 34평","location":"구미 산동","area":"34평","kind":"아파트 인테리어","tags":["#아파트","#34평","#인테리어"],"photos":["living","kitchen","kitchen-storage","hallway","hallway-reverse","entry"]}),
+    project({"slug":"samgu-trinity-36","title":"구미 삼구트리니엔 36평","location":"구미","area":"36평","kind":"아파트 인테리어","tags":["#아파트","#36평","#인테리어"],"photos":["living","kitchen","kitchen-storage","bathroom","shower","bedroom","balcony-door","entry"]}),
+    project({"slug":"songjeong-samwoo-32","title":"구미 송정동 삼우타운 32평","location":"구미 송정동","area":"32평","kind":"아파트 인테리어","tags":["#아파트","#32평","#인테리어"],"photos":["hallway","living","storage","bathroom","kitchen","dining"]}),
+    project({"slug":"wonho-prugio-34","title":"구미 원호 푸르지오 34평","location":"구미 원호","area":"34평","kind":"아파트 인테리어","tags":["#아파트","#34평","#인테리어"],"photos":["living","kitchen","dining","bathroom","hallway","vanity","entry"]}),
+    project({"slug":"wonho-prugio-renovation-34","title":"구미 원호 푸르지오 34평 리모델링","location":"구미 원호","area":"34평","kind":"아파트 인테리어","tags":["#아파트","#34평","#인테리어"],"photos":["living","living-window","hallway","vanity","bedroom","kitchen","entry-door"]}),
+    project({"slug":"indong-restaurant-50","title":"구미 인동 50평 식당 인테리어","location":"구미 인동","area":"50평","kind":"식당 인테리어","tags":["#상가","#50평","#인테리어"],"photos":["dining","dining-reverse","wall","seating","counter","lighting"]}),
+    project({"slug":"sinpyeong-salon-40","title":"구미 신평동 40평 미용실 인테리어","location":"구미 신평동","area":"40평","kind":"미용실 인테리어","tags":["#상가","#40평","#인테리어"],"photos":["salon","counter","seating","storage","mirror","detail"]})
   ];
 
   function copyProject(item){return Object.assign({},item,{tags:item.tags.slice(),photos:item.photos.slice()});}
