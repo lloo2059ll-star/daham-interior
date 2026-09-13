@@ -18,7 +18,7 @@
     project({slug:'songjeong-house-23',title:'송정 주택·상가 23평',location:'구미 송정동',area:'23평',kind:'주택·상가 리모델링',tags:['#주택','#23평','#리모델링'],photos:['living-kitchen','living-tv','kitchen','bathroom-main','bathroom-secondary','entry','storage','living-alt']}),
     project({slug:'okgye-epyeon-35',title:'옥계 e편한세상 35평',location:'구미 옥계',area:'35평',kind:'아파트 전체 인테리어',tags:['#아파트','#35평','#전체인테리어'],photos:['whole-space','living','dining','kitchen-dining','kitchen','bedroom','vanity']}),
     project({slug:'songjeong-dongyang-42',title:'송정동 동양한신 42평',location:'구미 송정동',area:'42평',kind:'아파트 전체 인테리어',tags:['#아파트','#42평','#전체인테리어'],photos:['living','living-window','living-kitchen','kitchen','kitchen-close','hallway','storage-detail']}),
-    project({slug:'daegu-sangin-hwasung',title:'대구 화성 상인화이츠',location:'대구',area:'',kind:'아파트 전체 인테리어',tags:['#아파트','#대구','#전체인테리어'],photos:['living-main','living-alt','kitchen','kitchen-detail','kitchen-hall','bedroom-storage','bathroom','hallway']})
+    project({slug:'daegu-sangin-hwasung',title:'대구 화성 상인화이츠 33평',location:'대구',area:'33평',kind:'아파트 전체 인테리어',tags:['#아파트','#33평','#대구','#전체인테리어'],photos:['living-main','living-alt','kitchen','kitchen-detail','kitchen-hall','bedroom-storage','bathroom','hallway']})
   ];
 
   function copyProject(item){return Object.assign({},item,{tags:item.tags.slice(),photos:item.photos.slice()});}
