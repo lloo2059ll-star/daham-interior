@@ -16,7 +16,7 @@ var PORTFOLIO_LEGACY_FIELDS='id,slug,title,location,area_pyeong,style,summary,co
 
 function esc(value){var d=document.createElement('div');d.textContent=String(value==null?'':value);return d.innerHTML;}
 function projectBySlug(slug){return rows.find(function(row){return row.slug===slug;})||null;}
-function card(row){return '<a class="portfolio-project" href="portfolio/'+encodeURIComponent(row.slug)+'.html" data-project="'+esc(row.slug)+'"><div class="portfolio-project-photo"><img src="'+esc(row.coverImage)+'" alt="'+esc(row.title)+'" loading="lazy" style="object-position:'+esc(row.coverPosition||'center center')+'"></div><div class="portfolio-project-copy"><h2>'+esc(row.title)+'</h2><div class="portfolio-project-meta">'+esc([row.location,row.area].filter(Boolean).join(' · '))+'</div><div class="portfolio-project-line"><span>'+esc(row.kind)+'</span><b>'+row.photos.length+' PHOTOS →</b></div></div></a>';}
+function card(row){return '<a class="portfolio-project" href="portfolio/'+encodeURIComponent(row.slug)+'.html" data-project="'+esc(row.slug)+'"><div class="portfolio-project-photo"><img src="'+esc(row.thumbnailImage||row.coverImage)+'" alt="'+esc(row.title)+'" loading="lazy" style="object-position:'+esc(row.coverPosition||'center center')+'"></div><div class="portfolio-project-copy"><h2>'+esc(row.title)+'</h2><div class="portfolio-project-meta">'+esc([row.location,row.area].filter(Boolean).join(' · '))+'</div><div class="portfolio-project-line"><span>'+esc(row.kind)+'</span><b>'+row.photos.length+' PHOTOS →</b></div></div></a>';}
 function renderCards(){if(list)list.innerHTML=rows.map(card).join('');}
 
 function mergePublishedRows(published){
@@ -24,7 +24,7 @@ function mergePublishedRows(published){
     var row=DAHAM_WEBSITE_PUBLIC.normalizePortfolioRow(raw);
     var current=projectBySlug(row.slug);
     if(!current)return;
-    if(row.coverImageUrl)current.coverImage=row.coverImageUrl;
+    if(row.coverImageUrl){current.coverImage=row.coverImageUrl;current.thumbnailImage=api.cardImageForProject(row.slug,row.coverImageUrl);}
     if(row.galleryImageUrls.length)current.photos=row.galleryImageUrls.slice();
   });
   renderCards();

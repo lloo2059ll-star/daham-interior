@@ -48,7 +48,7 @@ test('approved desktop mockup structure replaces the old generic homepage stylin
 test('homepage uses repository image assets rather than emoji process icons', () => {
   const src = source();
   assert.match(src, /portfolio-assets\/projects\/prugio-castle-a-32\/living-overview\.webp/);
-  assert.match(src, /portfolio-assets\/projects\/geochang-prugio-34\/cover\.webp/);
+  assert.match(src, /portfolio-assets\/projects\/geochang-prugio-34\/cover-card\.webp/);
   assert.match(src, /website-assets\/trust-icons\.png/);
   assert.match(src, /website-assets\/process-icons\.svg/);
   assert.match(src, /website-assets\/instagram\.jpg/);

@@ -7,7 +7,7 @@
 
   function project(data){
     var base='portfolio-assets/projects/'+data.slug+'/';
-    return {slug:data.slug,title:data.title,location:data.location,area:data.area,kind:data.kind,tags:data.tags,coverImage:base+'cover.webp',coverPosition:data.coverPosition||'center center',photos:data.photos.map(function(name){return base+name+'.webp';})};
+    return {slug:data.slug,title:data.title,location:data.location,area:data.area,kind:data.kind,tags:data.tags,coverImage:base+'cover.webp',thumbnailImage:base+'cover-card.webp',coverPosition:data.coverPosition||'center center',photos:data.photos.map(function(name){return base+name+'.webp';})};
   }
 
   var PROJECTS=[
@@ -33,5 +33,10 @@
   function listProjects(){return PROJECTS.map(copyProject);}
   function findProject(slug){var key=String(slug||'').trim();for(var i=0;i<PROJECTS.length;i+=1){if(PROJECTS[i].slug===key)return copyProject(PROJECTS[i]);}return null;}
 
-  return {listProjects:listProjects,findProject:findProject};
+  function cardImageForProject(slug,image){
+    var item=findProject(slug);if(!item)return image;
+    var known=[item.coverImage,'/'+item.coverImage,'https://daham-interior.com/'+item.coverImage,'https://www.daham-interior.com/'+item.coverImage];
+    return known.indexOf(image)>=0?item.thumbnailImage:image;
+  }
+  return {listProjects:listProjects,findProject:findProject,cardImageForProject:cardImageForProject};
 });
