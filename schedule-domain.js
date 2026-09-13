@@ -131,6 +131,17 @@
       return {id:uid(),name:row.name,start:start,end:end,worker:'',memo:'',status:'planned',kind:'construction',source:'estimate',sourceRuleId:row.ruleId};
     });
   }
+  function syncProjectPeriod(site){
+    site.info=Object.assign({},site.info||{});
+    var periods=(Array.isArray(site.tasks)?site.tasks:[]).filter(function(task){
+      return (!task.kind||task.kind==='construction')&&task.status!=='cancelled'&&task.status!=='canceled'&&isValidDateString(task.start);
+    }).map(function(task){return {start:task.start,end:isValidDateString(task.end)&&task.end>=task.start?task.end:task.start};});
+    if(periods.length){
+      site.info.start=periods.map(function(p){return p.start;}).sort()[0];
+      site.info.end=periods.map(function(p){return p.end;}).sort().pop();site.periodSource='tasks';
+    }else if(site.periodSource==='tasks'){site.info.start='';site.info.end='';delete site.periodSource;}
+    return site;
+  }
   function normalizeSites(sites,colors){
     return (Array.isArray(sites)?sites:[]).map(function(site,index){
       var out=Object.assign({},site);
@@ -138,7 +149,7 @@
       out.tasks=(Array.isArray(out.tasks)?out.tasks:[]).map(function(task){
         return Object.assign({},task);
       });
-      return out;
+      return syncProjectPeriod(out);
     });
   }
   function projectStatus(p){
@@ -177,7 +188,7 @@
         if(site.tasks.length){site.autoScheduleInitialized=true;if(!wasNew)updated++;}
       }
     });
-    return {sites:out,added:added,updated:updated,removed:removed};
+    return {sites:out.map(syncProjectPeriod),added:added,updated:updated,removed:removed};
   }
   function normWorker(v){return String(v||'').trim().replace(/\s+/g,' ');}
   function findWorkerConflicts(next,sites){
@@ -308,7 +319,7 @@
   }
 
   return {parseKey:parseKey,selectedItems:selectedItems,buildPhaseCandidates:buildPhaseCandidates,buildAutomaticContractTasks:buildAutomaticContractTasks,replaceEstimateTasks:replaceEstimateTasks,projectTasks:projectTasks,
-    materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
+    syncProjectPeriod:syncProjectPeriod,materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
     constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress,completePastSchedules:completePastSchedules,buildProjectPrintPlan:buildProjectPrintPlan,
     generalTypeMeta:generalTypeMeta,moveSiteTaskToGeneral:moveSiteTaskToGeneral,compactPrintMonthTimeline:compactPrintMonthTimeline};

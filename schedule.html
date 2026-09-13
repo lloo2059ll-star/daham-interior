@@ -249,7 +249,7 @@ select.mf-inp{cursor:pointer}
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
 <link rel="stylesheet" href="operations-ui.css">
-<script src="schedule-domain.js?v=20260909-auto4"></script>
+<script src="schedule-domain.js?v=20260913-period1"></script>
 <script src="consult-schedule-link.js?v=20260901-2"></script>
 <script src="schedule-holidays.js"></script>
 <style id="schedule-redesign">
@@ -357,6 +357,7 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
             <input class="field-inp" id="f-start" type="date" oninput="onDateChange()"></div>
           <div class="field"><div class="field-lbl">준공(예정)</div>
             <input class="field-inp" id="f-end" type="date" oninput="onInfoInput()"></div>
+          <div class="field span4" style="font-size:12px;color:var(--dim)">공사 일정이 있으면 착공일·준공 예정일은 가장 빠른 시작일과 가장 늦은 종료일로 자동 반영됩니다.</div>
           <div class="field span2"><div class="field-lbl">현장 주소</div>
             <input class="field-inp" id="f-addr" oninput="onInfoInput()" placeholder="주소"></div>
           <div class="field"><div class="field-lbl">담당자</div>
@@ -753,6 +754,9 @@ function loadDB(){
   migrate();
 }
 function saveDB(){
+  allProjects.forEach(DAHAM_SCHEDULE_DOMAIN.syncProjectPeriod);
+  var current=currentId&&getProj();if(current){document.getElementById('f-start').value=current.info.start||'';document.getElementById('f-end').value=current.info.end||'';}
+  renderSiteCards();
   try{ localStorage.setItem(DB_KEY,JSON.stringify(allProjects)); }catch(e){}
   cloudPush();
 }

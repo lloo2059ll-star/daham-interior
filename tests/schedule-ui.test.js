@@ -76,7 +76,7 @@ test('existing modal and domain integration hooks remain available', () => {
 });
 
 test('schedule loads the automatic completion domain update with a cache-busted asset', () => {
-  assert.match(html, /schedule-domain\.js\?v=20260909-auto4/);
+  assert.match(html, /schedule-domain\.js\?v=20260913-period1/);
 });
 
 test('estimate phase import rebuilds a sequential schedule without opening the candidate modal', () => {
