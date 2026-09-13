@@ -232,7 +232,7 @@ body.modal-open{overflow-y:hidden}
 .operations-consult .survey-photo-list{flex-wrap:wrap}
 .operations-consult .detail-bottom-actions{position:static;flex-wrap:wrap}
 }
-</style></head>
+</style><style>.consult-phone-link{display:inline-flex;align-items:center;min-height:44px;max-width:100%;color:#6035c5;font-weight:750;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}</style></head>
 <body class="operations-ui operations-admin operations-consult">
 <div class="consult-shell">
   <aside class="consult-nav" aria-label="주요 메뉴"><div class="consult-logo">DAHAM<small>인테리어의 기준, 다함</small></div><nav class="consult-menu">
@@ -395,6 +395,13 @@ function getInquiryReceipt(r, now){
   var age=(now===undefined?Date.now():now)-received;
   return {label:values.year+'.'+values.month+'.'+values.day+' '+values.hour+':'+values.minute,isNew:r.status==='inquiry'&&age>=0&&age<3*86400000};
 }
+function renderConsultPhone(value){
+  var text=String(value||'').trim();if(!text)return '—';
+  if(!/^\+?[0-9\s().-]+$/.test(text))return escHtml(text);
+  var dial=text.replace(/[\s().-]/g,'');
+  if(dial.replace(/\D/g,'').length<7)return escHtml(text);
+  return '<a class="consult-phone-link" href="tel:'+dial+'" aria-label="'+escHtml(text)+' 전화 걸기">'+escHtml(text)+'</a>';
+}
 function renderInquiryReceipt(r){
   var receipt=getInquiryReceipt(r);if(!receipt)return '';
   return '<div class="consult-receipt">'+(receipt.isNew?'<span class="consult-new" title="접수 후 3일 이내 상담문의">NEW</span> ':'')+'접수 '+escHtml(receipt.label)+' <span class="consult-receipt-zone">(한국 시간)</span></div>';
@@ -479,7 +486,7 @@ function renderSelectedDetail(){
   var host=document.getElementById('consult-detail');if(!host)return;var r=_records.find(function(x){return x.id===_selectedId;});if(!r){host.innerHTML='<div class="detail-empty">왼쪽에서 상담을 선택하세요.</div>';return;}
   var sc=getStatusCfg(r.status),scopes=getRecordScopes(r),d=r.scopeDetails||{},survey=r.survey||{};
   host.innerHTML='<div class="detail-head"><div class="detail-title"><h2>'+escHtml(r.name||'고객명 미입력')+' <small>고객님</small></h2><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></div><div class="detail-actions"><button class="outline-btn" onclick="openEditModal(\''+r.id+'\')">✎ 상담 정보 수정</button>'+(_canDeleteConsult?'<button class="outline-btn detail-more" aria-label="상담 삭제" title="상담 삭제" onclick="deleteRecord(\''+r.id+'\')">•••</button>':'')+'</div></div>'
-  +renderInquiryReceipt(r)+'<div class="detail-row-primary"><article class="info-card"><h3>고객 정보</h3><dl class="info-lines"><dt>이름</dt><dd>'+escHtml(r.name||'—')+'</dd><dt>연락처</dt><dd>'+escHtml(r.tel||'—')+'</dd><dt>이메일</dt><dd>'+escHtml(r.email||'—')+'</dd><dt>예비연락처</dt><dd>'+escHtml(r.altTel||r.phone2||'—')+'</dd></dl></article>'
+  +renderInquiryReceipt(r)+'<div class="detail-row-primary"><article class="info-card"><h3>고객 정보</h3><dl class="info-lines"><dt>이름</dt><dd>'+escHtml(r.name||'—')+'</dd><dt>연락처</dt><dd>'+renderConsultPhone(r.tel)+'</dd><dt>이메일</dt><dd>'+escHtml(r.email||'—')+'</dd><dt>예비연락처</dt><dd>'+renderConsultPhone(r.altTel||r.phone2)+'</dd></dl></article>'
   +'<article class="info-card"><h3>주소</h3><dl class="info-lines"><dt>우편번호</dt><dd>'+escHtml(r.zip||r.postcode||'—')+'</dd><dt>주소</dt><dd>'+escHtml(r.addr||'—')+'</dd><dt>상세주소</dt><dd>'+escHtml(r.addrDetail||'—')+'</dd></dl></article>'
   +'<article class="info-card"><h3>프로젝트 정보</h3><dl class="info-lines"><dt>현장명</dt><dd>'+escHtml(r.siteName||r.addrDetail||r.addr||'—')+'</dd><dt>평형</dt><dd>'+escHtml(r.area||'—')+(r.area?'평':'')+'</dd><dt>준공연도</dt><dd>'+escHtml(r.buildYear||'—')+'</dd><dt>주거 형태</dt><dd>'+escHtml(r.housingType||'—')+'</dd></dl></article></div>'
   +'<div class="detail-row-secondary"><article class="info-card schedule-card"><h3>희망 일정</h3><dl class="info-lines"><dt>희망 공사 시점</dt><dd>'+escHtml(r.moveDate||'—')+'</dd><dt>상담 장소</dt><dd>'+escHtml(r.schedPlace||'—')+'</dd></dl></article><article class="info-card budget-card"><h3>예산 범위</h3><div class="memo-copy">'+escHtml(r.budget||'미정')+'</div></article><article class="info-card memo-card"><h3>메모</h3><div class="memo-copy">'+escHtml(r.memo||'—')+'</div></article></div>'
