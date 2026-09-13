@@ -1,0 +1,21 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync(require('node:path').join(__dirname, '../consult.html'), 'utf8');
+test('website receipt shows original Korean-time timestamp and NEW only for recent pending inquiries', () => {
+  const block = source.match(/function getInquiryReceipt\(r, now\)\{[\s\S]*?\n\}/);
+  assert.ok(block, 'receipt helper exists');
+  const context = {}; vm.createContext(context); vm.runInContext(block[0], context);
+  const now = Date.parse('2026-09-14T00:00:00Z');
+  const r = {websiteInquiryId:'id', createdAt:'2026-09-13T05:54:00Z', status:'inquiry'};
+  const receipt = context.getInquiryReceipt(r, now);
+  assert.equal(receipt.label, '2026.09.13 14:54');
+  assert.equal(receipt.isNew, true);
+  assert.equal(context.getInquiryReceipt({...r,status:'est_meeting'}, now).isNew, false);
+  assert.equal(context.getInquiryReceipt(r, now+3*86400000).isNew, false);
+  assert.equal(context.getInquiryReceipt({...r,createdAt:'invalid'},now), null);
+  assert.equal(context.getInquiryReceipt({...r,createdAt:'2026-09-15T00:00:00Z'},now).isNew, false);
+  assert.equal(context.getInquiryReceipt({createdAt:r.createdAt,status:'inquiry'},now), null);
+  assert.match(source, /renderInquiryReceipt\(r\)/);
+});

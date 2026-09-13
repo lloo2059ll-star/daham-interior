@@ -184,7 +184,7 @@ body.operations-consult{overflow-y:auto}.consult-shell{height:auto;min-height:10
 .scope-details::-webkit-scrollbar{height:5px}.scope-details::-webkit-scrollbar-thumb{background:#ddd7f2;border-radius:5px}
 @media(max-width:1100px){.consult-list-panel{top:89px}.scope-details{grid-template-columns:repeat(2,minmax(0,1fr))}.scope-detail-card{min-height:214px}.survey-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.consult-list-panel{position:relative;top:auto;height:auto}.consult-top{position:relative}.scope-details{grid-template-columns:1fr}}
-</style>
+.consult-receipt{font-size:12px;color:#596579;margin:8px 0;line-height:1.6}.consult-new{display:inline-block;background:#e9e2ff;color:#6035c5;border-radius:4px;font-size:10px;font-weight:800;padding:1px 6px;margin-right:4px}.consult-receipt-zone{font-size:10px;color:#858c9a}</style>
 <link rel="stylesheet" href="v2-theme.css">
 <link rel="stylesheet" href="v2-suite.css">
 <script defer src="v2-suite.js"></script>
@@ -360,6 +360,19 @@ function localDTStr(){
   return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+'T'+p2(d.getHours())+':'+p2(d.getMinutes());
 }
 function fmtDate(iso){ return iso?iso.slice(0,10):''; }
+function getInquiryReceipt(r, now){
+  if(!r.websiteInquiryId) return null;
+  var received=Date.parse(r.createdAt);
+  if(!Number.isFinite(received)) return null;
+  var parts=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(received));
+  var values={};parts.forEach(function(p){values[p.type]=p.value;});
+  var age=(now===undefined?Date.now():now)-received;
+  return {label:values.year+'.'+values.month+'.'+values.day+' '+values.hour+':'+values.minute,isNew:r.status==='inquiry'&&age>=0&&age<3*86400000};
+}
+function renderInquiryReceipt(r){
+  var receipt=getInquiryReceipt(r);if(!receipt)return '';
+  return '<div class="consult-receipt">'+(receipt.isNew?'<span class="consult-new" title="접수 후 3일 이내 상담문의">NEW</span> ':'')+'접수 '+escHtml(receipt.label)+' <span class="consult-receipt-zone">(한국 시간)</span></div>';
+}
 function fmtDateTime(iso){
   if(!iso) return '';
   var d=new Date(iso);
@@ -416,7 +429,7 @@ function renderList(){
     var sc=getStatusCfg(r.status);
     var sched=r.schedDate?r.schedDate+(r.schedTime?' '+r.schedTime:''):'—';
     var scopes=getRecordScopes(r);
-    return '<article role="button" tabindex="0" class="consult-card'+(_selectedId===r.id?' active':'')+'" onclick="selectRecord(\''+r.id+'\')"><div class="consult-card-avatar">'+escHtml((r.name||'다').slice(0,1))+'</div><div class="consult-card-content"><div class="consult-card-head"><span class="consult-card-name">'+escHtml(r.name||'고객명 미입력')+' <small>고객님</small></span><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></div><div class="consult-card-address">'+escHtml(r.addr||'주소 미입력')+(r.area?' · '+escHtml(r.area)+'평':'')+'</div><div class="consult-card-meta"><span>▣ '+escHtml(sched)+'</span><span>♙ '+escHtml(r.manager||'담당자 미정')+'</span></div><div class="consult-card-scopes">'+scopes.slice(0,5).map(function(s){return '<span class="scope-tag">'+escHtml(s)+'</span>';}).join('')+(scopes.length>5?'<span class="scope-tag">+'+(scopes.length-5)+'</span>':'')+(_canDeleteConsult?'<button class="consult-delete-btn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')">삭제</button>':'')+'</div></div></article>';
+    return '<article role="button" tabindex="0" class="consult-card'+(_selectedId===r.id?' active':'')+'" onclick="selectRecord(\''+r.id+'\')"><div class="consult-card-avatar">'+escHtml((r.name||'다').slice(0,1))+'</div><div class="consult-card-content"><div class="consult-card-head"><span class="consult-card-name">'+escHtml(r.name||'고객명 미입력')+' <small>고객님</small></span><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></div><div class="consult-card-address">'+escHtml(r.addr||'주소 미입력')+(r.area?' · '+escHtml(r.area)+'평':'')+'</div><div class="consult-card-meta"><span>▣ '+escHtml(sched)+'</span><span>♙ '+escHtml(r.manager||'담당자 미정')+'</span></div>'+renderInquiryReceipt(r)+'<div class="consult-card-scopes">'+scopes.slice(0,5).map(function(s){return '<span class="scope-tag">'+escHtml(s)+'</span>';}).join('')+(scopes.length>5?'<span class="scope-tag">+'+(scopes.length-5)+'</span>':'')+(_canDeleteConsult?'<button class="consult-delete-btn" onclick="event.stopPropagation();deleteRecord(\''+r.id+'\')">삭제</button>':'')+'</div></div></article>';
   }).join('');
   el.innerHTML=rows;
   renderSelectedDetail();
@@ -440,7 +453,7 @@ function renderSelectedDetail(){
   var host=document.getElementById('consult-detail');if(!host)return;var r=_records.find(function(x){return x.id===_selectedId;});if(!r){host.innerHTML='<div class="detail-empty">왼쪽에서 상담을 선택하세요.</div>';return;}
   var sc=getStatusCfg(r.status),scopes=getRecordScopes(r),d=r.scopeDetails||{},survey=r.survey||{};
   host.innerHTML='<div class="detail-head"><div class="detail-title"><h2>'+escHtml(r.name||'고객명 미입력')+' <small>고객님</small></h2><span class="ct-badge" style="color:'+sc.color+';background:'+sc.bg+'">'+sc.label+'</span></div><div class="detail-actions"><button class="outline-btn" onclick="openEditModal(\''+r.id+'\')">✎ 상담 정보 수정</button>'+(_canDeleteConsult?'<button class="outline-btn detail-more" aria-label="상담 삭제" title="상담 삭제" onclick="deleteRecord(\''+r.id+'\')">•••</button>':'')+'</div></div>'
-  +'<div class="detail-row-primary"><article class="info-card"><h3>고객 정보</h3><dl class="info-lines"><dt>이름</dt><dd>'+escHtml(r.name||'—')+'</dd><dt>연락처</dt><dd>'+escHtml(r.tel||'—')+'</dd><dt>이메일</dt><dd>'+escHtml(r.email||'—')+'</dd><dt>예비연락처</dt><dd>'+escHtml(r.altTel||r.phone2||'—')+'</dd></dl></article>'
+  +renderInquiryReceipt(r)+'<div class="detail-row-primary"><article class="info-card"><h3>고객 정보</h3><dl class="info-lines"><dt>이름</dt><dd>'+escHtml(r.name||'—')+'</dd><dt>연락처</dt><dd>'+escHtml(r.tel||'—')+'</dd><dt>이메일</dt><dd>'+escHtml(r.email||'—')+'</dd><dt>예비연락처</dt><dd>'+escHtml(r.altTel||r.phone2||'—')+'</dd></dl></article>'
   +'<article class="info-card"><h3>주소</h3><dl class="info-lines"><dt>우편번호</dt><dd>'+escHtml(r.zip||r.postcode||'—')+'</dd><dt>주소</dt><dd>'+escHtml(r.addr||'—')+'</dd><dt>상세주소</dt><dd>'+escHtml(r.addrDetail||'—')+'</dd></dl></article>'
   +'<article class="info-card"><h3>프로젝트 정보</h3><dl class="info-lines"><dt>현장명</dt><dd>'+escHtml(r.siteName||r.addrDetail||r.addr||'—')+'</dd><dt>평형</dt><dd>'+escHtml(r.area||'—')+(r.area?'평':'')+'</dd><dt>준공연도</dt><dd>'+escHtml(r.buildYear||'—')+'</dd><dt>주거 형태</dt><dd>'+escHtml(r.housingType||'—')+'</dd></dl></article></div>'
   +'<div class="detail-row-secondary"><article class="info-card schedule-card"><h3>희망 일정</h3><dl class="info-lines"><dt>희망 공사 시점</dt><dd>'+escHtml(r.moveDate||'—')+'</dd><dt>상담 장소</dt><dd>'+escHtml(r.schedPlace||'—')+'</dd></dl></article><article class="info-card budget-card"><h3>예산 범위</h3><div class="memo-copy">'+escHtml(r.budget||'미정')+'</div></article><article class="info-card memo-card"><h3>메모</h3><div class="memo-copy">'+escHtml(r.memo||'—')+'</div></article></div>'
