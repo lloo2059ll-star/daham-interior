@@ -206,14 +206,40 @@ body.modal-open{overflow-y:hidden}
 @media(max-width:900px){.consult-modal-main-grid{grid-template-columns:1fr}.consult-modal-left{grid-template-columns:1fr 1fr}.consult-modal-lower-grid{grid-template-columns:1fr}.consult-registration-card,.consult-schedule-card,.consult-customer-card,.consult-project-card,.consult-memo-card{min-height:0}.consult-history-track{grid-template-columns:1fr;gap:7px}.consult-history-step:not(:last-child):after,.consult-history-step:not(:last-child):before{display:none}.consult-history-log-row{grid-template-columns:90px minmax(0,1fr);padding-bottom:8px;border-bottom:1px solid #eef0f4}.consult-history-log-row .ms-memo-inp{grid-column:1/-1}.consult-detail-field-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.operations-consult .modal-overlay{left:0}.operations-consult .modal-box{border-radius:0!important}.operations-consult .modal-hd{padding:16px 16px 8px}.operations-consult .mbar{padding:5px 16px 10px}.operations-consult .modal-body{padding:10px}.consult-modal-left{grid-template-columns:1fr}.consult-customer-grid,.consult-project-grid,.consult-detail-field-grid,.consult-survey-grid{grid-template-columns:1fr}.consult-address-field,.consult-detail-address{grid-column:auto}.consult-address-line{grid-template-columns:90px minmax(0,1fr)}.consult-address-line .address-search{grid-column:1/-1}.consult-existing-details .scope-picker{grid-template-columns:repeat(2,minmax(0,1fr))}.operations-consult .modal-ft{padding:10px}.hist-add-row{align-items:stretch;flex-direction:column}.hist-add-btn{width:100%}}
 </style>
-</head>
+<style id="consult-mobile-access">
+.consult-mobile-nav{display:none}
+@media(max-width:760px){
+.operations-consult .consult-shell{display:block;min-width:0}
+.operations-consult .consult-nav{display:none}
+.operations-consult .consult-top{height:auto;position:static;flex-wrap:wrap;padding:14px;gap:12px}
+.operations-consult .consult-top-actions{width:100%;justify-content:flex-end}
+.operations-consult .consult-mobile-nav{display:flex;gap:8px;flex-wrap:wrap;padding:8px 12px;background:#fff;border-bottom:1px solid #dfe4ed}
+.consult-mobile-nav a{display:flex;align-items:center;min-height:44px;padding:8px 12px;color:#6035c5;background:#f0ebff;border-radius:7px;text-decoration:none;font-size:12px;font-weight:700}
+.operations-consult .consult-workspace{display:block;padding:8px;min-height:0}
+.operations-consult .consult-list-panel{position:static;height:auto;max-height:none;margin-bottom:12px}
+.operations-consult .consult-list-scroll{max-height:48vh;overflow-y:auto}
+.operations-consult .consult-detail-panel{min-height:0;scroll-margin-top:12px;padding:12px}
+.operations-consult .detail-head{height:auto;flex-wrap:wrap;gap:10px}
+.operations-consult .detail-title{flex-wrap:wrap}
+.operations-consult .detail-actions{width:100%}
+.operations-consult .detail-actions .outline-btn{min-height:44px}
+.operations-consult .detail-row-primary,.operations-consult .detail-row-secondary,.operations-consult .scope-details{grid-template-columns:minmax(0,1fr)}
+.operations-consult .scope-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.operations-consult .survey-grid{grid-template-columns:minmax(0,1fr)}
+.operations-consult #consult-survey{scroll-margin-top:12px}
+.operations-consult .survey-item{min-height:64px}
+.operations-consult .survey-photo-thumb{width:72px;height:72px}
+.operations-consult .survey-photo-list{flex-wrap:wrap}
+.operations-consult .detail-bottom-actions{position:static;flex-wrap:wrap}
+}
+</style></head>
 <body class="operations-ui operations-admin operations-consult">
 <div class="consult-shell">
   <aside class="consult-nav" aria-label="주요 메뉴"><div class="consult-logo">DAHAM<small>인테리어의 기준, 다함</small></div><nav class="consult-menu">
     <a href="erp.html">⌂ <span>대시보드</span></a><a class="active" href="consult.html">▣ <span>상담 / 현장실측</span></a><a href="estimate.html">▤ <span>견적 관리</span></a><a href="contract.html">▧ <span>계약 관리</span></a><a href="schedule.html">◇ <span>현장 관리</span></a><a href="order.html">▦ <span>자재 관리</span></a><a href="employees.html">⚙ <span>설정</span></a>
   </nav><div class="consult-user"><div class="consult-user-mark">D</div><div><strong id="consult-user-name">다함</strong><small style="display:block;color:#aeb9d3">대표</small></div></div></aside>
   <main class="consult-app"><header class="consult-top"><div><h1>상담 / 현장실측</h1><p>상담 현황을 관리하고, 현장 실측 및 Polycam 정보를 등록하세요.</p></div><div class="consult-top-actions"><span id="sync-dot" title="클라우드 동기화">☁</span><span class="consult-notification" aria-label="알림"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><b>3</b></span><button class="consult-add" onclick="openAddModal()">＋ 새 상담 등록</button></div></header>
-    <div class="consult-workspace"><section class="consult-list-panel"><div class="consult-list-head"><h2>상담 목록</h2><button class="outline-btn" onclick="setFilter('active')">전체 필터</button></div><input id="consult-search" class="consult-search" placeholder="고객명, 연락처, 주소 검색" oninput="renderList()"><div id="tab-wrap" class="consult-tabs"></div><div id="list-area" class="consult-list-scroll"></div><div id="consult-total" style="padding:12px 16px;border-top:1px solid var(--consult-border);color:#7b8293"></div></section><section id="consult-detail" class="consult-detail-panel"><div class="detail-empty">왼쪽에서 상담을 선택하세요.</div></section></div>
+    <nav class="consult-mobile-nav" aria-label="모바일 상담 메뉴"><a href="erp.html">← ERP</a><a href="#list-area">상담 목록</a><a href="#consult-survey">실측 · 사진</a></nav><div class="consult-workspace"><section class="consult-list-panel"><div class="consult-list-head"><h2>상담 목록</h2><button class="outline-btn" onclick="setFilter('active')">전체 필터</button></div><input id="consult-search" class="consult-search" placeholder="고객명, 연락처, 주소 검색" oninput="renderList()"><div id="tab-wrap" class="consult-tabs"></div><div id="list-area" class="consult-list-scroll"></div><div id="consult-total" style="padding:12px 16px;border-top:1px solid var(--consult-border);color:#7b8293"></div></section><section id="consult-detail" class="consult-detail-panel"><div class="detail-empty">왼쪽에서 상담을 선택하세요.</div></section></div>
   </main>
 </div>
 
@@ -436,7 +462,7 @@ function renderList(){
 }
 function setFilter(k){ _filter=k; renderTabs(); renderList(); }
 function getRecordScopes(r){if(Array.isArray(r.scopes))return r.scopes.slice();return String(r.works||'').split(/[,/]/).map(function(x){return x.trim();}).filter(Boolean);}
-function selectRecord(id){_selectedId=id;renderList();}
+function selectRecord(id){_selectedId=id;renderList();if(window.matchMedia('(max-width:760px)').matches){document.getElementById('consult-detail').scrollIntoView({block:'start'});}}
 function referenceOptions(values,selected){var chosen=Array.isArray(selected)?selected:[selected];return '<div class="scope-option-line">'+values.map(function(v){return '<span class="scope-option'+(chosen.indexOf(v)>=0?' on':'')+'">'+escHtml(v)+'</span>';}).join('')+'</div>';}
 function renderReferenceScopeDetails(details){
   var wall=details['도배']||{},floor=details['바닥']||{},bath=details['욕실']||{},windowInfo=details['샷시']||{},furniture=details['가구']||{};
@@ -458,7 +484,7 @@ function renderSelectedDetail(){
   +'<article class="info-card"><h3>프로젝트 정보</h3><dl class="info-lines"><dt>현장명</dt><dd>'+escHtml(r.siteName||r.addrDetail||r.addr||'—')+'</dd><dt>평형</dt><dd>'+escHtml(r.area||'—')+(r.area?'평':'')+'</dd><dt>준공연도</dt><dd>'+escHtml(r.buildYear||'—')+'</dd><dt>주거 형태</dt><dd>'+escHtml(r.housingType||'—')+'</dd></dl></article></div>'
   +'<div class="detail-row-secondary"><article class="info-card schedule-card"><h3>희망 일정</h3><dl class="info-lines"><dt>희망 공사 시점</dt><dd>'+escHtml(r.moveDate||'—')+'</dd><dt>상담 장소</dt><dd>'+escHtml(r.schedPlace||'—')+'</dd></dl></article><article class="info-card budget-card"><h3>예산 범위</h3><div class="memo-copy">'+escHtml(r.budget||'미정')+'</div></article><article class="info-card memo-card"><h3>메모</h3><div class="memo-copy">'+escHtml(r.memo||'—')+'</div></article></div>'
   +'<section class="scope-section"><h3>공종 선택</h3><div class="scope-grid">'+CONSULT_SCOPES.map(function(s){return '<button class="scope-chip'+(scopes.indexOf(s)>=0?' selected':'')+'" onclick="openEditModal(\''+r.id+'\')">'+s+'</button>';}).join('')+'</div><div class="scope-details scope-details-viewport">'+renderReferenceScopeDetails(d)+'</div></section>'
-  +'<section class="survey-section"><h3>현장 실측 / Polycam 정보</h3><div class="survey-grid"><div class="survey-item"><span>방문일</span><strong>'+escHtml(survey.visitDate||'미정')+'</strong></div><div class="survey-item"><span>실측 완료</span><strong>'+(survey.measured?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 완료</span><strong>'+(survey.polycamDone?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 링크</span>'+(survey.polycamUrl?'<a href="'+escAttr(survey.polycamUrl)+'" target="_blank">링크 열기</a>':'<strong>—</strong>')+'</div><div class="survey-item"><span>현장사진</span>'+renderSurveyPhotos(survey.photoUrls||[])+'</div><div class="survey-item"><span>특이사항</span><strong>'+escHtml(survey.note||'—')+'</strong></div></div></section>'
+  +'<section id="consult-survey" class="survey-section"><h3>현장 실측 / Polycam 정보</h3><div class="survey-grid"><div class="survey-item"><span>방문일</span><strong>'+escHtml(survey.visitDate||'미정')+'</strong></div><div class="survey-item"><span>실측 완료</span><strong>'+(survey.measured?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 완료</span><strong>'+(survey.polycamDone?'✓ 완료':'미완료')+'</strong></div><div class="survey-item"><span>Polycam 링크</span>'+(survey.polycamUrl?'<a href="'+escAttr(survey.polycamUrl)+'" target="_blank">링크 열기</a>':'<strong>—</strong>')+'</div><div class="survey-item"><span>현장사진</span>'+renderSurveyPhotos(survey.photoUrls||[])+'</div><div class="survey-item"><span>특이사항</span><strong>'+escHtml(survey.note||'—')+'</strong></div></div></section>'
   +'<div class="detail-bottom-actions"><button class="outline-btn" onclick="cancelConsult(\''+r.id+'\')">상담 취소</button><button class="outline-btn estimate-go" onclick="'+(r.projId?'openProject(\''+r.projId+'\')':'goEstimateFrom(\''+r.id+'\')')+'">견적서 작성으로 이동 →</button></div>';
 }
 function scopeDetailRows(name,value){if(!value)return '<div class="scope-detail-row">세부 선택 없음</div>';if(typeof value==='string')return '<div class="scope-detail-row">'+escHtml(value)+'</div>';var labels={grade:'벽지 등급',wood:'마루 규격',vinyl:'장판 두께',place:'욕실 위치',mode:'공사 방식',tile:'타일 규격',brand:'브랜드',range:'교체 범위',note:'메모',items:'선택 항목',closetRooms:'붙박이장 위치',count:'수량',places:'위치',itemLabel:'중문 옵션'};return Object.keys(value).filter(function(k){return k!=='itemRef'&&value[k]&&(!Array.isArray(value[k])||value[k].length);}).map(function(k){var v=Array.isArray(value[k])?value[k].join(', '):value[k];return '<div class="scope-detail-row"><b>'+escHtml(labels[k]||'선택 내용')+'</b>'+escHtml(v)+'</div>';}).join('')||'<div class="scope-detail-row">세부 선택 없음</div>';}
