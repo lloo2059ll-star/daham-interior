@@ -113,7 +113,7 @@ test('public inquiry stays on the website and shows in-place result state', () =
   assert.match(src, /문의가 접수되었습니다/);
 });
 
-test('dedicated Naver Blog inquiry page uses the existing public ERP intake safely', () => {
+test('dedicated inquiry page uses the existing public ERP intake safely', () => {
   const html = fs.readFileSync(path.join(root, 'inquiry.html'), 'utf8');
   const js = fs.readFileSync(path.join(root, 'inquiry.js'), 'utf8');
   const css = fs.readFileSync(path.join(root, 'inquiry-overrides.css'), 'utf8');
@@ -130,7 +130,8 @@ test('dedicated Naver Blog inquiry page uses the existing public ERP intake safe
   assert.match(css, /letter-spacing:\s*-0\.015em/);
   assert.match(css, /\.intro h1 em\{[^}]*color:\s*inherit/);
   assert.match(js, /from\('website_inquiries'\)\.insert\(payload\)/);
-  assert.match(js, /sourceChannel:'naver_blog'/);
+  assert.match(js, /detectSourceChannel\(location\.href,document\.referrer\)/);
+  assert.match(js, /sourceChannel:sourceChannel/);
   assert.match(js, /validateStep/);
   assert.match(js, /aria-busy/);
   assert.match(js, /\.focus\(\)/);

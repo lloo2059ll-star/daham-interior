@@ -30,4 +30,10 @@
   script.async = true;
   script.src = 'https://www.googletagmanager.com/gtag/js?id=' + measurementId;
   document.head.appendChild(script);
+  var domain=window.DAHAM_CONVERSION_DOMAIN;
+  function track(name,input){var conversionEvent=domain&&domain.buildEvent(name,input);if(!conversionEvent)return;window.gtag('event',conversionEvent.name,conversionEvent.params);}
+  window.DAHAM_CONVERSION={track:track};
+  var inquiryStarted=false;
+  document.addEventListener('click',function(event){var target=event.target&&event.target.closest?event.target.closest('a,button'):null;if(!target)return;var locationName=target.getAttribute('data-cta-location')||'';if(target.matches('[data-open-inquiry]')){inquiryStarted=true;track('inquiry_start',{location:locationName||'homepage_modal',pagePath:location.pathname});return;}if(target.matches('[data-conversion="inquiry"]')){track('inquiry_click',{location:locationName||'inquiry_link',pagePath:location.pathname});return;}if(target.matches('a[href^="tel:"]'))track('phone_click',{location:locationName||'phone_link',pagePath:location.pathname});});
+  document.addEventListener('focusin',function(event){if(inquiryStarted)return;var form=event.target&&event.target.closest?event.target.closest('#inquiry-form,#inquiry-page-form'):null;if(!form)return;inquiryStarted=true;track('inquiry_start',{location:form.id==='inquiry-page-form'?'inquiry_page':'homepage_modal',pagePath:location.pathname});});
 }());

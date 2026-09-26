@@ -9,6 +9,12 @@
 
   function normalizeSourceChannel(value){ return value==='naver_blog'?'naver_blog':'website'; }
 
+  function detectSourceChannel(currentUrl,referrer){
+    try{var current=new URL(currentUrl||'https://daham-interior.com/');if(current.searchParams.get('source')==='naver_blog')return 'naver_blog';}catch(e){}
+    try{var previous=new URL(referrer||'');if(previous.hostname==='blog.naver.com'||previous.hostname.endsWith('.blog.naver.com'))return 'naver_blog';}catch(e){}
+    return 'website';
+  }
+
   function normalizePhone(value){
     var digits=String(value==null?'':value).replace(/\D/g,'');
     if(digits.length===11) return digits.slice(0,3)+'-'+digits.slice(3,7)+'-'+digits.slice(7);
@@ -78,5 +84,5 @@
     };
   }
 
-  return {normalizePhone:normalizePhone,normalizeSourceChannel:normalizeSourceChannel,safeImageUrl:safeImageUrl,normalizeGalleryUrls:normalizeGalleryUrls,buildInquiryPayload:buildInquiryPayload,normalizePortfolioRow:normalizePortfolioRow};
+  return {normalizePhone:normalizePhone,normalizeSourceChannel:normalizeSourceChannel,detectSourceChannel:detectSourceChannel,safeImageUrl:safeImageUrl,normalizeGalleryUrls:normalizeGalleryUrls,buildInquiryPayload:buildInquiryPayload,normalizePortfolioRow:normalizePortfolioRow};
 });
