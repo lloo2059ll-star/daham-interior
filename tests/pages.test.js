@@ -68,6 +68,26 @@ test('public homepage footer displays the office address', () => {
   assert.match(html, /경상북도 구미시 신시로10길 75-2/);
 });
 
+test('homepage inquiry links retain usable no-script destinations with source attribution', () => {
+  const html = read('index.html');
+  const inquiryLinks = [...html.matchAll(/<a\b[^>]*data-open-inquiry[^>]*>/g)].map(match => match[0]);
+
+  assert.equal(inquiryLinks.length, 3);
+  assert.ok(inquiryLinks.some(link => /href="inquiry\.html\?source=website_nav"/.test(link)));
+  assert.ok(inquiryLinks.some(link => /href="inquiry\.html\?source=website_footer"/.test(link)));
+  assert.ok(inquiryLinks.some(link => /href="inquiry\.html\?source=website_quick"/.test(link)));
+  assert.ok(inquiryLinks.every(link => !/href="#"/.test(link)));
+});
+
+test('homepage displays the confirmed year-round operating hours', () => {
+  const html = read('index.html');
+
+  assert.match(html, /매일 10:00 - 22:00/);
+  assert.match(html, /연중무휴/);
+  assert.match(html, /"openingHours": \["Mo-Su 10:00-22:00"\]/);
+  assert.doesNotMatch(html, /공휴일 휴무/);
+});
+
 test('public homepage exposes local interior FAQ content and FAQ schema', () => {
   const html = read('index.html');
   assert.match(html, /id="faq"/);
