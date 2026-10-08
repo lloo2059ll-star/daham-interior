@@ -106,6 +106,6 @@ test('priority portfolio detail documents have unique searchable metadata and vi
     assert.match(html, /<h1>[^<]+<\/h1>/);
     assert.match(html, /기존 상태|설계 판단|주요 시공|완공 결과/);
     assert.match(html, /견적 문의/);
-    assert.match(html, /href="\.\.\/inquiry\.html"/);
+    assert.match(html, /href="\.\.\/inquiry\.html(?:\?source=portfolio_[^"]+)?"/);
   }
 });

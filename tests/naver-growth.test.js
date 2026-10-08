@@ -45,3 +45,17 @@ test('confirmed blog posts connect to matching project pages without invented po
     assert.match(item[0], /rel="noopener noreferrer"/);
   }
 });
+
+test('highest-traffic case pages expose breadcrumbs and attributable inquiry paths', () => {
+  for (const slug of ['bonggok-hyunjin-36', 'prugio-castle-a-32']) {
+    const html = read(`portfolio/${slug}.html`);
+    assert.match(html, /<nav\b[^>]*class="breadcrumb"[^>]*>/);
+    const schemas = [...html.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)]
+      .map(match => JSON.parse(match[1]));
+    assert.ok(schemas.some(schema => schema['@type'] === 'BreadcrumbList'), `structured breadcrumb missing for ${slug}`);
+    assert.ok(
+      html.includes(`href="../inquiry.html?source=portfolio_${slug}"`),
+      `attributable inquiry link missing for ${slug}`
+    );
+  }
+});
