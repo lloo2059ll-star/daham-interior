@@ -217,11 +217,15 @@
   function projectTasks(sites,projectId){
     var out=[];
     (sites||[]).forEach(function(site){
+      if(projectId&&site.id!==projectId)return;
       (Array.isArray(site.tasks)?site.tasks:[]).forEach(function(task){
         out.push(Object.assign({},task,{projectId:site.id,projectColor:site.color,projectName:(site.info&&site.info.name)||'현장명 미입력',isSelectedProject:site.id===projectId}));
       });
     });
     return out;
+  }
+  function toggleProjectSelection(currentId,nextId){
+    return currentId===nextId?null:nextId;
   }
   function agendaOccurrences(events,year,month){
     var first=year+'-'+String(month+1).padStart(2,'0')+'-01', lastDate=new Date(year,month+1,0).getDate(),last=year+'-'+String(month+1).padStart(2,'0')+'-'+String(lastDate).padStart(2,'0'),out=[];
@@ -298,6 +302,19 @@
     });
     return {sites:nextSites,generalEvents:nextGeneral,changedSites:changedSites,changedGeneralEvents:changedGeneralEvents};
   }
+  function findScheduleTarget(sites,generalEvents,eventId){
+    if(!eventId) return null;
+    for(var i=0;i<(sites||[]).length;i++){
+      var site=sites[i],tasks=Array.isArray(site&&site.tasks)?site.tasks:[];
+      if(tasks.some(function(task){return String(task.id)===String(eventId);})){
+        return {kind:'project',projectId:site.id,taskId:eventId};
+      }
+    }
+    if((generalEvents||[]).some(function(event){return String(event.id)===String(eventId);})){
+      return {kind:'general',eventId:eventId};
+    }
+    return null;
+  }
   function generalTypeMeta(type){
     return {
       contract:{label:'계약',color:'#f08a24'},
@@ -322,7 +339,8 @@
     syncProjectPeriod:syncProjectPeriod,materializeCandidates:materializeCandidates,normalizeSites:normalizeSites,reconcileContractSites:reconcileContractSites,
     projectStatus:projectStatus,findWorkerConflicts:findWorkerConflicts,findBatchWorkerConflicts:findBatchWorkerConflicts,canForceConflict:canForceConflict,agendaOccurrences:agendaOccurrences,
     constructionDisplayName:constructionDisplayName,scheduleProgress:scheduleProgress,completePastSchedules:completePastSchedules,buildProjectPrintPlan:buildProjectPrintPlan,
-    generalTypeMeta:generalTypeMeta,moveSiteTaskToGeneral:moveSiteTaskToGeneral,compactPrintMonthTimeline:compactPrintMonthTimeline};
+    generalTypeMeta:generalTypeMeta,moveSiteTaskToGeneral:moveSiteTaskToGeneral,compactPrintMonthTimeline:compactPrintMonthTimeline,toggleProjectSelection:toggleProjectSelection,
+    findScheduleTarget:findScheduleTarget};
 });
 
 

@@ -26,6 +26,7 @@ test('internal sync pages use the DAHAM auth config and employee JWT without pub
 
 test('public schedule sharing remains isolated from internal sync_data', () => {
   const html = fs.readFileSync(path.join(root, 'schedule-view.html'), 'utf8');
-  assert.match(html, /daham_backup/);
+  assert.match(html, /schedule_shares/);
   assert.doesNotMatch(html, /sync_data/);
+  assert.doesNotMatch(html, /ozgiihtixsjwoxbtotfi/);
 });

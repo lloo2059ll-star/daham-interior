@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="auth.js"></script>
+<script src="ui-helpers.js"></script>
+<script src="completion-transition.js"></script>
 <script src="price-catalog.js"></script>
 <script src="price-management.js"></script>
 <script src="estimate-print.js"></script>
@@ -1593,6 +1595,14 @@ function toggleClient(){
   bd.style.display=open?'none':'grid';
   ch.textContent=open?'▼':'▲';
 }
+function toggleSummaryBar(){
+  const bar=document.getElementById('summary-bar');
+  const btn=document.getElementById('sb-toggle-btn');
+  if(!bar||!btn)return;
+  const collapsed=bar.classList.toggle('collapsed');
+  btn.textContent=collapsed?'▼ 펼치기':'▲ 접기';
+  btn.setAttribute('aria-expanded',collapsed?'false':'true');
+}
 function updateTitle(){
   const name=document.getElementById('cl-name')?.value;
   document.title=name?`${name} — 다함 실행견적서`:'다함인테리어 — 실행견적서';
@@ -2444,88 +2454,108 @@ function getStatus(p){
 function setStatus(id, status){
   if(!id || !STATUS_CONFIG[status]) return;
   if(status === 'completed'){
-    dahamConfirm('시공완료 처리하면\n일정표·시방서·결제내역·현장사진이\n준공 현장으로 이전되고 각 항목에서 제거됩니다.\n계속하시겠습니까?', function(){
-      _applyStatus(id, status);
+    var confirmed=dahamConfirm('시공완료 처리하면\n일정표·시방서·결제내역·현장사진이\n준공 현장으로 이전되고 각 항목에서 제거됩니다.\n계속하시겠습니까?', function(){
+      return _applyStatus(id, status);
     });
+    if(confirmed===false){ renderCards(); updateToolbarStatus(); }
     return;
   }
   _applyStatus(id, status);
 }
 
-function _applyStatus(id, status){
+function _readJsonStore(key,fallback){
+  try{ var value=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback)); return value==null?fallback:value; }
+  catch(e){ return fallback; }
+}
+function _completionBackup(){
+  var keys=[PROJ_DB,'daham_schedule_v1','daham_schedule_v1_ts','daham_spec_v1','daham_spec_v1_ts','daham_pay_v2','daham_photos_v1','daham_completed_photos_v1'];
+  var values={}; keys.forEach(function(key){values[key]=localStorage.getItem(key);});
+  return {values:values,projects:JSON.stringify(allProjects)};
+}
+function _restoreCompletionBackup(backup){
+  Object.keys(backup.values).forEach(function(key){var value=backup.values[key];if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);});
+  allProjects=JSON.parse(backup.projects||'[]');
+}
+function _writeCompletionLocal(result){
+  var index=allProjects.findIndex(function(project){return project.id===result.project.id;});
+  if(index<0)throw new Error('완료할 프로젝트를 찾을 수 없습니다.');
+  allProjects[index]=result.project;
+  localStorage.setItem(PROJ_DB,JSON.stringify(allProjects));
+  localStorage.setItem('daham_schedule_v1',JSON.stringify(result.datasets.schedules));
+  localStorage.setItem('daham_spec_v1',JSON.stringify(result.datasets.specs));
+  localStorage.setItem('daham_pay_v2',JSON.stringify(result.datasets.payments));
+  localStorage.setItem('daham_photos_v1',JSON.stringify(result.datasets.photos));
+  localStorage.setItem('daham_completed_photos_v1',JSON.stringify(result.datasets.completedPhotos));
+}
+async function _syncCompletionRemote(result,backup){
+  if(!_sb)throw new Error('클라우드에 연결되지 않았습니다. 인터넷 연결 후 다시 시도해 주세요.');
+  var ts=result.project.updatedAt,index=allProjects.map(function(project){return {id:project.id,updatedAt:project.updatedAt||ts};});
+  var stores=[
+    {key:'daham_schedule_v1',value:JSON.stringify(result.datasets.schedules)},
+    {key:'daham_spec_v1',value:JSON.stringify(result.datasets.specs)},
+    {key:PROJ_DB+'__'+result.project.id,value:JSON.stringify(result.project)},
+    {key:PROJ_INDEX_KEY,value:JSON.stringify(index)},
+    {key:PROJ_DB,value:JSON.stringify(allProjects)}
+  ];
+  setSyncDot('up');
+  try{
+    for(var i=0;i<stores.length;i++){
+      var response=await _sb.from('sync_data').upsert({key:stores[i].key,value:stores[i].value,updated_at:ts});
+      if(response&&response.error)throw response.error;
+    }
+    localStorage.setItem('daham_schedule_v1_ts',ts);
+    localStorage.setItem('daham_spec_v1_ts',ts);
+    setProjTs(result.project.id,ts);
+    setSyncDot('ok');
+  }catch(error){
+    setSyncDot('err');
+    throw error;
+  }
+}
+async function _restoreCompletionRemote(backup,projectId){
+  if(!_sb)return;
+  try{
+    var projects=JSON.parse(backup.projects||'[]'),project=projects.find(function(item){return item.id===projectId;}),ts=nowISO();
+    var index=projects.map(function(item){return {id:item.id,updatedAt:item.updatedAt||ts};});
+    var stores=[
+      {key:'daham_schedule_v1',value:backup.values['daham_schedule_v1']||'[]'},
+      {key:'daham_spec_v1',value:backup.values['daham_spec_v1']||'[]'},
+      {key:PROJ_INDEX_KEY,value:JSON.stringify(index)},
+      {key:PROJ_DB,value:backup.projects||'[]'}
+    ];
+    if(project)stores.push({key:PROJ_DB+'__'+projectId,value:JSON.stringify(project)});
+    for(var i=0;i<stores.length;i++)await _sb.from('sync_data').upsert({key:stores[i].key,value:stores[i].value,updated_at:ts});
+  }catch(error){console.error('completion remote rollback failed',error);}
+}
+
+async function _applyStatus(id, status){
   var p = allProjects.find(function(x){ return x.id===id; });
   if(!p) return;
 
   if(status === 'completed'){
-    var snap = { completedAt: nowISO() };
-
-    /* 일정표 스냅샷 */
-    try {
-      var scheds = JSON.parse(localStorage.getItem('daham_schedule_v1')||'[]');
-      var sp = scheds.find(function(s){ return s.estimateId === id; });
-      /* estimateId 미설정 프로젝트: 주소·이름으로 폴백 매칭 */
-      if(!sp){
-        var addr = ((p.client||{})['cl-addr']||'').trim();
-        var name = ((p.client||{})['cl-name']||'').trim();
-        sp = scheds.find(function(s){
-          var ia = (s.info&&s.info.addr||'').trim();
-          var in_ = (s.info&&s.info.name||'').trim();
-          return (addr && ia && ia.indexOf(addr)>=0) || (name && in_ && in_.indexOf(name)>=0);
-        });
-        if(sp) sp.estimateId = id; // 연결 업데이트
-      }
-      if(sp){ snap.schedId=sp.id; snap.tasks=sp.tasks||[]; snap.color=sp.color||'#E65100'; }
-    } catch(e){}
-
-    /* 시방서 스냅샷 */
-    try {
-      var specs = JSON.parse(localStorage.getItem('daham_spec_v1')||'[]');
-      snap.specs = snap.schedId ? specs.filter(function(s){ return s.schedId===snap.schedId; }) : [];
-    } catch(e){}
-
-    /* 결제내역 스냅샷 */
-    try {
-      var payDB = JSON.parse(localStorage.getItem('daham_pay_v2')||'{}');
-      if(payDB[id]) snap.payData = payDB[id];
-    } catch(e){}
-
-    /* 사진 스냅샷 — 용량 절감을 위해 별도 키에 저장, completionData에는 건수만 */
-    try {
-      var photos = JSON.parse(localStorage.getItem('daham_photos_v1')||'[]');
-      var filteredPhotos = photos.filter(function(ph){ return ph.projId===id||(snap.schedId&&ph.projId===snap.schedId); });
-      var cmpPhotos = JSON.parse(localStorage.getItem('daham_completed_photos_v1')||'{}');
-      cmpPhotos[id] = filteredPhotos;
-      localStorage.setItem('daham_completed_photos_v1', JSON.stringify(cmpPhotos));
-      snap.photoCount = filteredPhotos.length;
-    } catch(e){}
-
-    p.completionData = snap;
-
-    /* 각 시스템에서 제거 */
-    try {
-      var scheds = JSON.parse(localStorage.getItem('daham_schedule_v1')||'[]');
-      var removeId = snap.schedId;
-      localStorage.setItem('daham_schedule_v1', JSON.stringify(
-        scheds.filter(function(s){ return s.id !== removeId && s.estimateId !== id; })
-      ));
-    } catch(e){}
-    try {
-      if(snap.schedId){
-        var specs = JSON.parse(localStorage.getItem('daham_spec_v1')||'[]');
-        localStorage.setItem('daham_spec_v1', JSON.stringify(specs.filter(function(s){ return s.schedId!==snap.schedId; })));
-      }
-    } catch(e){}
-    try {
-      var payDB = JSON.parse(localStorage.getItem('daham_pay_v2')||'{}');
-      delete payDB[id];
-      localStorage.setItem('daham_pay_v2', JSON.stringify(payDB));
-    } catch(e){}
-    try {
-      var photos = JSON.parse(localStorage.getItem('daham_photos_v1')||'[]');
-      localStorage.setItem('daham_photos_v1', JSON.stringify(
-        photos.filter(function(ph){ return ph.projId!==id&&(!snap.schedId||ph.projId!==snap.schedId); })
-      ));
-    } catch(e){}
+    var backup=_completionBackup();
+    try{
+      await DAHAM_COMPLETION_TRANSITION.commitCompletionTransition(p,{
+        schedules:_readJsonStore('daham_schedule_v1',[]),
+        specs:_readJsonStore('daham_spec_v1',[]),
+        payments:_readJsonStore('daham_pay_v2',{}),
+        photos:_readJsonStore('daham_photos_v1',[]),
+        completedPhotos:_readJsonStore('daham_completed_photos_v1',{})
+      },nowISO(),{
+        writeLocal:_writeCompletionLocal,
+        syncRemote:function(result){return _syncCompletionRemote(result,backup);},
+        rollback:async function(){_restoreCompletionBackup(backup);await _restoreCompletionRemote(backup,id);}
+      });
+      renderCards();
+      updateToolbarStatus();
+      showToast('✓ 시공완료로 변경됐습니다');
+    }catch(error){
+      renderCards();
+      updateToolbarStatus();
+      showToast('⚠ 시공완료 저장 실패 · 기존 자료를 복구했습니다');
+      console.error('completion transition failed',error);
+    }
+    return;
   }
 
   p.status = status;

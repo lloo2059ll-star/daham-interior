@@ -198,18 +198,26 @@ test('reimport replaces estimate schedules while preserving manual schedules', (
   assert.deepEqual(next.map(x => x.id), ['manual', 'new']);
 });
 
-test('calendar keeps schedules from every site visible while one site is selected', () => {
+test('calendar shows only the selected site schedules and restores all schedules when cleared', () => {
   const sites = [
     {id:'selected', color:'#111', info:{name:'현장 A'}, tasks:[{id:'mine'}]},
     {id:'other', color:'#222', info:{name:'현장 B'}, tasks:[{id:'theirs'}]}
   ];
 
-  const tasks = D.projectTasks(sites, 'selected');
-  assert.deepEqual(tasks.map(x => x.id), ['mine', 'theirs']);
-  assert.deepEqual(tasks.map(x => [x.projectId, x.projectColor, x.projectName]), [
-    ['selected', '#111', '현장 A'],
-    ['other', '#222', '현장 B']
+  const selectedTasks = D.projectTasks(sites, 'selected');
+  assert.deepEqual(selectedTasks.map(x => x.id), ['mine']);
+  assert.deepEqual(selectedTasks.map(x => [x.projectId, x.projectColor, x.projectName]), [
+    ['selected', '#111', '현장 A']
   ]);
+
+  const allTasks = D.projectTasks(sites, null);
+  assert.deepEqual(allTasks.map(x => x.id), ['mine', 'theirs']);
+});
+
+test('clicking the selected site again clears the calendar filter', () => {
+  assert.equal(D.toggleProjectSelection(null, 'site-a'), 'site-a');
+  assert.equal(D.toggleProjectSelection('site-a', 'site-b'), 'site-b');
+  assert.equal(D.toggleProjectSelection('site-a', 'site-a'), null);
 });
 
 test('floor demolition only appears with new wood floor', () => {
@@ -405,6 +413,15 @@ test('past construction and general schedules become done after their end date',
   assert.equal(result.sites[0].tasks[0].memo,'keep');
   assert.notEqual(result.sites,sites);
   assert.notEqual(result.generalEvents,generalEvents);
+});
+
+test('reminder deep links resolve project tasks and general events without guessing', () => {
+  const sites=[{id:'site-1',tasks:[{id:'task-1',name:'목공'}]}];
+  const general=[{id:'event-1',name:'상담'}];
+  assert.deepEqual(D.findScheduleTarget(sites,general,'task-1'),{kind:'project',projectId:'site-1',taskId:'task-1'});
+  assert.deepEqual(D.findScheduleTarget(sites,general,'event-1'),{kind:'general',eventId:'event-1'});
+  assert.equal(D.findScheduleTarget(sites,general,'missing'),null);
+  assert.equal(D.findScheduleTarget(sites,general,''),null);
 });
 
 

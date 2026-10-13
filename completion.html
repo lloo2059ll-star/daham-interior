@@ -301,7 +301,10 @@ var currentEstimate = null, currentSaved = null;
 
 function loadProjects(){
   try{ estimates = JSON.parse(localStorage.getItem(EST_KEY)||'[]'); }catch(e){ estimates=[]; }
-  try{ schedProjects = DAHAM_ACTIVE_SITES.filterSchedules(JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'),estimates); }catch(e){ schedProjects=[]; }
+  try{
+    var activeSchedules=DAHAM_ACTIVE_SITES.filterSchedules(JSON.parse(localStorage.getItem(SCHED_KEY)||'[]'),estimates);
+    schedProjects=DAHAM_WARRANTY_DOMAIN.completionScheduleOptions(activeSchedules,estimates);
+  }catch(e){ schedProjects=[]; }
   try{ savedCertificates = JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'); }catch(e){ savedCertificates={}; }
 }
 
@@ -563,7 +566,7 @@ function loadSavedCertificate(id){
   var f=currentSaved.fields||{};
   ['addr','start','end','client','tel','special'].forEach(function(k){var el=document.getElementById('f-'+k);if(el&&f[k]!=null)el.value=f[k];});
 }
-function saveCertificate(){
+async function saveCertificate(){
   if(!currentSched){showToast('현장을 먼저 선택해주세요');return;}
   var fields={addr:document.getElementById('f-addr').value,start:document.getElementById('f-start').value,end:document.getElementById('f-end').value,client:document.getElementById('f-client').value,tel:document.getElementById('f-tel').value,special:document.getElementById('f-special').value};
   var trades={};
@@ -572,8 +575,12 @@ function saveCertificate(){
   savedCertificates[currentSched.id]=currentSaved;
   localStorage.setItem(SAVE_KEY,JSON.stringify(savedCertificates));
   var token=window.DAHAM_AUTH&&DAHAM_AUTH.getAccessToken&&DAHAM_AUTH.getAccessToken(),cfg=window.DAHAM_AUTH&&DAHAM_AUTH.getSupabaseConfig&&DAHAM_AUTH.getSupabaseConfig();
-  if(token&&cfg&&cfg.url)fetch(cfg.url+'/rest/v1/sync_data',{method:'POST',headers:{apikey:cfg.anonKey,Authorization:'Bearer '+token,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({key:SAVE_KEY,value:JSON.stringify(savedCertificates),updated_at:new Date().toISOString()})}).catch(function(){});
-  showToast('저장했습니다');
+  if(!token||!cfg||!cfg.url){showToast('로컬 저장 완료 · 로그인 후 동기화됩니다');return;}
+  try{
+    var response=await fetch(cfg.url+'/rest/v1/sync_data',{method:'POST',headers:{apikey:cfg.key,Authorization:'Bearer '+token,'Content-Type':'application/json',Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({key:SAVE_KEY,value:JSON.stringify(savedCertificates),updated_at:new Date().toISOString()})});
+    if(!response.ok)throw new Error('HTTP '+response.status);
+    showToast('저장 및 동기화 완료');
+  }catch(e){showToast('로컬 저장 완료 · 클라우드 동기화 실패');}
 }
 function showPreview(){ buildDoc(); document.getElementById('editor').style.display='none'; document.getElementById('preview-wrap').style.display='block'; window.scrollTo(0,0); }
 function showEditor(){ document.getElementById('editor').style.display='block'; document.getElementById('preview-wrap').style.display='none'; }
@@ -583,15 +590,13 @@ function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;')
 function loadRemoteCertificates(){
   var token=window.DAHAM_AUTH&&DAHAM_AUTH.getAccessToken&&DAHAM_AUTH.getAccessToken(),cfg=window.DAHAM_AUTH&&DAHAM_AUTH.getSupabaseConfig&&DAHAM_AUTH.getSupabaseConfig();
   if(!token||!cfg||!cfg.url)return;
-  fetch(cfg.url+'/rest/v1/sync_data?key=eq.'+encodeURIComponent(SAVE_KEY)+'&select=value',{headers:{apikey:cfg.anonKey,Authorization:'Bearer '+token}}).then(function(r){return r.ok?r.json():[];}).then(function(rows){if(rows&&rows[0]&&rows[0].value){var remote=typeof rows[0].value==='string'?JSON.parse(rows[0].value):rows[0].value;if(remote&&typeof remote==='object'){savedCertificates=remote;localStorage.setItem(SAVE_KEY,JSON.stringify(remote));}}}).catch(function(){});
+  fetch(cfg.url+'/rest/v1/sync_data?key=eq.'+encodeURIComponent(SAVE_KEY)+'&select=value',{headers:{apikey:cfg.key,Authorization:'Bearer '+token}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(rows){if(rows&&rows[0]&&rows[0].value){var remote=typeof rows[0].value==='string'?JSON.parse(rows[0].value):rows[0].value;if(remote&&typeof remote==='object'){savedCertificates=remote;localStorage.setItem(SAVE_KEY,JSON.stringify(remote));}}}).catch(function(){showToast('클라우드 준공확인서를 불러오지 못했습니다');});
 }
 
 loadProjects();
 populateSelector();
 if(window.DAHAM_AUTH&&DAHAM_AUTH.ready)DAHAM_AUTH.ready.then(loadRemoteCertificates);else loadRemoteCertificates();
 </script>
-<script src="auth.js"></script>
-
 <script>
 (function(){
   const KEY='daham_workflow_v1';

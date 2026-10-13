@@ -39,5 +39,18 @@
     });
   }
   function customerInfo(estimate){var c=estimate&&estimate.client||{};return {name:c['cl-name']||c.name||'',phone:c['cl-tel']||c.tel||c.phone||'',address:c['cl-addr']||c.address||''};}
-  return {completionTrades:completionTrades,buildWarrantyRows:buildWarrantyRows,completionRows:completionRows,customerInfo:customerInfo};
+  function completionScheduleOptions(activeSchedules,estimates){
+    var rows=(Array.isArray(activeSchedules)?activeSchedules:[]).map(function(site){return JSON.parse(JSON.stringify(site));}),ids={};
+    rows.forEach(function(site){ids[String(site.id)]=true;});
+    (Array.isArray(estimates)?estimates:[]).forEach(function(estimate){
+      var status=estimate&&(estimate.status||(estimate.completed?'completed':''));
+      if(status!=='completed'||!estimate.completionData)return;
+      var data=estimate.completionData,client=estimate.client||{},id=data.schedId||('completed-'+estimate.id);
+      if(ids[String(id)])return;
+      rows.push({id:id,estimateId:estimate.id,color:data.color||'#1565C0',info:{name:client['cl-addr']||client['cl-name']||'완료 현장',addr:client['cl-addr']||'',customerName:client['cl-name']||'',start:client['cl-start']||'',end:client['cl-end']||'',status:'completed'},tasks:JSON.parse(JSON.stringify(data.tasks||[])),completed:true});
+      ids[String(id)]=true;
+    });
+    return rows;
+  }
+  return {completionTrades:completionTrades,buildWarrantyRows:buildWarrantyRows,completionRows:completionRows,customerInfo:customerInfo,completionScheduleOptions:completionScheduleOptions};
 });

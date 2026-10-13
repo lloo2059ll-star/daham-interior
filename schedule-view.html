@@ -95,8 +95,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:14p
 </div>
 
 <script>
-var SUPA_URL = 'https://ozgiihtixsjwoxbtotfi.supabase.co';
-var SUPA_KEY = 'sb_publishable_aHoQvdLGjD6J36LXb90HhA_d-DyvbAm';
+var SUPA_URL = 'https://famqvwnsustbxuizohni.supabase.co';
+var SUPA_KEY = 'sb_publishable_Rm1rOYizfT6ichTlh2la9w_G4O7fTNf';
 
 var FIXED_HOL={'01-01':'신정','03-01':'삼일절','05-05':'어린이날','06-06':'현충일','08-15':'광복절','10-03':'개천절','10-09':'한글날','12-25':'크리스마스'};
 var LUNAR_HOL={'2024-02-09':'설날연휴','2024-02-10':'설날','2024-02-11':'설날연휴','2024-02-12':'대체공휴일','2025-01-28':'설날연휴','2025-01-29':'설날','2025-01-30':'설날연휴','2026-02-16':'설날연휴','2026-02-17':'설날','2026-02-18':'설날연휴','2027-02-05':'설날연휴','2027-02-06':'설날','2027-02-07':'설날연휴','2027-02-08':'대체공휴일','2025-05-05':'부처님오신날','2025-05-06':'대체공휴일','2026-05-24':'부처님오신날','2026-05-25':'대체공휴일','2027-05-13':'부처님오신날','2025-10-05':'추석연휴','2025-10-06':'추석','2025-10-07':'추석연휴','2025-10-08':'대체공휴일','2026-09-24':'추석연휴','2026-09-25':'추석','2026-09-26':'추석연휴','2026-09-28':'대체공휴일','2025-03-03':'대체공휴일','2026-03-02':'대체공휴일','2026-06-08':'대체공휴일','2026-08-17':'대체공휴일','2026-10-05':'대체공휴일'};
@@ -270,7 +270,7 @@ if(!shareId){
   try{ sb=supabase.createClient(SUPA_URL,SUPA_KEY); }catch(e){}
   if(!sb){ renderError('연결 실패. 잠시 후 다시 시도해주세요.'); }
   else {
-    sb.from('daham_backup').select('data').eq('id',shareId).maybeSingle()
+    sb.from('schedule_shares').select('data').eq('id',shareId).gt('expires_at',new Date().toISOString()).maybeSingle()
       .then(function(res){
         if(res.error||!res.data){ renderError('일정을 찾을 수 없습니다.\n링크가 만료됐거나 잘못된 링크입니다.'); return; }
         try{

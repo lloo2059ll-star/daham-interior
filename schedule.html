@@ -310,7 +310,7 @@ body.operations-schedule{background:var(--sch-canvas);color:var(--sch-text);font
       <a class="nav-item" href="order.html"><span class="nav-icon">◆</span><span class="nav-label">발주관리</span></a>
       <a class="nav-item" href="payment.html"><span class="nav-icon">▥</span><span class="nav-label">정산/결제</span></a>
       <a class="nav-item" href="as.html"><span class="nav-icon">×</span><span class="nav-label">준공/AS</span></a>
-      <a class="nav-item" href="photo.html"><span class="nav-icon">▧</span><span class="nav-label">현장사진</span></a>
+      <a class="nav-item" href="photos.html"><span class="nav-icon">▧</span><span class="nav-label">현장사진</span></a>
       <a class="nav-item" href="employees.html"><span class="nav-icon">⚙</span><span class="nav-label">설정</span></a>
     </nav>
     <div class="sidebar-user"><div class="user-avatar">D</div><div class="user-copy"><strong id="sidebar-user-name">DAHAM</strong><span id="sidebar-user-role">사용자</span></div></div>
@@ -520,8 +520,6 @@ var GENERAL_DB_KEY = 'daham_schedule_general_v1';
 var _AUTH_CONFIG = DAHAM_AUTH.getSupabaseConfig();
 var SUPA_URL  = _AUTH_CONFIG.url;
 var SUPA_KEY  = _AUTH_CONFIG.key;
-var SHARE_URL = 'https://ozgiihtixsjwoxbtotfi.supabase.co';
-var SHARE_KEY = 'sb_publishable_aHoQvdLGjD6J36LXb90HhA_d-DyvbAm';
 var _sb = null;
 
 /* ── 주말 제외 날짜 유틸 ── */
@@ -811,10 +809,11 @@ function shareProject(){
   var shareId = 'share_'+uid();
   var payload = { info: p.info||{}, tasks: p.tasks||[], color: p.color||'#E65100', sharedAt: nowISO() };
   showToast('링크 생성 중...');
-  fetch(SHARE_URL+'/rest/v1/daham_backup',{
+  var expiresAt=new Date(Date.now()+90*24*60*60*1000).toISOString();
+  fetch(SUPA_URL+'/rest/v1/schedule_shares',{
     method:'POST',
-    headers:{'apikey':SHARE_KEY,'Authorization':'Bearer '+SHARE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify({id:shareId,data:payload,updated_at:nowISO()})
+    headers:Object.assign({},_HDRS,{'Prefer':'resolution=merge-duplicates,return=minimal'}),
+    body:JSON.stringify({id:shareId,data:payload,updated_at:nowISO(),expires_at:expiresAt})
   }).then(function(r){
     if(!r.ok){ showToast('공유 실패'); return; }
     var _origin = (location.origin && location.origin !== 'null') ? location.origin : 'https://daham1.netlify.app';
@@ -925,6 +924,10 @@ function openProject(id){
     }
   }
 }
+function toggleProjectFilter(id){
+  var next=DAHAM_SCHEDULE_DOMAIN.toggleProjectSelection(currentId,id);
+  if(next===null) showAllCalendar(); else openProject(next);
+}
 
 /* ════ SIDEBAR ════ */
 function renderSidebar(){
@@ -945,7 +948,7 @@ function renderSidebar(){
     var name=esc((p.info&&p.info.name)||'현장명 미입력');
     var color=p.color||COLORS[0];
     h+='<button class="sb-item'+(active?' active':'')+'" '
-      +'onclick="openProject(\''+p.id+'\')" '
+      +'onclick="toggleProjectFilter(\''+p.id+'\')" '
       +'style="border-left-color:'+(active?color:'transparent')+'">'
       +'<span class="sb-dot" style="background:'+color+'"></span>'
       +'<span style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0">'+name+'</span>'
@@ -983,7 +986,7 @@ function renderSiteCards(){
     var tasks=p.tasks||[],progress=DAHAM_SCHEDULE_DOMAIN.scheduleProgress(tasks,todayStr());
     var info=p.info||{},status={contracted:'계약완료',construction:'시공중'}[info.status]||info.status||'계약완료';
     var selected=p.id===currentId;
-    return '<article class="site-card'+(selected?' selected':'')+'" data-project-id="'+esc(p.id)+'" data-action="select-project" style="--site-color:'+esc(p.color||COLORS[0])+'" onclick="openProject(\''+p.id+'\')">'
+    return '<article class="site-card'+(selected?' selected':'')+'" data-project-id="'+esc(p.id)+'" data-action="select-project" style="--site-color:'+esc(p.color||COLORS[0])+'" onclick="toggleProjectFilter(\''+p.id+'\')">'
       +'<span class="site-card-check">✓</span><div class="site-card-name">'+esc(info.name||'현장명 미입력')+'</div><span class="site-card-status">'+esc(status)+'</span>'
       +'<div class="site-card-period">'+esc(info.start||'미정')+' ~ '+esc(info.end||'미정')+'</div><div class="site-card-progress-label">진행률</div>'
       +'<div class="site-progress-row"><div class="site-progress"><span style="width:'+progress+'%"></span></div><span class="site-progress-pct">'+progress+'%</span></div>'
@@ -1550,6 +1553,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProject
   initCloud();
   loadDB();
   var imp=localStorage.getItem('daham_schedule_import'), requestedEstimateId=null;
+  var requestedEventId=new URLSearchParams(location.search).get('id');
   if(imp){
     try{
       var d=JSON.parse(imp);
@@ -1562,8 +1566,15 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')closeProject
       reconcileConsultationCalendar(function(){
         pullCurrentEstimateCache(function(){
           syncContractedProjects();completePastSchedules();renderSidebar();renderSiteCards();
+          var target=DAHAM_SCHEDULE_DOMAIN.findScheduleTarget(allProjects,allGeneralEvents,requestedEventId);
           var requested=allProjects.find(function(p){return p.estimateId===requestedEstimateId;});
-          if(requested) openProject(requested.id); else showAllCalendar();
+          if(target&&target.kind==='project'){
+            openProject(target.projectId);
+            setTimeout(function(){openTaskModal(target.taskId,null);},80);
+          }else if(target&&target.kind==='general'){
+            showAllCalendar();
+            setTimeout(function(){openGeneralModal(target.eventId,null);},80);
+          }else if(requested) openProject(requested.id); else showAllCalendar();
         });
       });
     });

@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>DAHAM — 거래처 관리</title>
 <script src="auth.js"></script>
+<script src="ui-helpers.js"></script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#E65100">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -243,30 +244,33 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:13p
 var STORE_KEY = 'daham_contacts_v1';
 
 /* ── Supabase 동기화 ── */
-var SUPABASE_URL = 'https://ozgiihtixsjwoxbtotfi.supabase.co';
-var SUPABASE_KEY = 'sb_publishable_aHoQvdLGjD6J36LXb90HhA_d-DyvbAm';
+var _CONTACT_AUTH = DAHAM_AUTH.getSupabaseConfig();
+var SUPABASE_URL = _CONTACT_AUTH.url;
+var SUPABASE_KEY = _CONTACT_AUTH.key;
 var _sb = null;
-try{ _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }catch(e){}
+try{
+  var _contactToken=DAHAM_AUTH.getAccessToken();
+  _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY,{global:{headers:_contactToken?{Authorization:'Bearer '+_contactToken}:{}}});
+}catch(e){}
 
 function cloudPushContacts(){
-  if(!_sb) return;
-  /* erp.html과 동일한 구조: id='main', data={...} */
-  _sb.from('daham_backup').select('data').eq('id','main').maybeSingle().then(function(res){
-    var existing = (res.data && res.data.data) ? res.data.data : {};
-    existing[STORE_KEY] = JSON.stringify(records);
-    _sb.from('daham_backup').upsert({ id:'main', data:existing, updated_at:new Date().toISOString() }).then(function(){});
+  if(!_sb) return Promise.reject(new Error('Supabase 연결 실패'));
+  return _sb.from('sync_data').upsert({key:STORE_KEY,value:JSON.stringify(records),updated_at:new Date().toISOString()}).then(function(res){
+    if(res.error) throw res.error;
+    return true;
   });
 }
 
 function cloudPullContacts(cb){
   if(!_sb){ if(cb) cb(false); return; }
-  _sb.from('daham_backup').select('data').eq('id','main').maybeSingle().then(function(res){
-    if(res.data && res.data.data && res.data.data[STORE_KEY]){
+  _sb.from('sync_data').select('value').eq('key',STORE_KEY).maybeSingle().then(function(res){
+    if(res.error) throw res.error;
+    if(res.data && res.data.value){
       try{
-        var remote = JSON.parse(res.data.data[STORE_KEY]);
+        var remote = typeof res.data.value==='string'?JSON.parse(res.data.value):res.data.value;
         if(Array.isArray(remote) && remote.length > 0){
           records = remote;
-          localStorage.setItem(STORE_KEY, res.data.data[STORE_KEY]);
+          localStorage.setItem(STORE_KEY, JSON.stringify(remote));
         }
       }catch(e){}
     }
@@ -384,14 +388,16 @@ function saveRecord(){
   } else {
     records.push({id:uid(),cat:cat,name:name,tel:tel,note:note});
   }
-  save(); cloudPushContacts(); closeModal(); renderCards(); showToast('✓ 저장했습니다');
+  save(); closeModal(); renderCards();
+  cloudPushContacts().then(function(){showToast('✓ 저장 및 동기화 완료');}).catch(function(){showToast('로컬 저장 완료 · 클라우드 동기화 실패');});
 }
 
 function deleteRecord(){
   if(!editingId) return;
   dahamConfirm('이 연락처를 삭제할까요?', function() {
     records=records.filter(function(x){ return x.id!==editingId; });
-    save(); cloudPushContacts(); closeModal(); renderCards(); showToast('삭제했습니다');
+    save(); closeModal(); renderCards();
+    cloudPushContacts().then(function(){showToast('✓ 삭제 및 동기화 완료');}).catch(function(){showToast('로컬 삭제 완료 · 클라우드 동기화 실패');});
   });
 }
 
@@ -403,19 +409,17 @@ function manualPush(){
   if(!records.length){ setSyncMsg('저장할 거래처가 없습니다'); return; }
   setSyncMsg('저장 중...');
   if(!_sb){ setSyncMsg('❌ Supabase 연결 실패'); return; }
-  _sb.from('daham_backup').upsert({ id:'contacts', data:records, updated_at:new Date().toISOString() }).then(function(r){
-    if(r.error){ setSyncMsg('❌ '+r.error.message); }
-    else { setSyncMsg('✓ '+records.length+'개 저장 완료'); }
-  }).catch(function(e){ setSyncMsg('❌ '+(e.message||e)); });
+  cloudPushContacts().then(function(){setSyncMsg('✓ '+records.length+'개 저장 완료');})
+    .catch(function(e){ setSyncMsg('❌ '+(e.message||e)); });
 }
 
 function manualSync(){
   setSyncMsg('불러오는 중...');
   if(!_sb){ setSyncMsg('❌ Supabase 연결 실패'); return; }
-  _sb.from('daham_backup').select('data').eq('id','contacts').maybeSingle().then(function(res){
+  _sb.from('sync_data').select('value').eq('key',STORE_KEY).maybeSingle().then(function(res){
     if(res.error){ setSyncMsg('❌ '+res.error.message); return; }
     if(!res.data){ setSyncMsg('❌ 저장된 거래처 없음 — PC에서 먼저 저장하세요'); return; }
-    var arr = res.data.data;
+    var arr = res.data.value;
     if(typeof arr==='string'){ try{ arr=JSON.parse(arr); }catch(e){ setSyncMsg('❌ 파싱오류'); return; } }
     if(!Array.isArray(arr)||!arr.length){ setSyncMsg('❌ 거래처 데이터 없음'); return; }
     records = arr;
@@ -434,6 +438,5 @@ cloudPullContacts(function(ok){
   if(ok){ buildTabs(); renderCards(); }
 });
 </script>
-<script src="auth.js"></script>
 </body>
 </html>
