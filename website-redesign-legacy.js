@@ -1,0 +1,1 @@
+const slug=new URLSearchParams(location.search).get('project');if(slug&&window.DAHAM_PORTFOLIO_STATIC.findProject(slug))location.replace('/portfolio/'+encodeURIComponent(slug)+'.html');

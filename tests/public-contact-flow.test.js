@@ -7,15 +7,15 @@ const root = path.join(__dirname, '..');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 test('portfolio inquiry action takes the visitor directly to the inquiry form', () => {
-  const quote = read('portfolio.html').match(/<a\b[^>]*class="quote-btn"[^>]*>/)[0];
-  assert.match(quote, /href="(?:\.\/)?inquiry\.html(?:\?[^\"]*)?"/);
+  const quote = read('portfolio.html').match(/<a\b[^>]*data-view="consult"[^>]*>/)[0];
+  assert.match(quote, /href="(?:\.\/|\/)?inquiry\.html(?:\?[^\"]*)?"/);
 });
 
 test('every portfolio navigation and legacy header inquiry link opens the form', () => {
   for (const file of ['portfolio.html', 'portfolio-detail.html']) {
     const links = read(file).match(/<a\b[^>]*>[\s\S]*?<\/a>/g).filter(link => /견적\s*문의/.test(link));
     assert.ok(links.length, file);
-    for (const link of links) assert.match(link, /href="(?:\.\/)?inquiry\.html(?:\?[^\"]*)?"/, `${file}: ${link}`);
+    for (const link of links) assert.match(link, /href="(?:\.\/|\/)?inquiry\.html(?:\?[^\"]*)?"/, `${file}: ${link}`);
   }
 });
 

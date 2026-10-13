@@ -42,9 +42,9 @@ test('homepage and apartment guide expose immediate inquiry and mobile phone act
   const homepage = read('index.html');
   const guide = read('gumi-apartment-interior.html');
 
-  assert.match(homepage, /homepage_hero[^>]*>견적 상담하기</);
+  assert.match(homepage, /data-view="consult"[^>]*href="inquiry\.html[^"]*"/);
   assert.match(homepage, /class="mobile-conversion-bar"/);
-  assert.match(homepage, /href="tel:01020590347"[^>]*data-conversion="phone"/);
+  assert.match(homepage, /<a(?=[^>]*href="tel:01020590347")(?=[^>]*data-conversion="phone")[^>]*>/);
   assert.match(guide, /guide_hero[^>]*>견적 상담하기</);
   assert.match(guide, /guide_cases[^>]*>시공 범위 상담하기</);
   assert.match(guide, /class="mobile-conversion-bar"/);

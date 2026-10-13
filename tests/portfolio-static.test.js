@@ -41,9 +41,9 @@ test('public website is wired to static portfolio browsing', () => {
   const website = fs.readFileSync(websitePath, 'utf8');
   const portfolioPage = fs.readFileSync(portfolioPagePath, 'utf8');
   assert.match(website, /portfolio-static-domain\.js/);
-  assert.match(website, /href="portfolio\.html"/);
+  assert.match(website, /href="\/?portfolio\.html(?:[^"]*)?"/);
   assert.match(portfolioPage, /portfolio-static-domain\.js/);
-  assert.match(portfolioPage, /portfolio-page\.js/);
+  assert.match(portfolioPage, /website-redesign\.js/);
   assert.doesNotMatch(website + portfolioPage, /portfolio-image-loader\.js/);
 });
 
@@ -103,7 +103,7 @@ test('priority portfolio detail documents have unique searchable metadata and vi
     titles.add(title);
     descriptions.add(description);
     assert.match(html, new RegExp(`<link rel="canonical" href="https://daham-interior\\.com/portfolio/${slug}\\.html">`));
-    assert.match(html, /<h1>[^<]+<\/h1>/);
+    assert.match(html, /<h1[^>]*>[^<]+<\/h1>/);
     assert.match(html, /기존 상태|설계 판단|주요 시공|완공 결과/);
     assert.match(html, /견적 문의/);
     assert.match(html, /href="\.\.\/inquiry\.html(?:\?source=portfolio_[^"]+)?"/);
