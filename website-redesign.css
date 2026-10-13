@@ -397,3 +397,7 @@ html,body {margin:0;padding:0;background:#fafaf7;scroll-behavior:smooth}
 
 
 .do-seo-title{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}#dh-owl .do-menu a{font-family:Poppins,sans-serif;text-decoration:none;color:inherit;font-size:inherit}#dh-owl .do-honeypot{position:absolute;left:-9999px}#dh-owl .do-gallery-photo{cursor:zoom-in}
+#dh-owl .do-photo {backface-visibility:hidden}
+#dh-owl .do-photo-next {will-change:opacity}
+#dh-owl .do-progress span {transition:width 1.1s cubic-bezier(.4,0,.2,1)}
+@media(prefers-reduced-motion:reduce){#dh-owl .do-progress span{transition:none}}

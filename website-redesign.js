@@ -4,7 +4,22 @@ const photos={"castleLiving":"/website-assets/redesign/hero/castleLiving-2560.we
 const scenes=[{"key":"castleLiving","title":"푸르지오캐슬 A단지 · 거실과 주방","crop":53},{"key":"geochangClock","title":"거창 푸르지오 · 시계와 식물","crop":52},{"key":"castleFaucet","title":"푸르지오캐슬 A단지 · 수전과 석재 디테일","crop":52},{"key":"geochangLiving","title":"거창 푸르지오 · 거실 전체","crop":53},{"key":"geochangTile","title":"거창 푸르지오 · 욕실 타일 디테일","crop":50},{"key":"castleShadow","title":"푸르지오캐슬 A단지 · 우드 중문과 그림자","crop":52},{"key":"sinpyeongSalon","title":"청빈 신평 · 미용실 경대와 좌석","crop":58},{"key":"geochangNiche","title":"거창 푸르지오 · 우드 수납과 화분","crop":55},{"key":"imeunLivingStorage","title":"임은동 코오롱하늘채 · 거실 수납과 간접조명","crop":50},{"key":"castleStone","title":"푸르지오캐슬 A단지 · 석재와 간접조명","crop":55},{"key":"geochangKitchen","title":"거창 푸르지오 · 주방 전체","crop":53},{"key":"geochangPendant","title":"거창 푸르지오 · 펜던트 조명","crop":50},{"key":"castleShelf","title":"푸르지오캐슬 A단지 · 석재 선반 디테일","crop":45},{"key":"sinpyeongShampoo","title":"청빈 신평 · 샴푸 공간과 조명","crop":60},{"key":"geochangShadow","title":"거창 푸르지오 · 빛과 그림자","crop":50},{"key":"geochangLight","title":"거창 푸르지오 · 우드 간접조명","crop":48}];
 root.querySelectorAll('[data-image]').forEach(img=>{if(photos[img.dataset.image])img.src=photos[img.dataset.image];});
 let index=0;
-function renderSlide(){const s=scenes[index];const img=root.querySelector('.do-photo');img.src=photos[s.key];img.srcset=photos[s.key].replace('-2560.webp','-1280.webp')+' 1280w, '+photos[s.key]+' 2560w';img.sizes='100vw';img.alt=s.title+' 실제 시공 사진';root.style.setProperty('--dh-crop',s.crop+'%');root.querySelector('.do-caption').textContent=s.title;root.querySelector('.do-index').textContent=String(index+1).padStart(2,'0');root.querySelector('.do-progress span').style.width=((index+1)/scenes.length*100)+'%';}
+let currentHeroImage=root.querySelector('.do-photo');
+let heroInitialized=false;
+function slideFrame(i){const scene=scenes[i],src=photos[scene.key];return{src:src,srcset:src.replace('-2560.webp','-1280.webp')+' 1280w, '+src+' 2560w',title:scene.title,crop:scene.crop,index:i};}
+function updateSlideLabels(frame){root.querySelector('.do-caption').textContent=frame.title;root.querySelector('.do-index').textContent=String(frame.index+1).padStart(2,'0');root.querySelector('.do-progress span').style.width=((frame.index+1)/scenes.length*100)+'%';}
+const heroFader=DAHAM_SLIDESHOW.create({
+ load:async frame=>{const image=new Image();image.sizes='100vw';image.srcset=frame.srcset;image.src=frame.src;await image.decode();return image;},
+ display:async(ready,frame)=>{
+  const next=ready.cloneNode();next.className='do-photo do-photo-next';next.alt=frame.title+' 실제 시공 사진';next.setAttribute('aria-hidden','true');next.style.objectPosition=matchMedia('(max-width:760px)').matches?'55% center':'center '+frame.crop+'%';
+  const previous=currentHeroImage;previous.setAttribute('aria-hidden','true');previous.after(next);updateSlideLabels(frame);
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches){const animation=next.animate([{opacity:0},{opacity:1}],{duration:1100,easing:'cubic-bezier(.4,0,.2,1)',fill:'both'});await animation.finished;next.style.opacity='1';animation.cancel();}
+  previous.remove();next.classList.remove('do-photo-next');next.removeAttribute('aria-hidden');currentHeroImage=next;
+ }
+});
+function renderSlide(){const frame=slideFrame(index);if(!heroInitialized){currentHeroImage.src=frame.src;currentHeroImage.srcset=frame.srcset;currentHeroImage.sizes='100vw';currentHeroImage.alt=frame.title+' 실제 시공 사진';root.style.setProperty('--dh-crop',frame.crop+'%');updateSlideLabels(frame);heroInitialized=true;if(root.dataset.initialScreen==='home')heroFader.preload(slideFrame((index+1)%scenes.length));return;}
+ heroFader.show(frame).then(shown=>{if(shown)heroFader.preload(slideFrame((frame.index+1)%scenes.length));});}
+
 function show(view){root.querySelectorAll('[data-screen]').forEach(el=>el.hidden=el.dataset.screen!==view);root.classList.toggle('do-inner',view!=='home');root.querySelector('.do-menu').classList.remove('do-open');root.querySelector('.do-mobile').setAttribute('aria-expanded','false');}
 root.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.view)));
 root.querySelectorAll('[data-slide]').forEach(b=>b.addEventListener('click',()=>{index=(index+Number(b.dataset.slide)+scenes.length)%scenes.length;renderSlide();}));
