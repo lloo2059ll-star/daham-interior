@@ -74,13 +74,10 @@ const initial=(['#footer','#contact','#inquiry'].includes(location.hash)?'consul
 if(initial==='detail'){const project=portfolioRows.find(p=>p.slug===root.dataset.projectSlug);if(project)openProject(project);else show('portfolio');}else show(initial);
 const hero=root.querySelector('.do-hero');
 let lastAdvance=Date.now();
-let hovering=false;
-hero.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse')hovering=true;});
-hero.addEventListener('pointerleave',()=>{hovering=false;lastAdvance=Date.now();});
 root.querySelectorAll('[data-slide],[data-view]').forEach(button=>button.addEventListener('click',()=>{lastAdvance=Date.now();}));
 const autoSlideTimer=setInterval(()=>{
  if(!root.isConnected){clearInterval(autoSlideTimer);return;}
- if(hero.hidden||document.hidden||hovering){lastAdvance=Date.now();return;}
+ if(hero.hidden||document.hidden){lastAdvance=Date.now();return;}
  if(Date.now()-lastAdvance>=5000){index=(index+1)%scenes.length;renderSlide();lastAdvance=Date.now();}
 },250);
 
