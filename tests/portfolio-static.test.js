@@ -6,12 +6,12 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const domainPath = path.join(root, 'portfolio-static-domain.js');
 
-test('static portfolio exposes sixteen curated projects', () => {
+test('static portfolio exposes seventeen curated projects', () => {
   assert.equal(fs.existsSync(domainPath), true, 'portfolio-static-domain.js should exist');
   const portfolio = require(domainPath);
   const projects = portfolio.listProjects();
-  assert.equal(projects.length, 16);
-  assert.equal(new Set(projects.map((project) => project.slug)).size, 16);
+  assert.equal(projects.length, 17);
+  assert.equal(new Set(projects.map((project) => project.slug)).size, 17);
   assert.deepEqual(projects.slice(0,8).map((project) => project.photos.length), [12, 10, 10, 10, 8, 7, 7, 8]);
   for (const project of projects) {
     assert.ok(project.title);

@@ -10,7 +10,7 @@ const confirmed = [
 ];
 test('eight approved new cases preserve confirmed facts and exclude rejected projects', () => {
   const domain = require('../portfolio-static-domain');
-  assert.equal(domain.listProjects().length,16);
+  assert.equal(domain.listProjects().length,17);
   for (const [slug,area,weeks] of confirmed) {
     const project = domain.findProject(slug);
     assert.ok(project,slug);
