@@ -16,10 +16,10 @@
 <script src="auth.js"></script>
 <script src="ui-helpers.js"></script>
 <script src="completion-transition.js"></script>
-<script src="price-catalog.js?v=20261020-slabfit-simple"></script>
-<script src="slabfit-catalog.js?v=20261020-slabfit-simple"></script>
+<script src="price-catalog.js?v=20261020-dimensions"></script>
+<script src="slabfit-catalog.js?v=20261020-dimensions"></script>
 <style>#sections-container [hidden]{display:none!important}</style>
-<script src="price-management.js?v=20261020-slabfit-simple"></script>
+<script src="price-management.js?v=20261020-dimensions"></script>
 <script src="estimate-print.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -1335,6 +1335,7 @@ function applyProjectPrices(project){
       SECTIONS[si].items[ii].mu=price.material;
     });
   });
+  if(window.DAHAM_SLABFIT_ESTIMATE)window.DAHAM_SLABFIT_ESTIMATE.refresh(project);
 }
 function refreshPriceCells(){
   SECTIONS.forEach(function(sec,si){sec.items.forEach(function(item,ii){
@@ -3595,6 +3596,8 @@ body.v2-customer-view .v2-help{display:none!important}
 body.v2-customer-view .v2-summary-card{border-color:#e3e6ed!important}
 </style>
 
+<link rel="stylesheet" href="slabfit-estimate.css?v=20261020-dimensions">
+<script src="slabfit-estimate.js?v=20261020-dimensions"></script>
 </body>
 </html>
 

@@ -74,3 +74,20 @@ test('2600 by 1200 island uses 7.6m for all four cut and finished edges, not the
   const qtys=Object.fromEntries(rows.map(r=>[P.quantityKey(sink,r.item),r.qty]));
   assert.equal(P.projectTotal({...newProject,qtys,margins:{profit:'15'}},current.DAHAM_PRICE_CATALOG,{}),2650900);
 });
+
+test('changing island dimensions recalculates fabrication perimeter independently of installation length',()=>{
+  const large=C.calculate({lengthMm:2600,widthMm:1200});
+  const small=C.calculate({lengthMm:2000,widthMm:1200});
+  assert.equal(large.perimeter,7.6);
+  assert.equal(large.installation,2.6);
+  assert.equal(large.total,2305120);
+  assert.equal(small.perimeter,6.4);
+  assert.equal(small.installation,2);
+  assert.equal(small.total,2187280);
+  assert.equal(small.quantities['싱크 타공'],1);
+  assert.equal(small.quantities['워터젯 재단'],6.4);
+  assert.equal(small.quantities['기본시공'],2);
+  for(const i of C.items.filter(i=>i.unit!=='m'))assert.equal(small.quantities[i.det],1);
+  assert.throws(()=>C.calculate({lengthMm:0,widthMm:1200}),/길이/);
+  assert.throws(()=>C.calculate({lengthMm:4000,widthMm:1200}),/원장 한 장/);
+});
