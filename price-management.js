@@ -52,8 +52,21 @@
     return { labor: Number(item.lu) || 0, material: Number(item.mu) || 0 };
   }
 
+  function projectBasePrice(project, item) {
+    if (project && item.priceRevision && project.priceCatalogVersion !== item.priceRevision) {
+      return item.previousPrice || basePrice(item);
+    }
+    return basePrice(item);
+  }
+
+  function itemAvailable(project, item) {
+    return !item.introducedRevision || !!project && project.priceCatalogVersion === item.introducedRevision;
+  }
+
   function overridePrice(section, item, overrides) {
-    return (overrides && overrides[itemKey(section, item)]) || basePrice(item);
+    const key = itemKey(section, item);
+    const revision = item.priceRevision || item.introducedRevision;
+    return (overrides && overrides[revision ? key + '@' + revision : key]) || basePrice(item);
   }
 
   function snapshotExistingSelections(project, catalog) {
@@ -63,7 +76,7 @@
     (catalog || []).forEach(section => (section.items || []).forEach(item => {
       const quantity = Number(qtys[quantityKey(section, item)] || 0);
       const key = itemKey(section, item);
-      if (quantity > 0 && !project.priceSnapshots[key]) project.priceSnapshots[key] = basePrice(item);
+      if (quantity > 0 && !project.priceSnapshots[key]) project.priceSnapshots[key] = projectBasePrice(project, item);
     }));
     return project;
   }
@@ -72,6 +85,9 @@
     const key = itemKey(section, item);
     const scoped = project && projectOverrides && projectOverrides[project.id];
     if (scoped && scoped[key]) return scoped[key];
+    if (project && item.priceRevision && project.priceCatalogVersion !== item.priceRevision && !(project.priceSnapshots && project.priceSnapshots[key])) {
+      return projectBasePrice(project, item);
+    }
     return project && project.priceSnapshots && project.priceSnapshots[key]
       ? project.priceSnapshots[key]
       : overridePrice(section, item, overrides);
@@ -82,7 +98,7 @@
     project.priceSnapshots = project.priceSnapshots || {};
     const key = itemKey(section, item);
     if (!project.priceSnapshots[key]) {
-      const price = overridePrice(section, item, overrides);
+      const price = priceForProject(project, section, item, overrides);
       project.priceSnapshots[key] = { labor: price.labor, material: price.material };
     }
     return project.priceSnapshots[key];
@@ -118,7 +134,12 @@
 
   async function saveOverrides(options) {
     if (!canManage(options.user)) throw new Error('단가를 저장할 권한이 없습니다.');
-    const priceOverrides = validateOverrides(options.catalog, options.draft);
+    const validated = validateOverrides(options.catalog, options.draft);
+    const priceOverrides = {};
+    (options.catalog || []).forEach(section => (section.items || []).forEach(item => {
+      const key = itemKey(section, item), revision = item.priceRevision || item.introducedRevision;
+      if (validated[key]) priceOverrides[revision ? key + '@' + revision : key] = validated[key];
+    }));
     const settings = Object.assign({}, options.readSettings() || {}, { priceOverrides });
     await options.writeRemote(settings);
     options.writeLocal(settings);
@@ -186,7 +207,7 @@
 
   return {
     itemKey, quantityKey, parseMoney, canManage, validateOverrides,
-    snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice, applyDraftToProject, projectTotal,
+    snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice, applyDraftToProject, projectTotal, itemAvailable,
     saveOverrides, saveProjectOverrides, saveCommercialDefaults, loadCommercialDefaults, loadCommercialSettings,
   };
 });

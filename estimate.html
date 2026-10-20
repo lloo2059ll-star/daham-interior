@@ -16,8 +16,9 @@
 <script src="auth.js"></script>
 <script src="ui-helpers.js"></script>
 <script src="completion-transition.js"></script>
-<script src="price-catalog.js"></script>
-<script src="price-management.js"></script>
+<script src="price-catalog.js?v=20261020-carpentry"></script>
+<style>#sections-container [hidden]{display:none!important}</style>
+<script src="price-management.js?v=20261020-carpentry"></script>
 <script src="estimate-print.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -1323,6 +1324,11 @@ function applyProjectPrices(project){
   const projectOverrides=getProjectPriceOverrides();
   PRICE_BASE_SECTIONS.forEach(function(sec,si){
     sec.items.forEach(function(baseItem,ii){
+      const available=DAHAM_PRICES.itemAvailable(project,baseItem);
+      const chip=document.getElementById('chip_'+si+'_'+ii);
+      if(chip)chip.hidden=!available;
+      const row=document.getElementById('tr_'+si+'_'+ii);
+      if(row)row.hidden=!available;
       const price=DAHAM_PRICES.priceForProject(project,sec,baseItem,overrides,projectOverrides);
       SECTIONS[si].items[ii].lu=price.labor;
       SECTIONS[si].items[ii].mu=price.material;
@@ -2424,6 +2430,7 @@ function newProject(){
     .replace(/\.\s*/g,'-').replace(/-$/,'');
   var p = {
     id: projUid(),
+    priceCatalogVersion: window.DAHAM_PRICE_CATALOG_VERSION,
     createdAt: nowISO(),
     updatedAt: nowISO(),
     client: { 'cl-date': todayVal, 'cl-name':'', 'cl-tel':'', 'cl-movein':'', 'cl-addr':'', 'cl-area':'', 'cl-start':'', 'cl-end':'' },
@@ -3331,7 +3338,7 @@ function startFromConsult(){
   document.getElementById('consult-banner').style.display='none';
   var todayVal=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\.\s*/g,'-').replace(/-$/,'');
   var p={
-    id:projUid(),createdAt:nowISO(),updatedAt:nowISO(),
+    id:projUid(),priceCatalogVersion:window.DAHAM_PRICE_CATALOG_VERSION,createdAt:nowISO(),updatedAt:nowISO(),
     client:{
       'cl-date':d.consultDate||todayVal,
       'cl-name':d.name||'','cl-tel':d.tel||'',

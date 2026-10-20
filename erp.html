@@ -6,8 +6,8 @@
 <title>DAHAM INTERIOR — Dashboard</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="auth.js"></script>
-<script src="price-catalog.js"></script>
-<script src="price-management.js"></script>
+<script src="price-catalog.js?v=20261020-carpentry"></script>
+<script src="price-management.js?v=20261020-carpentry"></script>
 <link rel="stylesheet" href="sales-funnel-dashboard.css?v=20260908-1">
 <script src="sales-funnel-domain.js?v=20260908-1" defer></script>
 <script src="sales-funnel-client.js?v=20260908-1" defer></script>
@@ -258,7 +258,7 @@ window.addEventListener('storage',renderDashboard);window.addEventListener('focu
   function projects(){return projectList;}
   function selectedProject(){return projectList.find(item=>String(item.id)===project.value)||null;}
   function projectLabel(item){const client=item.client||{};return client['cl-name']||item.name||'이름 없는 견적';}
-  function currentPrice(sec,item){const key=DAHAM_PRICES.itemKey(sec,item),target=selectedProject(),saved=settings(),scoped=target&&saved.projectPriceOverrides&&saved.projectPriceOverrides[target.id],overrides=saved.priceOverrides||{};return scoped&&scoped[key]||target&&target.priceSnapshots&&target.priceSnapshots[key]||overrides[key]||{labor:Number(item.lu)||0,material:Number(item.mu)||0};}
+  function currentPrice(sec,item){const target=selectedProject(),saved=settings();return DAHAM_PRICES.priceForProject(target,sec,item,saved.priceOverrides||{},saved.projectPriceOverrides||{});}
   function fillProjects(){projectList=safeJSON('daham_detail_v2',[]);project.innerHTML='<option value="">기본 단가 · 이후 추가 품목</option>'+projects().map(item=>'<option value="'+html(item.id)+'">'+html(projectLabel(item))+'</option>').join('');}
   function fillDraft(){draft={};catalog.forEach(sec=>sec.items.forEach(item=>{const key=DAHAM_PRICES.itemKey(sec,item),price=currentPrice(sec,item);draft[key]={labor:String(price.labor),material:String(price.material)};}));}
   function render(){const q=search.value.trim().toLowerCase(),selected=category.value;let content='';catalog.forEach(sec=>{if(selected&&sec.name!==selected)return;sec.items.forEach(item=>{const name=(item.sub||'')+(item.det?' · '+item.det:'');if(q&&!(sec.name+' '+name+' '+(item.unit||'')).toLowerCase().includes(q))return;const key=DAHAM_PRICES.itemKey(sec,item),current=currentPrice(sec,item);content+='<tr data-key="'+html(key)+'"><td>'+html(sec.name)+'</td><td class="price-item-name"><b>'+html(item.sub||'—')+'</b><small>'+html(item.det||'')+'</small></td><td>'+html(item.unit||'—')+'</td><td class="price-money">'+money(current.labor)+'원</td><td><input class="price-input" inputmode="numeric" data-field="labor" value="'+money(draft[key].labor)+'" aria-label="'+html(name)+' 변경 인건비"></td><td class="price-money">'+money(current.material)+'원</td><td><input class="price-input" inputmode="numeric" data-field="material" value="'+money(draft[key].material)+'" aria-label="'+html(name)+' 변경 자재비"></td></tr>';});});rows.innerHTML=content||'<tr><td colspan="7" class="price-empty">검색 결과가 없습니다.</td></tr>';}
