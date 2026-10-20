@@ -27,8 +27,8 @@ test('photo rates retain Daegu fabrication, Gumi transport and installation amou
   assert.equal(find('싱크 타공').mu,114000);
   assert.equal(find('인덕션 타공').mu,54000);
   assert.equal(find('A형 파렛트').mu,156000);
-  assert.equal(find('기본시공').lu,116000);
-  assert.equal(find('기본시공').unit,'m');
+  assert.equal(find('시공').lu,116000);
+  assert.equal(find('시공').unit,'m');
   assert.equal(find('실측').lu,100000);
   assert.equal(find('구미 시외비').lu,50000);
   assert.equal(find('원형 타공').mu,24000);
@@ -57,13 +57,13 @@ test('adding ceramic choices leaves every existing catalog item, stable key and 
 });
 test('one slab plus independent measured fabrication and installation quantities are not charged automatically',()=>{
   const slab=C.items.find(i=>i.sub==='세라믹 상판 원장');
-  const install=C.items.find(i=>i.det.startsWith('기본시공'));
+  const install=C.items.find(i=>i.det==='시공');
   const project={...newProject,qtys:{[P.quantityKey(sink,slab)]:1,[P.quantityKey(sink,install)]:3}};
   assert.equal(P.projectTotal(project,current.DAHAM_PRICE_CATALOG,{}),1780200);
   assert.equal(P.projectTotal({...newProject,qtys:{}},current.DAHAM_PRICE_CATALOG,{}),0);
 });
 
-test('2600 by 1200 island uses 7.6m for all four cut and finished edges, not the 2.6m installation length',()=>{
+test('separately entered processing and installation metres calculate independently',()=>{
   const rows=C.items.map(i=>({item:i,qty:i.unit==='m'?(i.sub==='세라믹 상판 가공'?7.6:2.6):1}));
   const labor=rows.reduce((sum,r)=>sum+r.qty*r.item.lu,0);
   const material=rows.reduce((sum,r)=>sum+r.qty*r.item.mu,0);
@@ -72,22 +72,21 @@ test('2600 by 1200 island uses 7.6m for all four cut and finished edges, not the
   assert.equal(labor+material,2305120);
   assert.equal(C.items.filter(i=>/하부연마|뒷도매/.test(i.det)).length,1);
   const qtys=Object.fromEntries(rows.map(r=>[P.quantityKey(sink,r.item),r.qty]));
-  assert.equal(P.projectTotal({...newProject,qtys,margins:{profit:'15'}},current.DAHAM_PRICE_CATALOG,{}),2650900);
+  assert.equal(P.projectTotal({...newProject,qtys,margins:{profit:'15'}},current.DAHAM_PRICE_CATALOG,{}),2650920);
 });
 
-test('changing island dimensions recalculates fabrication perimeter independently of installation length',()=>{
-  const large=C.calculate({lengthMm:2600,widthMm:1200});
-  const small=C.calculate({lengthMm:2000,widthMm:1200});
-  assert.equal(large.perimeter,7.6);
-  assert.equal(large.installation,2.6);
-  assert.equal(large.total,2305120);
-  assert.equal(small.perimeter,6.4);
-  assert.equal(small.installation,2);
-  assert.equal(small.total,2187280);
-  assert.equal(small.quantities['싱크 타공'],1);
-  assert.equal(small.quantities['워터젯 재단'],6.4);
-  assert.equal(small.quantities['기본시공'],2);
-  for(const i of C.items.filter(i=>i.unit!=='m'))assert.equal(small.quantities[i.det],1);
-  assert.throws(()=>C.calculate({lengthMm:0,widthMm:1200}),/길이/);
-  assert.throws(()=>C.calculate({lengthMm:4000,widthMm:1200}),/원장 한 장/);
+test('manual decimal metres have no minimum and never derive from countertop dimensions',()=>{
+  const result=C.calculate({'워터젯 재단':4.2,'고스라':0.1,'하부연마·뒷도매':0.03,'시공':0.01,lengthMm:2600,widthMm:1200});
+  assert.equal(result.quantities['워터젯 재단'],4.2);
+  assert.equal(result.quantities['고스라'],0.1);
+  assert.equal(result.quantities['하부연마·뒷도매'],0.03);
+  assert.equal(result.quantities['시공'],0.01);
+  for(const i of C.items.filter(i=>i.unit!=='m'))assert.equal(result.quantities[i.det],1);
+  const install=C.items.find(i=>i.det==='시공');
+  assert.equal(P.roundItemAmount(install,install.lu*0.01),1160);
+  assert.equal(P.roundItemAmount(install,install.lu*0.1),11600);
+  assert.equal(P.roundItemAmount(install,install.lu*1),116000);
+  assert.equal(C.calculate({lengthMm:2600,widthMm:1200}).quantities['시공'],0);
+  assert.equal(P.quantityKey(sink,install),'싱크대|세라믹 상판 시공|기본시공');
+  assert.throws(()=>C.calculate({'시공':-0.1}),/수량/);
 });

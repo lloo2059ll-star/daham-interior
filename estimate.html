@@ -16,10 +16,10 @@
 <script src="auth.js"></script>
 <script src="ui-helpers.js"></script>
 <script src="completion-transition.js"></script>
-<script src="price-catalog.js?v=20261020-dimensions"></script>
-<script src="slabfit-catalog.js?v=20261020-dimensions"></script>
+<script src="price-catalog.js?v=20261020-manual-metres"></script>
+<script src="slabfit-catalog.js?v=20261020-manual-metres"></script>
 <style>#sections-container [hidden]{display:none!important}</style>
-<script src="price-management.js?v=20261020-dimensions"></script>
+<script src="price-management.js?v=20261020-manual-metres"></script>
 <script src="estimate-print.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -1311,8 +1311,8 @@ body{background:#eef1f6!important}
 const SECTIONS = window.DAHAM_PRICE_CATALOG;
 const uid = ()=>'_'+Math.random().toString(36).slice(2,9);
 const r100 = n=>Math.round(n/100)*100;
-const comma = n=>n>0?r100(n).toLocaleString('ko-KR'):'—';
-const won = n=>n>0?'₩ '+r100(n).toLocaleString('ko-KR'):'—';
+const comma = n=>n>0?Math.round(n).toLocaleString('ko-KR'):'—';
+const won = n=>n>0?'₩ '+Math.round(n).toLocaleString('ko-KR'):'—';
 const PRICE_BASE_SECTIONS = JSON.parse(JSON.stringify(SECTIONS));
 function getPriceOverrides(){
   try{return (JSON.parse(localStorage.getItem('daham_settings')||'{}').priceOverrides)||{};}catch(e){return {};}
@@ -1476,9 +1476,9 @@ function onQtyChange(si,ii,el){
     const project=allProjects.find(function(p){return p.id===currentProjId;});
     if(project)DAHAM_PRICES.snapshotSelection(project,PRICE_BASE_SECTIONS[si],PRICE_BASE_SECTIONS[si].items[ii],getPriceOverrides());
   }
-  const lt=r100(qty*item.lu*(item.k||1));
-  const mt_raw=r100(qty*item.mu*(item.s||1));
-  const mt_sell=r100(mt_raw*getMatMult());
+  const lt=DAHAM_PRICES.roundItemAmount(item,qty*item.lu*(item.k||1));
+  const mt_raw=DAHAM_PRICES.roundItemAmount(item,qty*item.mu*(item.s||1));
+  const mt_sell=DAHAM_PRICES.roundItemAmount(item,mt_raw*getMatMult());
   const tot=lt+mt_sell;
 
   document.getElementById(`lt_${si}_${ii}`).textContent=comma(lt);
@@ -1512,10 +1512,10 @@ function recalcSection(si){
   const mult=getMatMult();
   SECTIONS[si].items.forEach((item,ii)=>{
     const qty=parseFloat(document.getElementById(`q_${si}_${ii}`)?.value)||0;
-    l+=r100(qty*item.lu*(item.k||1));
-    m_raw+=r100(qty*item.mu*(item.s||1));
+    l+=DAHAM_PRICES.roundItemAmount(item,qty*item.lu*(item.k||1));
+    m_raw+=DAHAM_PRICES.roundItemAmount(item,qty*item.mu*(item.s||1));
   });
-  const m_sell=r100(m_raw*mult);
+  const m_sell=Math.round(m_raw*mult);
   const t=l+m_sell;
   secTotals[si]={l,m_raw,m_sell};
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=comma(v)};
@@ -1575,6 +1575,7 @@ function toggleChip(si,ii,e){
   chip.classList.toggle('selected',select);
   tr.style.display=select?'table-row':'none';
   if(!select&&inp){inp.value='';onQtyChange(si,ii,inp);}
+  if(select&&window.DAHAM_SLABFIT_ESTIMATE)window.DAHAM_SLABFIT_ESTIMATE.onSelect(si,ii);
   if(select&&inp) setTimeout(()=>inp.focus(),50);
 }
 
@@ -1697,7 +1698,7 @@ function recalcAll(){
     sec.items.forEach((item,ii)=>{
       /* 고정 자재 단가 셀 갱신 */
       if(item.mu>0){
-        const muSell=r100(item.mu*mult);
+        const muSell=DAHAM_PRICES.roundItemAmount(item,item.mu*mult);
         const muvEl=document.getElementById(`muv_${si}_${ii}`);
         if(muvEl){
           muvEl.innerHTML=muSell.toLocaleString();
@@ -1705,9 +1706,9 @@ function recalcAll(){
       }
       const qty=parseFloat(document.getElementById(`q_${si}_${ii}`)?.value)||0;
       if(qty>0){
-        const mt_raw=r100(qty*item.mu*(item.s||1));
-        const mt_sell=r100(mt_raw*mult);
-        const tot=r100(qty*item.lu*(item.k||1))+mt_sell;
+        const mt_raw=DAHAM_PRICES.roundItemAmount(item,qty*item.mu*(item.s||1));
+        const mt_sell=DAHAM_PRICES.roundItemAmount(item,mt_raw*mult);
+        const tot=DAHAM_PRICES.roundItemAmount(item,qty*item.lu*(item.k||1))+mt_sell;
         const mtsEl=document.getElementById(`mts_${si}_${ii}`);
         const totEl=document.getElementById(`tot_${si}_${ii}`);
         if(mtsEl) mtsEl.textContent=comma(mt_sell);
@@ -1737,8 +1738,8 @@ function buildPrintData(){
       var el=document.getElementById('q_'+si+'_'+ii);
       var qty=el?parseFloat(el.value)||0:0;
       if(qty>0){
-        var lt=r100(qty*item.lu*(item.k||1));
-        var mt=r100(r100(qty*item.mu*(item.s||1))*mult);
+        var lt=DAHAM_PRICES.roundItemAmount(item,qty*item.lu*(item.k||1));
+        var mt=DAHAM_PRICES.roundItemAmount(item,DAHAM_PRICES.roundItemAmount(item,qty*item.mu*(item.s||1))*mult);
         activeItems.push({sub:item.sub,det:item.det,unit:item.unit,qty:qty,lu:item.lu,mu:item.mu,sell:lt+mt});
       }
     });
@@ -2155,7 +2156,7 @@ function collectState(){
   SECTIONS.forEach(function(sec, si){
     sec.items.forEach(function(item, ii){
       var el = document.getElementById('q_' + si + '_' + ii);
-      if(el && el.value) qtys[sec.name+'|'+(item.sub||'')+'|'+(item.det||'')] = el.value;
+      if(el && el.value) qtys[DAHAM_PRICES.quantityKey(sec,item)] = el.value;
     });
   });
   return { client: client, margins: margins, qtys: qtys };
@@ -2174,7 +2175,7 @@ function applyState(state){
   });
   SECTIONS.forEach(function(sec, si){
     sec.items.forEach(function(item, ii){
-      var nameKey = sec.name+'|'+(item.sub||'')+'|'+(item.det||'');
+      var nameKey = DAHAM_PRICES.quantityKey(sec,item);
       var val = qtys[nameKey] !== undefined ? qtys[nameKey] : (qtys[si+'_'+ii] || '');
       var el = document.getElementById('q_' + si + '_' + ii);
       if(el){
@@ -2238,7 +2239,7 @@ function resetForm(){
 
 /* 카드 표시용 총액 계산 */
 function getQtyVal(qtys, sec, si, item, ii){
-  var nk = sec.name+'|'+(item.sub||'')+'|'+(item.det||'');
+  var nk = DAHAM_PRICES.quantityKey(sec,item);
   return parseFloat(qtys[nk] !== undefined ? qtys[nk] : (qtys[si+'_'+ii] || '')) || 0;
 }
 
@@ -2251,8 +2252,8 @@ function calcProjectTotal(p){
     sec.items.forEach(function(item, ii){
       var qty = getQtyVal(qtys, sec, si, item, ii);
       var price=DAHAM_PRICES.priceForProject(p,sec,item,getPriceOverrides(),getProjectPriceOverrides());
-      totalL += r100(qty * price.labor * (item.k||1));
-      totalM += r100(qty * price.material * (item.s||1) * matMult);
+      totalL += DAHAM_PRICES.roundItemAmount(item,qty * price.labor * (item.k||1));
+      totalM += DAHAM_PRICES.roundItemAmount(item,qty * price.material * (item.s||1) * matMult);
     });
   });
   var sub = totalL + totalM;
@@ -2269,8 +2270,8 @@ function calcSectionTotals(){
     sec.items.forEach(function(item, ii){
       var el = document.getElementById('q_' + si + '_' + ii);
       var qty = el ? (parseFloat(el.value) || 0) : 0;
-      labor += r100(qty * item.lu * (item.k||1));
-      mat   += r100(qty * item.mu * (item.s||1) * matMult);
+      labor += DAHAM_PRICES.roundItemAmount(item,qty * item.lu * (item.k||1));
+      mat   += DAHAM_PRICES.roundItemAmount(item,qty * item.mu * (item.s||1) * matMult);
     });
     var sub = labor + mat;
     var withProfit = sub > 0 ? sub + r100(sub * profitRate) : 0;
@@ -3596,8 +3597,8 @@ body.v2-customer-view .v2-help{display:none!important}
 body.v2-customer-view .v2-summary-card{border-color:#e3e6ed!important}
 </style>
 
-<link rel="stylesheet" href="slabfit-estimate.css?v=20261020-dimensions">
-<script src="slabfit-estimate.js?v=20261020-dimensions"></script>
+<link rel="stylesheet" href="slabfit-estimate.css?v=20261020-manual-metres">
+<script src="slabfit-estimate.js?v=20261020-manual-metres"></script>
 </body>
 </html>
 

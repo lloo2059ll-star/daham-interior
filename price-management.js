@@ -10,11 +10,15 @@
   }
 
   function itemKey(section, item) {
-    return [section.name, item.sub, item.det, item.unit].map(part).join('|');
+    return [section.name, item.sub, item.legacyDet || item.det, item.unit].map(part).join('|');
   }
 
   function quantityKey(section, item) {
-    return section.name + '|' + (item.sub || '') + '|' + (item.det || '');
+    return section.name + '|' + (item.sub || '') + '|' + (item.legacyDet || item.det || '');
+  }
+
+  function roundItemAmount(item, amount) {
+    return item.rounding === 1 ? Math.round(amount) : Math.round(amount / 100) * 100;
   }
 
   function parseMoney(value) {
@@ -128,8 +132,8 @@
       const quantity = Number(qtys[quantityKey(section, item)] || 0);
       if (quantity <= 0) return;
       const price = priceForProject(project, section, item, overrides, projectOverrides);
-      labor += Math.round(quantity * price.labor * (item.k || 1) / 100) * 100;
-      material += Math.round(quantity * price.material * (item.s || 1) / 100) * 100;
+      labor += roundItemAmount(item, quantity * price.labor * (item.k || 1));
+      material += roundItemAmount(item, quantity * price.material * (item.s || 1));
     }));
     const subtotal = labor + material;
     const rate = Number(project && project.margins && project.margins.profit || 15) / 100;
@@ -210,7 +214,7 @@
   }
 
   return {
-    itemKey, quantityKey, parseMoney, canManage, validateOverrides,
+    itemKey, quantityKey, roundItemAmount, parseMoney, canManage, validateOverrides,
     snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice, applyDraftToProject, projectTotal, itemAvailable,
     saveOverrides, saveProjectOverrides, saveCommercialDefaults, loadCommercialDefaults, loadCommercialSettings,
   };

@@ -1,8 +1,6 @@
-.slabfit-calculator{margin:14px;padding:16px;border:1px solid #ddd5f8;border-radius:10px;background:#faf8ff}
-.slabfit-calculator[hidden]{display:none!important}
-.slabfit-calculator strong{font-size:14px}
-.slabfit-calculator p{margin:8px 0;font-size:12px;line-height:1.6;color:#625b76}
-.slabfit-fields{display:flex;flex-wrap:wrap;gap:12px}
-.slabfit-fields label{display:flex;flex-direction:column;gap:5px;font-size:12px;flex:1 1 120px}
-.slabfit-fields input{width:100%;box-sizing:border-box;padding:9px;border:1px solid #cfc5e8;border-radius:6px;font:inherit;background:#fff}
-@media print{.slabfit-calculator{display:none!important}}
+.slabfit-manual{margin:14px;padding:16px;border:1px solid #ddd5f8;border-radius:10px;background:#faf8ff}
+.slabfit-manual[hidden]{display:none!important}
+.slabfit-manual strong{font-size:14px}
+.slabfit-manual p{margin:8px 0;font-size:12px;line-height:1.6;color:#625b76}
+.slabfit-manual button{padding:9px 14px;border:1px solid #cfc5e8;border-radius:6px;background:#fff;color:#4e3587;font:inherit;cursor:pointer}
+@media print{.slabfit-manual{display:none!important}}
