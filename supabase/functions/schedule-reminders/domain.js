@@ -94,5 +94,62 @@
     });
   }
 
-  return { extractScheduleEvents: extractScheduleEvents, buildReminderRows: buildReminderRows };
+  function validDate(value) {
+    var text=String(value||'').slice(0,10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(text))return '';
+    var date=new Date(text+'T00:00:00Z');
+    return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===text?text:'';
+  }
+
+  function materialLabel(name) {
+    var label=String(name||'').replace(/\([^)]*\)/g,'').replace(/（[^）]*）/g,'');
+    // Remove service-only work before recognizing mixed legacy phase names.
+    label=label.replace(/(?:마루|타일|욕실|가스)?\s*철거|(?:에어컨|전기)\s*타공|엘리베이터\s*보양|보양|입주청소|청소|준공촬영|실측|상담/g,'').replace(/^[\s,./·]+|[\s,./·]+$/g,'').trim();
+    return /타일|도배|목공|목작업|필름|마루|장판|바닥|도기|욕실|바스|창호|샷시|샤시|중문|도어|방문|문틀|전기|조명|스위치|콘센트|에어컨|싱크|주방|가구|대리석|세라믹|탄성|도장|설비|수전|도어락|인터폰|붙박이|커튼|커텐|블라인드/.test(label)?label:'';
+  }
+
+  function inactive(item) {
+    return !item||item.deleted===true||isCancelled(item)||/^(done|completed|complete|archived|progress|완료|시공완료|준공|진행중)$/i.test(String(item.status||''));
+  }
+
+  function extractMaterialEvents(input) {
+    var events=[];
+    asArray(input&&input.construction).forEach(function(site){
+      if(inactive(site)||inactive(site.info||{}))return;
+      asArray(site.tasks).forEach(function(task){
+        if(inactive(task)||!task.id)return;
+        var date=validDate(task.start),material=materialLabel(task.name);
+        if(!date||!material)return;
+        var due=new Date(date+'T00:00:00Z');due.setUTCDate(due.getUTCDate()-7);
+        var siteId=String(site.id||site.estimateId||'site');
+        events.push({siteId:siteId,taskId:String(task.id),date:date,reminderDate:due.toISOString().slice(0,10),
+          siteName:String((site.info&&(site.info.addr||site.info.name))||site.name||'현장'),material:material,
+          targetUrl:'schedule.html?id='+encodeURIComponent(task.id),
+          dedupeKey:'material-order:'+siteId+':'+String(task.id)+':'+date});
+      });
+    });
+    return events;
+  }
+
+  function buildMaterialReminderRows(input) {
+    var now=new Date(input.now||Date.now()),local=kstParts(now);
+    // Catch up missed/legacy D-7 reminders during business hours, but never after work starts.
+    if(local.hour<9||local.hour>=18)return [];
+    return asArray(input.events).filter(function(e){return validDate(e.date)&&e.reminderDate<=local.date&&e.date>local.date;}).map(function(e){
+      var days=Math.round((Date.parse(e.date+'T00:00:00Z')-Date.parse(local.date+'T00:00:00Z'))/86400000);
+      var dateText=Number(e.date.slice(5,7))+'월 '+Number(e.date.slice(8,10))+'일';
+      return {companyId:input.companyId,kind:'material_order_week',title:'['+e.siteName+'] '+e.material+' 시공 D-'+days+' · 자재 발주 확인',
+        body:dateText+' 시공 예정입니다. '+e.material+' 품목·수량과 납기 일정을 확인해 주세요.',
+        targetUrl:e.targetUrl,dedupeKey:e.dedupeKey,sendAfter:now.toISOString(),status:'pending'};
+    });
+  }
+
+  function obsoleteMaterialReminderIds(jobs,events,now) {
+    var today=kstParts(now||Date.now()).date;
+    var valid=new Set(asArray(events).filter(function(e){return e.date>today;}).map(function(e){return e.dedupeKey;}));
+    return asArray(jobs).filter(function(job){return job.status==='pending'&&String(job.dedupe_key||'').indexOf('material-order:')===0&&!valid.has(job.dedupe_key);}).map(function(job){return job.id;});
+  }
+
+  return { extractScheduleEvents: extractScheduleEvents, buildReminderRows: buildReminderRows,
+    extractMaterialEvents:extractMaterialEvents,buildMaterialReminderRows:buildMaterialReminderRows,obsoleteMaterialReminderIds:obsoleteMaterialReminderIds };
 });
