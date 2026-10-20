@@ -52,15 +52,19 @@
     return { labor: Number(item.lu) || 0, material: Number(item.mu) || 0 };
   }
 
+  function hasRevision(project, revision) {
+    return !!project && (project.priceCatalogVersion === revision || (Array.isArray(project.priceCatalogRevisions) && project.priceCatalogRevisions.includes(revision)));
+  }
+
   function projectBasePrice(project, item) {
-    if (project && item.priceRevision && project.priceCatalogVersion !== item.priceRevision) {
+    if (project && item.priceRevision && !hasRevision(project, item.priceRevision)) {
       return item.previousPrice || basePrice(item);
     }
     return basePrice(item);
   }
 
   function itemAvailable(project, item) {
-    return !item.introducedRevision || !!project && project.priceCatalogVersion === item.introducedRevision;
+    return !item.introducedRevision || hasRevision(project, item.introducedRevision);
   }
 
   function overridePrice(section, item, overrides) {
@@ -85,7 +89,7 @@
     const key = itemKey(section, item);
     const scoped = project && projectOverrides && projectOverrides[project.id];
     if (scoped && scoped[key]) return scoped[key];
-    if (project && item.priceRevision && project.priceCatalogVersion !== item.priceRevision && !(project.priceSnapshots && project.priceSnapshots[key])) {
+    if (project && item.priceRevision && !hasRevision(project, item.priceRevision) && !(project.priceSnapshots && project.priceSnapshots[key])) {
       return projectBasePrice(project, item);
     }
     return project && project.priceSnapshots && project.priceSnapshots[key]

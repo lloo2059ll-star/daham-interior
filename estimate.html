@@ -16,9 +16,10 @@
 <script src="auth.js"></script>
 <script src="ui-helpers.js"></script>
 <script src="completion-transition.js"></script>
-<script src="price-catalog.js?v=20261020-carpentry"></script>
+<script src="price-catalog.js?v=20261020-slabfit"></script>
+<script src="slabfit-catalog.js?v=20261020-slabfit"></script>
 <style>#sections-container [hidden]{display:none!important}</style>
-<script src="price-management.js?v=20261020-carpentry"></script>
+<script src="price-management.js?v=20261020-slabfit"></script>
 <script src="estimate-print.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
@@ -2431,6 +2432,7 @@ function newProject(){
   var p = {
     id: projUid(),
     priceCatalogVersion: window.DAHAM_PRICE_CATALOG_VERSION,
+    priceCatalogRevisions: (window.DAHAM_PRICE_CATALOG_REVISIONS||[window.DAHAM_PRICE_CATALOG_VERSION]).slice(),
     createdAt: nowISO(),
     updatedAt: nowISO(),
     client: { 'cl-date': todayVal, 'cl-name':'', 'cl-tel':'', 'cl-movein':'', 'cl-addr':'', 'cl-area':'', 'cl-start':'', 'cl-end':'' },
@@ -3338,7 +3340,7 @@ function startFromConsult(){
   document.getElementById('consult-banner').style.display='none';
   var todayVal=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\.\s*/g,'-').replace(/-$/,'');
   var p={
-    id:projUid(),priceCatalogVersion:window.DAHAM_PRICE_CATALOG_VERSION,createdAt:nowISO(),updatedAt:nowISO(),
+    id:projUid(),priceCatalogVersion:window.DAHAM_PRICE_CATALOG_VERSION,priceCatalogRevisions:(window.DAHAM_PRICE_CATALOG_REVISIONS||[window.DAHAM_PRICE_CATALOG_VERSION]).slice(),createdAt:nowISO(),updatedAt:nowISO(),
     client:{
       'cl-date':d.consultDate||todayVal,
       'cl-name':d.name||'','cl-tel':d.tel||'',
