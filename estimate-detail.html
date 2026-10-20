@@ -166,7 +166,7 @@ if (!d || !d.sections || !d.sections.length) {
   render(d);
 }
 
-function fmt(n) { return Math.round(n/100)*100; }
+function fmt(n) { return d.amountRounding===1 ? Math.round(n) : Math.round(n/100)*100; }
 function comma(n) { return fmt(n).toLocaleString('ko-KR'); }
 
 function hdr(docNo, projAddr) {

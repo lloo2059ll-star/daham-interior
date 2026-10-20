@@ -1758,7 +1758,8 @@ function buildPrintData(){
   var today=new Date();
   var ymd=String(today.getFullYear()).slice(2)+String(today.getMonth()+1).padStart(2,'0')+String(today.getDate()).padStart(2,'0');
   var dateStr=today.getFullYear()+'.'+String(today.getMonth()+1).padStart(2,'0')+'.'+String(today.getDate()).padStart(2,'0');
-  return {projId:currentProjId,docNo:'DH-'+ymd,date:dateStr,client:client,sections:sections,
+  var exactAmounts=SECTIONS.some(function(sec,si){return sec.items.some(function(item,ii){return item.ceramicBundle&&parseFloat(document.getElementById('q_'+si+'_'+ii)?.value)>0;});});
+  return {projId:currentProjId,docNo:'DH-'+ymd,date:dateStr,client:client,sections:sections,amountRounding:exactAmounts?1:100,
     subtotal:sub,profitRate:Math.round(profitRate*100),profit:profit,grandTotal:grand};
 }
 
