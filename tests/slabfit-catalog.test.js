@@ -8,7 +8,8 @@ const old=load(['price-catalog.js','price-management.js']);
 const current=load(['price-catalog.js','slabfit-catalog.js','price-management.js']);
 const C=current.DAHAM_SLABFIT_CATALOG, P=current.DAHAM_PRICES;
 const sink=current.DAHAM_PRICE_CATALOG.find(s=>s.name==='싱크대');
-const newProject={priceCatalogVersion:current.DAHAM_PRICE_CATALOG_VERSION,priceCatalogRevisions:Array.from(current.DAHAM_PRICE_CATALOG_REVISIONS)};
+// These tests exercise the preserved component-style estimate revision.
+const newProject={priceCatalogVersion:current.DAHAM_PRICE_CATALOG_VERSION,priceCatalogRevisions:[current.DAHAM_PRICE_CATALOG_VERSION,C.revision]};
 test('ceramic material selection contains only the approved 1200000 slab',()=>{
   assert.equal(C.products.length,1);
   const slabs=C.items.filter(i=>i.sub==='세라믹 상판 원장');

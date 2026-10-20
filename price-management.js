@@ -21,6 +21,16 @@
     return item.rounding === 1 ? Math.round(amount) : Math.round(amount / 100) * 100;
   }
 
+  function itemAmounts(item, quantity, price) {
+    if (!Number.isFinite(quantity) || quantity <= 0) return {labor:0,material:0};
+    price = price || basePrice(item);
+    const stock = item.stockLength ? Math.ceil(quantity / item.stockLength) : 0;
+    return {
+      labor: roundItemAmount(item, quantity * price.labor * (item.k || 1) + (item.fixedLabor || 0)),
+      material: roundItemAmount(item, quantity * price.material * (item.s || 1) + (item.fixedMaterial || 0) + stock * (item.stockMaterial || 0))
+    };
+  }
+
   function parseMoney(value) {
     if (value === null || value === undefined) return null;
     const text = String(value).trim();
@@ -68,6 +78,7 @@
   }
 
   function itemAvailable(project, item) {
+    if (item.retiredRevision && hasRevision(project, item.retiredRevision)) return false;
     return !item.introducedRevision || hasRevision(project, item.introducedRevision);
   }
 
@@ -132,8 +143,9 @@
       const quantity = Number(qtys[quantityKey(section, item)] || 0);
       if (quantity <= 0) return;
       const price = priceForProject(project, section, item, overrides, projectOverrides);
-      labor += roundItemAmount(item, quantity * price.labor * (item.k || 1));
-      material += roundItemAmount(item, quantity * price.material * (item.s || 1));
+      const amounts = itemAmounts(item, quantity, price);
+      labor += amounts.labor;
+      material += amounts.material;
     }));
     const subtotal = labor + material;
     const rate = Number(project && project.margins && project.margins.profit || 15) / 100;
@@ -214,7 +226,7 @@
   }
 
   return {
-    itemKey, quantityKey, roundItemAmount, parseMoney, canManage, validateOverrides,
+    itemKey, quantityKey, roundItemAmount, itemAmounts, parseMoney, canManage, validateOverrides,
     snapshotExistingSelections, priceForProject, snapshotSelection, overridePrice, applyDraftToProject, projectTotal, itemAvailable,
     saveOverrides, saveProjectOverrides, saveCommercialDefaults, loadCommercialDefaults, loadCommercialSettings,
   };
