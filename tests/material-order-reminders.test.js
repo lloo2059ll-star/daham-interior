@@ -42,6 +42,7 @@ test('material phases include supplier legacy names without exposing worker labe
   const events=extract([site(tasks)]);assert.equal(events.length,tasks.length);
   assert.ok(events.every(e=>!e.material.includes('업체')));
   assert.equal(events.find(e=>e.taskId==='t17').material,'설비');
+  assert.ok(rows(events).every(r=>!r.title.includes('시공 시공')));
 });
 test('valid dates handle year boundaries and do not silently roll invalid dates',()=>{
   assert.equal(extract([site([task({start:'2027-01-03'})])])[0].reminderDate,'2026-12-27');

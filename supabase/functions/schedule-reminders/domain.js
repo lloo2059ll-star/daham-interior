@@ -138,7 +138,8 @@
     return asArray(input.events).filter(function(e){return validDate(e.date)&&e.reminderDate<=local.date&&e.date>local.date;}).map(function(e){
       var days=Math.round((Date.parse(e.date+'T00:00:00Z')-Date.parse(local.date+'T00:00:00Z'))/86400000);
       var dateText=Number(e.date.slice(5,7))+'월 '+Number(e.date.slice(8,10))+'일';
-      return {companyId:input.companyId,kind:'material_order_week',title:'['+e.siteName+'] '+e.material+' 시공 D-'+days+' · 자재 발주 확인',
+      var work=e.material+(/시공$/.test(e.material)?'':' 시공');
+      return {companyId:input.companyId,kind:'material_order_week',title:'['+e.siteName+'] '+work+' D-'+days+' · 자재 발주 확인',
         body:dateText+' 시공 예정입니다. '+e.material+' 품목·수량과 납기 일정을 확인해 주세요.',
         targetUrl:e.targetUrl,dedupeKey:e.dedupeKey,sendAfter:now.toISOString(),status:'pending'};
     });
