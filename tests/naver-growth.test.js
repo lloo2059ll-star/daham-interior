@@ -59,3 +59,16 @@ test('highest-traffic case pages expose breadcrumbs and attributable inquiry pat
     );
   }
 });
+
+test('portfolio landing page turns case browsing into an attributable consultation path', () => {
+  const html = read('portfolio.html');
+  const intro = html.match(/<div\b[^>]*class="portfolio-intro"[^>]*>([\s\S]*?)<\/div><div class="do-grid">/);
+  assert.ok(intro, 'portfolio consultation guide missing');
+  assert.match(intro[1], /구미[^<]*아파트[^<]*(?:인테리어|리모델링)/);
+  assert.match(intro[1], /시공 사례/);
+
+  const inquiry = links(intro[1]).find(link => link[1] === '/inquiry.html?source=website_portfolio');
+  assert.ok(inquiry, 'attributable portfolio consultation link missing');
+  assert.match(inquiry[0], /data-open-inquiry/);
+  assert.match(inquiry[2], /견적|상담/);
+});
