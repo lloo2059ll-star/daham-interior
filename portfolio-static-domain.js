@@ -5,9 +5,12 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
 
+  // First website publication dates, not construction dates. Set publishedAt for new cases.
+  var PUBLICATION_DATES={"prugio-castle-a-32":"2026-09-11T01:50:17+09:00","geochang-prugio-34":"2026-09-13T12:47:10+09:00","bonggok-hyunjin-36":"2026-09-11T01:50:17+09:00","imeun-kolon-35":"2026-09-11T01:50:17+09:00","songjeong-house-23":"2026-09-13T12:47:10+09:00","okgye-epyeon-35":"2026-09-11T01:50:17+09:00","songjeong-dongyang-42":"2026-09-13T12:47:10+09:00","daegu-sangin-hwasung":"2026-09-13T12:47:10+09:00","gangbyeon-kolon-34":"2026-09-13T12:59:59+09:00","sandong-ssangyong-34":"2026-09-13T12:59:59+09:00","samgu-trinity-36":"2026-09-13T12:59:59+09:00","okgye-samgu-trinity-51":"2026-10-15T20:45:56+09:00","songjeong-samwoo-32":"2026-09-13T12:59:59+09:00","wonho-prugio-34":"2026-09-13T12:59:59+09:00","wonho-prugio-renovation-34":"2026-09-13T12:59:59+09:00","indong-restaurant-50":"2026-09-13T12:59:59+09:00","sinpyeong-salon-40":"2026-09-13T12:59:59+09:00"};
+
   function project(data){
     var base='portfolio-assets/projects/'+data.slug+'/';
-    return {slug:data.slug,title:data.title,location:data.location,area:data.area,kind:data.kind,tags:data.tags,coverImage:base+'cover.webp',thumbnailImage:base+'cover-card.webp',coverPosition:data.coverPosition||'center center',photos:data.photos.map(function(name){return base+name+'.webp';})};
+    return {slug:data.slug,publishedAt:data.publishedAt||PUBLICATION_DATES[data.slug]||'',title:data.title,location:data.location,area:data.area,kind:data.kind,tags:data.tags,coverImage:base+'cover.webp',thumbnailImage:base+'cover-card.webp',coverPosition:data.coverPosition||'center center',photos:data.photos.map(function(name){return base+name+'.webp';})};
   }
 
   var PROJECTS=[
@@ -31,7 +34,8 @@
   ];
 
   function copyProject(item){return Object.assign({},item,{tags:item.tags.slice(),photos:item.photos.slice()});}
-  function listProjects(){return PROJECTS.map(copyProject);}
+  function sortProjectsNewestFirst(items){return items.map(function(item,index){return {item:item,index:index};}).sort(function(a,b){var left=String(a.item.publishedAt||''),right=String(b.item.publishedAt||'');return left===right?a.index-b.index:(left>right?-1:1);}).map(function(entry){return entry.item;});}
+  function listProjects(){return sortProjectsNewestFirst(PROJECTS).map(copyProject);}
   function findProject(slug){var key=String(slug||'').trim();for(var i=0;i<PROJECTS.length;i+=1){if(PROJECTS[i].slug===key)return copyProject(PROJECTS[i]);}return null;}
 
   function cardImageForProject(slug,image){
@@ -39,5 +43,5 @@
     var known=[item.coverImage,'/'+item.coverImage,'https://daham-interior.com/'+item.coverImage,'https://www.daham-interior.com/'+item.coverImage];
     return known.indexOf(image)>=0?item.thumbnailImage:image;
   }
-  return {listProjects:listProjects,findProject:findProject,cardImageForProject:cardImageForProject};
+  return {sortProjectsNewestFirst:sortProjectsNewestFirst,listProjects:listProjects,findProject:findProject,cardImageForProject:cardImageForProject};
 });

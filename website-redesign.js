@@ -38,6 +38,8 @@ if(grid){
   });
 }
 
+// Reorder both existing and newly appended cards by the central publication order.
+if(grid){staticPortfolio.forEach(project=>{const card=grid.querySelector('[data-project="'+project.slug+'"]');if(card)grid.append(card);});}
 const detail=root.querySelector('[data-screen="detail"]');
 const detailMain=detail.querySelector('.do-detail-main');
 let activeProject=null,detailIndex=0;
