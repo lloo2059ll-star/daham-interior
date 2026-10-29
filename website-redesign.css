@@ -316,13 +316,20 @@ html,body {margin:0;padding:0;background:#fafaf7;scroll-behavior:smooth}
 #dh-owl [data-screen="portfolio"] {padding:195px 30px 100px}
 #dh-owl [data-screen="portfolio"]>.do-heading {font-family:Poppins,sans-serif;font-size:18px;font-weight:500;line-height:21.6px;letter-spacing:-.54px;color:#242424;max-width:1400px;width:100%;margin:0 auto 40px;padding:0 0 27px;border:0;position:relative;text-align:left}
 #dh-owl [data-screen="portfolio"]>.do-heading:after {content:'';position:absolute;bottom:0;left:0;width:500px;max-width:100%;height:1px;background:#ccc}
+#dh-owl .portfolio-intro {max-width:1400px;margin:0 auto 55px;padding:30px 32px;display:flex;align-items:flex-end;justify-content:space-between;gap:40px;border:1px solid #d8d3c8;background:rgba(255,255,255,.58)}
+#dh-owl .portfolio-intro>div {max-width:780px}
+#dh-owl .portfolio-intro-kicker {margin:0 0 10px;font-family:Poppins,sans-serif;font-size:11px;font-weight:600;letter-spacing:.14em;color:#7d766b}
+#dh-owl .portfolio-intro h2 {margin:0 0 12px;font-size:clamp(22px,2.3vw,34px);line-height:1.25;letter-spacing:-.045em;color:#242424}
+#dh-owl .portfolio-intro p:not(.portfolio-intro-kicker) {margin:0;font-size:15px;line-height:1.8;color:#655f56;word-break:keep-all}
+#dh-owl .portfolio-intro-cta {flex:0 0 auto;display:inline-flex;align-items:center;justify-content:space-between;gap:28px;min-width:220px;padding:16px 18px;border-bottom:1px solid #242424;font-size:14px;font-weight:600;color:#242424;text-decoration:none;transition:background .2s,color .2s}
+#dh-owl .portfolio-intro-cta:hover,#dh-owl .portfolio-intro-cta:focus-visible {background:#242424;color:#fff}
 #dh-owl .do-grid {max-width:1400px;margin:0 auto;grid-template-columns:repeat(2,minmax(0,1fr));gap:60px}
 #dh-owl .do-project {position:relative;display:block;width:100%;padding:0;border:0;border-radius:0;background:none;text-align:center;overflow:visible;aspect-ratio:100/56.36;box-shadow:none}
 #dh-owl .do-project img {display:block;width:100%;height:100%;aspect-ratio:auto;object-fit:cover;object-position:center;transition:.4s ease-in-out}
 #dh-owl .do-project span {box-sizing:border-box;position:absolute;inset:0;padding:10px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;border:5px solid #1a1a1a;background:rgba(0,0,0,.5);box-shadow:3px 3px 20px rgba(0,0,0,.3);opacity:0;transition:opacity .2s;font-family:Pretendard,sans-serif;font-size:24px;font-weight:700;line-height:1.2;letter-spacing:-.03em;color:#fff}
 #dh-owl .do-project:hover span,#dh-owl .do-project:focus-visible span {opacity:1}
-@media(max-width:1024px){#dh-owl .do-grid {gap:20px}#dh-owl .do-project span {font-size:22px}}
-@media(max-width:640px){#dh-owl [data-screen="portfolio"] {padding:145px 15px 60px}#dh-owl [data-screen="portfolio"]>.do-heading {font-size:16px;padding-bottom:10px;margin-bottom:30px}#dh-owl .do-grid {grid-template-columns:1fr;gap:10px}#dh-owl .do-project span {font-size:20px}}
+@media(max-width:1024px){#dh-owl .portfolio-intro {align-items:flex-start;flex-direction:column;gap:18px}#dh-owl .do-grid {gap:20px}#dh-owl .do-project span {font-size:22px}}
+@media(max-width:640px){#dh-owl [data-screen="portfolio"] {padding:145px 15px 60px}#dh-owl [data-screen="portfolio"]>.do-heading {font-size:16px;padding-bottom:10px;margin-bottom:30px}#dh-owl .portfolio-intro {margin-bottom:30px;padding:22px 18px}#dh-owl .portfolio-intro h2 {font-size:22px}#dh-owl .portfolio-intro p:not(.portfolio-intro-kicker) {font-size:14px;line-height:1.7}#dh-owl .portfolio-intro-cta {width:100%;min-width:0}#dh-owl .do-grid {grid-template-columns:1fr;gap:10px}#dh-owl .do-project span {font-size:20px}}
 @media(hover:none){#dh-owl .do-project span {opacity:1}}
 
 #dh-owl [data-screen="detail"] {padding:165px 5vw 100px;background-color:#f7f5ef;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.075 .19' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' opacity='.075' filter='url(%23paper)'/%3E%3C/svg%3E")}
