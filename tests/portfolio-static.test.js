@@ -10,9 +10,10 @@ test('static portfolio exposes seventeen curated projects', () => {
   assert.equal(fs.existsSync(domainPath), true, 'portfolio-static-domain.js should exist');
   const portfolio = require(domainPath);
   const projects = portfolio.listProjects();
+  const originalProjects = ["prugio-castle-a-32", "geochang-prugio-34", "bonggok-hyunjin-36", "imeun-kolon-35", "songjeong-house-23", "okgye-epyeon-35", "songjeong-dongyang-42", "daegu-sangin-hwasung"].map(slug => projects.find(project => project.slug === slug));
   assert.equal(projects.length, 17);
   assert.equal(new Set(projects.map((project) => project.slug)).size, 17);
-  assert.deepEqual(projects.slice(0,8).map((project) => project.photos.length), [12, 10, 10, 10, 8, 7, 7, 8]);
+  assert.deepEqual(originalProjects.map((project) => project.photos.length), [12, 10, 10, 10, 8, 7, 7, 8]);
   for (const project of projects) {
     assert.ok(project.title);
     assert.match(project.coverImage, new RegExp(`portfolio-assets/projects/${project.slug}/cover\\.webp$`));

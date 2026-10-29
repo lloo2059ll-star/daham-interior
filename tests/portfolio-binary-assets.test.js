@@ -9,9 +9,10 @@ const portfolio = require(path.join(root, 'portfolio-static-domain.js'));
 
 test('all curated project photos and covers exist and fully decode', () => {
   const projects = portfolio.listProjects();
-  assert.deepEqual(projects.slice(0,8).map((project) => project.photos.length), [12, 10, 10, 10, 8, 7, 7, 8]);
+  const originalProjects = ["prugio-castle-a-32", "geochang-prugio-34", "bonggok-hyunjin-36", "imeun-kolon-35", "songjeong-house-23", "okgye-epyeon-35", "songjeong-dongyang-42", "daegu-sangin-hwasung"].map(slug => projects.find(project => project.slug === slug));
+  assert.deepEqual(originalProjects.map((project) => project.photos.length), [12, 10, 10, 10, 8, 7, 7, 8]);
   const relativeFiles = projects.flatMap((project) => [project.coverImage, project.thumbnailImage, ...project.photos]);
-  assert.equal(projects.slice(0,8).reduce((sum, project) => sum + project.photos.length, 0), 72);
+  assert.equal(originalProjects.reduce((sum, project) => sum + project.photos.length, 0), 72);
   for (const relativeFile of relativeFiles) {
     const file = path.join(root, relativeFile);
     assert.equal(fs.existsSync(file), true, `${relativeFile} should exist`);

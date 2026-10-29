@@ -13,6 +13,7 @@
  }
  function bind(form,client){
   if(!form)return;let sourceChannel=globalThis.DAHAM_WEBSITE_PUBLIC.detectSourceChannel(location.href,document.referrer);try{sourceChannel=resolveSourceChannel(globalThis.DAHAM_WEBSITE_PUBLIC,location.href,document.referrer,sessionStorage.getItem('daham_public_source'));sessionStorage.setItem('daham_public_source',sourceChannel);}catch(error){}const result=form.querySelector('.do-feedback'),submit=form.querySelector('[type=submit]');let busy=false;
+  form.addEventListener('invalid',function(event){const disclosure=event.target.closest('details');if(disclosure)disclosure.open=true;},true);
   form.addEventListener('submit',async function(event){event.preventDefault();if(busy||!form.reportValidity())return;result.textContent='';busy=true;submit.disabled=true;form.setAttribute('aria-busy','true');
    try{const values=Object.fromEntries(new FormData(form));values.privacyConsent=form.elements.privacyConsent.checked;values.sourceChannel=sourceChannel;values.honeypot=values.website||'';
     const payload=buildPayload(globalThis.DAHAM_WEBSITE_PUBLIC,values);
