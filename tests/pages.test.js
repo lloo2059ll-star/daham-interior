@@ -72,7 +72,8 @@ test('homepage inquiry links retain usable no-script destinations with source at
   const html = read('index.html');
   const inquiryLinks = [...html.matchAll(/<a\b[^>]*data-open-inquiry[^>]*>/g)].map(match => match[0]);
 
-  assert.equal(inquiryLinks.length, 3);
+  assert.equal(inquiryLinks.length, 4);
+  assert.ok(inquiryLinks.some(link => /href="\/inquiry\.html\?source=website_home_cases"/.test(link)));
   assert.ok(inquiryLinks.some(link => /href="inquiry\.html\?source=website_nav"/.test(link)));
   assert.ok(inquiryLinks.some(link => /href="inquiry\.html\?source=website_footer"/.test(link)));
   assert.ok(inquiryLinks.some(link => /href="inquiry\.html\?source=website_quick"/.test(link)));

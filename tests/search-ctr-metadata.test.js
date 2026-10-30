@@ -9,7 +9,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 test('homepage search snippet leads with the local service and shows real portfolio scope', () => {
   const homepage = read('index.html');
   assert.match(homepage, /<title>구미 인테리어·아파트 리모델링 시공사례 \| 다함 인테리어<\/title>/);
-  assert.match(homepage, /<meta name="description" content="[^"]*실제 시공사례[^"]*32~42평[^"]*거실·주방·욕실[^"]*공사 상담[^"]*">/);
+  assert.match(homepage, /<meta name="description" content="[^"]*실제 시공사례[^"]*51평[^"]*32평[^"]*거실·주방·욕실[^"]*상담[^"]*">/);
 });
 
 test('high-impression pages use specific search titles and matching descriptions', () => {
