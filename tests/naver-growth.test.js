@@ -72,3 +72,22 @@ test('portfolio landing page turns case browsing into an attributable consultati
   assert.match(inquiry[0], /data-open-inquiry/);
   assert.match(inquiry[2], /견적|상담/);
 });
+
+
+test('priority case narratives remain visible before the photo gallery', () => {
+  for (const slug of slugs) {
+    const html = read(`portfolio/${slug}.html`);
+    const context = html.match(/<div class="do-case-context">([\s\S]*?)<\/div>\s*<div class="do-detail-images">/);
+    assert.ok(context, `visible case context missing before gallery: ${slug}`);
+    assert.doesNotMatch(context[1], /<details|hidden/);
+    assert.ok((context[1].match(/<p>/g) || []).length >= 4, `case explanation missing: ${slug}`);
+    assert.match(context[1], /class="breadcrumb"/);
+  }
+});
+
+test('homepage restores crawlable links to the existing preparation guides', () => {
+  const html = read('index.html');
+  for (const target of ['gumi-apartment-interior.html', 'interior-cost-duration.html']) {
+    assert.ok(links(html).some(a => a[1] === target), `orphaned guide: ${target}`);
+  }
+});

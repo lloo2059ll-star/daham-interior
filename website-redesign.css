@@ -441,3 +441,15 @@ html,body {margin:0;padding:0;background:#fafaf7;scroll-behavior:smooth}
 #dh-owl .home-search-context a:focus-visible{outline:2px solid #545e3e;outline-offset:5px}
 @media(max-width:900px){#dh-owl .home-search-context .local-project-links{grid-template-columns:repeat(3,minmax(0,1fr))}#dh-owl .home-search-context dl{grid-template-columns:1fr 1fr}#dh-owl .home-search-context dl>div:last-child{grid-column:1/-1}}
 @media(max-width:560px){#dh-owl .home-search-context{padding:44px 20px 32px}#dh-owl .home-search-context dl{gap:18px;margin-bottom:28px}#dh-owl .home-search-context .local-project-links{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 14px}#dh-owl .home-case-actions{flex-direction:column}#dh-owl .home-search-context .local-project-links strong{font-size:13px}}
+
+/* Keep each case's verified explanation available before its gallery. */
+#dh-owl .do-detail:has(.do-case-context) .do-detail-summary{margin-bottom:48px}
+#dh-owl .do-case-context{max-width:980px;margin:0 auto 56px}
+#dh-owl .do-case-context .breadcrumb{display:flex;flex-wrap:wrap;gap:8px;font-size:12px;line-height:1.7;color:#73756c;margin-bottom:24px}
+#dh-owl .do-case-context .breadcrumb a{color:inherit}
+#dh-owl .do-case-context .story{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 36px}
+#dh-owl .do-case-context h2{font-size:19px;line-height:1.6;margin:0 0 12px;word-break:keep-all}
+#dh-owl .do-case-context p{font-size:14px;line-height:1.9;margin:0;color:#62665b;word-break:keep-all}
+#dh-owl .home-guide-links{display:flex;flex-wrap:wrap;gap:16px 28px;max-width:1320px;margin:28px auto 0;font-size:13px;line-height:1.8}
+#dh-owl .home-guide-links a{color:#545e3e;text-underline-offset:4px}
+@media(max-width:600px){#dh-owl .do-case-context .story{grid-template-columns:1fr;gap:26px}#dh-owl .do-case-context{margin-bottom:36px}#dh-owl .home-guide-links{flex-direction:column;gap:12px}}
