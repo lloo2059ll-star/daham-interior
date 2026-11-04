@@ -34,7 +34,7 @@ test('all shared inquiry screens put optional details behind a closed disclosure
  assert.equal(checked,23);
 });
 
-test('crawlable portfolio cards are newest first on every shared screen',()=>{
+test('crawlable portfolio cards follow the central display order on shared listing screens',()=>{
  const files=['index.html','portfolio.html','inquiry.html'];
  for(const file of files){
   const html=fs.readFileSync(path.join(root,file),'utf8');

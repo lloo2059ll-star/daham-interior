@@ -38,7 +38,7 @@ if(grid){
   });
 }
 
-// Reorder both existing and newly appended cards by the central publication order.
+// Reorder both existing and newly appended cards by the central owner-selected display order.
 if(grid){staticPortfolio.forEach(project=>{const card=grid.querySelector('[data-project="'+project.slug+'"]');if(card)grid.append(card);});}
 const detail=root.querySelector('[data-screen="detail"]');
 const detailMain=detail.querySelector('.do-detail-main');

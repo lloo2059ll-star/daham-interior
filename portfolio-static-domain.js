@@ -35,7 +35,10 @@
 
   function copyProject(item){return Object.assign({},item,{tags:item.tags.slice(),photos:item.photos.slice()});}
   function sortProjectsNewestFirst(items){return items.map(function(item,index){return {item:item,index:index};}).sort(function(a,b){var left=String(a.item.publishedAt||''),right=String(b.item.publishedAt||'');return left===right?a.index-b.index:(left>right?-1:1);}).map(function(entry){return entry.item;});}
-  function listProjects(){return sortProjectsNewestFirst(PROJECTS).map(copyProject);}
+  // Owner-selected display order; publication dates remain factual and unchanged.
+  var PREFERRED_PROJECTS=['okgye-samgu-trinity-51','prugio-castle-a-32','geochang-prugio-34','okgye-epyeon-35','imeun-kolon-35'];
+  function sortProjectsForDisplay(items){return sortProjectsNewestFirst(items).map(function(item,index){return {item:item,index:index};}).sort(function(a,b){var left=PREFERRED_PROJECTS.indexOf(a.item.slug),right=PREFERRED_PROJECTS.indexOf(b.item.slug);if(left<0)left=PREFERRED_PROJECTS.length;if(right<0)right=PREFERRED_PROJECTS.length;return left-right||a.index-b.index;}).map(function(entry){return entry.item;});}
+  function listProjects(){return sortProjectsForDisplay(PROJECTS).map(copyProject);}
   function findProject(slug){var key=String(slug||'').trim();for(var i=0;i<PROJECTS.length;i+=1){if(PROJECTS[i].slug===key)return copyProject(PROJECTS[i]);}return null;}
 
   function cardImageForProject(slug,image){
@@ -43,5 +46,5 @@
     var known=[item.coverImage,'/'+item.coverImage,'https://daham-interior.com/'+item.coverImage,'https://www.daham-interior.com/'+item.coverImage];
     return known.indexOf(image)>=0?item.thumbnailImage:image;
   }
-  return {sortProjectsNewestFirst:sortProjectsNewestFirst,listProjects:listProjects,findProject:findProject,cardImageForProject:cardImageForProject};
+  return {sortProjectsNewestFirst:sortProjectsNewestFirst,sortProjectsForDisplay:sortProjectsForDisplay,listProjects:listProjects,findProject:findProject,cardImageForProject:cardImageForProject};
 });

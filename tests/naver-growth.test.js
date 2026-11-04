@@ -8,12 +8,12 @@ const projects = require('../portfolio-static-domain.js');
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 const links = html => [...html.matchAll(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
 
-test('homepage exposes five current Gumi detail links before JavaScript loads', () => {
+test('homepage exposes the owner-selected five case links before JavaScript loads', () => {
   const section = read('index.html').match(/<nav\b[^>]*class="local-project-links"[^>]*>([\s\S]*?)<\/nav>/);
   assert.ok(section, 'static project navigation missing');
   const items = links(section[1]);
   assert.equal(items.length, 5);
-  for (const slug of ['okgye-samgu-trinity-51',...slugs]) {
+  for (const slug of ['okgye-samgu-trinity-51','prugio-castle-a-32','geochang-prugio-34','okgye-epyeon-35','imeun-kolon-35']) {
     const item = items.find(m => m[1] === `portfolio/${slug}.html`);
     assert.ok(item, `missing ${slug}`);
     assert.ok(fs.existsSync(path.join(root, item[1])));
