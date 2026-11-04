@@ -110,3 +110,21 @@ test('priority portfolio detail documents have unique searchable metadata and vi
     assert.match(html, /href="\.\.\/inquiry\.html(?:\?source=portfolio_[^"]+)?"/);
   }
 });
+
+test('the owner-selected five projects lead display order without changing publication dates', () => {
+  const p = require('../portfolio-static-domain.js');
+  const preferred = ['okgye-samgu-trinity-51','prugio-castle-a-32','geochang-prugio-34','okgye-epyeon-35','imeun-kolon-35'];
+  assert.deepEqual(p.listProjects().slice(0,5).map(x => x.slug), preferred);
+  assert.equal(p.findProject('prugio-castle-a-32').publishedAt, '2026-09-11T01:50:17+09:00');
+  for (const file of ['index.html','portfolio.html']) {
+    const html=fs.readFileSync(path.join(root,file),'utf8');
+    const slugs=[...html.matchAll(/<a\b[^>]*class="do-project[^>]*data-project="([^"]+)"/g)].map(x=>x[1]);
+    assert.deepEqual(slugs.slice(0,5), preferred, file);
+    assert.equal(new Set(slugs).size,17);
+  }
+  const guide=fs.readFileSync(path.join(root,'gumi-apartment-interior.html'),'utf8');
+  const cards=[...guide.matchAll(/<article class="guide-project"><a href="portfolio\/([^"]+)\.html"/g)].map(x=>x[1]);
+  assert.deepEqual(cards.slice(0,5),preferred);
+  const comparison=guide.match(/<tbody>([\s\S]*?)<\/tbody>/)[1];
+  assert.deepEqual([...comparison.matchAll(/href="portfolio\/([^"]+)\.html"/g)].slice(0,5).map(x=>x[1]),preferred);
+});
