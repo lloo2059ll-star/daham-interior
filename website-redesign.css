@@ -453,3 +453,65 @@ html,body {margin:0;padding:0;background:#fafaf7;scroll-behavior:smooth}
 #dh-owl .home-guide-links{display:flex;flex-wrap:wrap;gap:16px 28px;max-width:1320px;margin:28px auto 0;font-size:13px;line-height:1.8}
 #dh-owl .home-guide-links a{color:#545e3e;text-underline-offset:4px}
 @media(max-width:600px){#dh-owl .do-case-context .story{grid-template-columns:1fr;gap:26px}#dh-owl .do-case-context{margin-bottom:36px}#dh-owl .home-guide-links{flex-direction:column;gap:12px}}
+
+#dh-owl .do-home-intro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  padding: 116px 20px 104px;
+  text-align: center;
+  background: radial-gradient(ellipse at center, #000b, #0006 45%, transparent 78%);
+  pointer-events: none;
+}
+#dh-owl .do-home-intro .do-seo-title {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  margin: 0;
+  font-size: clamp(26px, 4vw, 48px);
+  line-height: 1.25;
+  word-break: keep-all;
+  text-shadow: 0 1px 12px #000;
+}
+#dh-owl .do-home-intro p {
+  max-width: 460px;
+  margin: 14px 0 24px;
+  font-size: clamp(14px, 1.6vw, 17px);
+  line-height: 1.6;
+  word-break: keep-all;
+  text-shadow: 0 1px 8px #000;
+}
+#dh-owl .do-home-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+#dh-owl .do-home-intro-actions a {
+  display: inline-flex;
+  position: static;
+  transform: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 18px;
+  border: 1px solid #fff;
+  border-radius: 40px;
+  background: #1f211ecc;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  pointer-events: auto;
+}
+#dh-owl .do-home-intro-actions .do-consult {
+  background: #f7f5ef;
+  color: #252720;
+}
+#dh-owl .do-home-intro-actions a:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+}
