@@ -22,6 +22,22 @@ test('high-impression pages use specific search titles and matching descriptions
   assert.match(guide, /<meta name="description" content="[^"]*공사 범위[^"]*32~51평[^"]*">/);
 });
 
+test('high-impression Samgu 51 case leads with its renovation type and verified design details', () => {
+  const samgu = read('portfolio/okgye-samgu-trinity-51.html');
+  assert.match(samgu, /<title>구미 옥계 삼구트리니엔 51평 리모델링 시공사례 \| 다함 인테리어<\/title>/);
+  assert.match(samgu, /<meta name="description" content="[^"]*곡선[^"]*간접조명[^"]*거실·주방·욕실[^"]*공사 기간 6주[^"]*">/);
+  assert.match(samgu, /<meta property="og:title" content="구미 옥계 삼구트리니엔 51평 리모델링 시공사례">/);
+  assert.match(samgu, /<meta property="og:description" content="[^"]*곡선[^"]*간접조명[^"]*공사 기간 6주[^"]*">/);
+});
+
+test('Samgu 51 case gives the homepage a descriptive contextual route and a truthful sitemap update', () => {
+  const samgu = read('portfolio/okgye-samgu-trinity-51.html');
+  assert.match(samgu, /<a href="\.\.\/">구미 인테리어 시공사례 전체 보기<\/a>/);
+
+  const sitemap = read('sitemap.xml');
+  assert.match(sitemap, /<loc>https:\/\/daham-interior\.com\/portfolio\/okgye-samgu-trinity-51\.html<\/loc><lastmod>2026-11-14<\/lastmod>/);
+});
+
 // The guide must provide static, accessible routes to the expanded verified cases.
 test('apartment comparison guide connects real cases and comparison anchors without JavaScript', () => {
   const guide = read('gumi-apartment-interior.html');
