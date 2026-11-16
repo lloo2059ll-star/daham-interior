@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>DAHAM — 추가공사 금액 확인서</title>
+  <script src="auth.js"></script>
+  <link rel="stylesheet" href="additional-work.css">
+  <script src="additional-work-domain.js" defer></script>
+  <script src="additional-work.js" defer></script>
+</head>
+<body>
+  <header class="aw-toolbar">
+    <a class="aw-brand" href="erp.html" aria-label="다함 ERP 홈">DAHAM <span>INTERIOR</span></a>
+    <a class="aw-button aw-home" href="erp.html">ERP 홈</a>
+  </header>
+  <main class="aw-workspace" id="workspace" aria-busy="true">
+    <div class="aw-heading">
+      <div><p class="aw-eyebrow">DOCUMENT / 추가공사</p><h1>추가공사 금액 확인서</h1><p class="aw-subtitle">내용과 금액을 입력하거나, 빈 양식을 출력해 직접 작성하세요.</p></div>
+      <div class="aw-print-actions"><button class="aw-button" id="print-blank" type="button" disabled>빈 양식 출력</button><button class="aw-button aw-primary" id="print-filled" type="button" disabled>인쇄 / PDF 저장</button></div>
+    </div>
+    <p class="aw-status" id="status" role="status" aria-live="polite">로그인을 확인하고 있습니다.</p>
+    <div class="aw-layout">
+      <section class="aw-editor" aria-label="확인서 작성">
+        <div class="aw-editor-top"><h2>확인서 작성</h2><a class="aw-preview-link" href="#preview-section">미리보기 ↓</a></div>
+        <form id="draft-form" novalidate>
+          <fieldset id="editor-fields" disabled>
+            <legend class="aw-sr-only">확인서 입력 항목</legend>
+            <div class="aw-input-grid">
+              <div class="aw-input-field"><label for="site">현장명</label><textarea id="site" name="site" rows="1"></textarea></div>
+              <div class="aw-input-field"><label for="customer">고객명</label><textarea id="customer" name="customer" rows="1"></textarea></div>
+              <div class="aw-input-field"><label for="date">작성일</label><input id="date" name="date" type="date"></div>
+              <div class="aw-input-field"><label for="vat">부가세 표시</label><select id="vat" name="vat"><option value="">선택 안 함</option><option value="included">부가세 포함</option><option value="excluded">부가세 별도</option></select></div>
+            </div>
+            <div class="aw-items-heading"><h3>추가공사 내역</h3><span>금액 단위: 원</span></div>
+            <p class="aw-input-help" id="amount-help">쉼표를 넣어 입력할 수 있습니다. 감액은 음수(-)로 입력하세요.</p>
+            <div id="item-rows" class="aw-item-rows"></div>
+            <button class="aw-button aw-add-row" id="add-row" type="button">+ 내역 추가</button>
+            <div class="aw-editor-total"><span>합계</span><strong id="editor-total">—</strong></div>
+            <p class="aw-error aw-total-error" id="total-error" role="alert" hidden></p>
+            <div class="aw-input-field aw-notes-input"><label for="notes">비고</label><textarea id="notes" name="notes" rows="3"></textarea></div>
+            <div class="aw-input-field"><label for="confirmedOn">확인일</label><input id="confirmedOn" name="confirmedOn" type="date"></div>
+          </fieldset>
+        </form>
+        <div class="aw-draft-actions"><button class="aw-button" id="save-draft" type="button" disabled>임시저장</button><button class="aw-button" id="load-draft" type="button" disabled>불러오기</button><button class="aw-button aw-reset" id="new-draft" type="button" disabled>새 양식</button></div>
+        <p class="aw-storage-note">이 브라우저에 임시저장됩니다.</p>
+      </section>
+      <section class="aw-preview-section" id="preview-section" aria-label="문서 미리보기">
+        <div class="aw-preview-heading"><h2>미리보기</h2><span>A4 · 세로</span></div>
+        <p class="aw-preview-error" id="preview-error" role="alert" hidden></p>
+        <div id="document-preview" class="aw-preview-paper"></div>
+      </section>
+    </div>
+  </main>
+  <div id="print-root" aria-hidden="true"></div>
+</body>
+</html>
