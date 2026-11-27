@@ -21,13 +21,13 @@ test('all curated project photos and covers exist and fully decode', () => {
 
   const decoder = spawnSync('python', ['-c', [
     'from PIL import Image',
-    'import sys',
-    'for file in sys.argv[1:]:',
+    'import sys, json',
+    'for file in json.load(sys.stdin):',
     '    with Image.open(file) as image:',
     '        image.load()',
     '        assert image.format == "WEBP"',
     '        assert image.width > 0 and image.height > 0',
-  ].join('\n'), ...relativeFiles.map((file) => path.join(root, file))], { encoding: 'utf8' });
+  ].join('\n')], { encoding: 'utf8', input: JSON.stringify(relativeFiles.map((file) => path.join(root, file))) });
   assert.equal(decoder.status, 0, decoder.stderr || decoder.stdout);
 });
 
