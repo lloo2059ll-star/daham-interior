@@ -6,13 +6,13 @@ const path = require('node:path');
 const root = path.join(__dirname, '..');
 const domainPath = path.join(root, 'portfolio-static-domain.js');
 
-test('static portfolio exposes eighteen curated projects', () => {
+test('static portfolio exposes nineteen curated projects', () => {
   assert.equal(fs.existsSync(domainPath), true, 'portfolio-static-domain.js should exist');
   const portfolio = require(domainPath);
   const projects = portfolio.listProjects();
   const originalProjects = ["prugio-castle-a-32", "geochang-prugio-34", "bonggok-hyunjin-36", "imeun-kolon-35", "songjeong-house-23", "okgye-epyeon-35", "songjeong-dongyang-42", "daegu-sangin-hwasung"].map(slug => projects.find(project => project.slug === slug));
-  assert.equal(projects.length, 18);
-  assert.equal(new Set(projects.map((project) => project.slug)).size, 18);
+  assert.equal(projects.length, 19);
+  assert.equal(new Set(projects.map((project) => project.slug)).size, 19);
   assert.deepEqual(originalProjects.map((project) => project.photos.length), [12, 10, 10, 10, 8, 7, 7, 8]);
   for (const project of projects) {
     assert.ok(project.title);
@@ -120,7 +120,7 @@ test('the owner-selected five projects lead display order without changing publi
     const html=fs.readFileSync(path.join(root,file),'utf8');
     const slugs=[...html.matchAll(/<a\b[^>]*class="do-project[^>]*data-project="([^"]+)"/g)].map(x=>x[1]);
     assert.deepEqual(slugs.slice(0,5), preferred, file);
-    assert.equal(new Set(slugs).size,18);
+    assert.equal(new Set(slugs).size,19);
   }
   const guide=fs.readFileSync(path.join(root,'gumi-apartment-interior.html'),'utf8');
   const cards=[...guide.matchAll(/<article class="guide-project"><a href="portfolio\/([^"]+)\.html"/g)].map(x=>x[1]);

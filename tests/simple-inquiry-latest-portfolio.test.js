@@ -40,6 +40,6 @@ test('crawlable portfolio cards follow the central display order on shared listi
   const html=fs.readFileSync(path.join(root,file),'utf8');
   const slugs=[...html.matchAll(/<a\b[^>]*class="do-project\b[^"]*"[^>]*data-project="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(slugs,portfolio.listProjects().map(p=>p.slug),file);
-  assert.equal(slugs[0],'okgye-samgu-trinity-51');assert.equal(new Set(slugs).size,18);
+  assert.equal(slugs[0],'okgye-samgu-trinity-51');assert.equal(new Set(slugs).size,19);
  }
 });
